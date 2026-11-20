@@ -1,0 +1,22 @@
+PR/task: FR-05 contracts (test-first spec, test/spec ONLY — no implementation)
+branch:   spec/FR-05-contracts
+commit:   f60cfb58b572897914ff0e620bbcb73bc44fc273
+base:     main
+
+files (per-file SHA-256):
+  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/contracts/__init__.py
+  dba3966fc3f0c3e5c73980cabefcba0282f75f25f295bdc3e791a2d4e40af6e8  test/offline/contracts/conftest.py
+  b57e778cb04080d8f772b8e6e8c9698583ba5363d0a303ef3abf15853ed6b7c5  test/offline/contracts/test_events.py
+  110995f8c22def40ed8c74e91fb53c46b0e8d715032d2726403485837aa17138  test/offline/contracts/test_manifest.py
+
+aggregate_sha256 (sha256sum of per-file lines, sorted by path):
+  7c11189c1be389671cf6d5c24bd33356ad68e6f0158cd078c08b4d0afc0fb727
+
+approved_by: D (@ZFebron491001) — PENDING
+approved_at: PENDING
+
+Notes:
+- Approval binds to this content hash AND the commit above. If any test file
+  changes after approval, the aggregate hash changes and approval is void.
+- Tests are RED on this branch by design (no src/egta/contracts here); red is the
+  test-first signal, not a failure. No xfail/skip is permitted to mask it.
