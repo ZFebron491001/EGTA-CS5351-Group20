@@ -1,0 +1,9 @@
+# Debt Register
+
+Known technical and process debt, with impact and the condition under which each
+entry expires. Owner identifiers follow the A–E role map in `execution_plan_261111.md`.
+
+| ID | Category | Description | Impact | Opened | Expiry condition | Status |
+|---|---|---|---|---|---|---|
+| DEBT-D1 | Reproducibility debt | The project Conda env `egta` is now established and version-recorded (Python 3.12.16, pydantic 2.14.4, pytest 9.2.0, ruff 0.17.6); `pydantic` is still **not pinned by a lock file** (arrives transitively via `langchain-core`/`langgraph`). The earlier `/tmp/egta-venv` evidence is superseded. | Residual risk limited to version drift of transitive deps: a pass in `egta` is reproducible only while the unpinned transitive versions match. The pydantic/lock gap is resolved before G0. | 2026-11-20 | Remaining (pinning) part must be resolved before the **G0** gate by adding a lock (`pip-compile`/`uv lock`/`conda env export`) and committing it. Owner: E, with environment setup on the human side. | Partially resolved (env established + versions recorded; pydantic lock pending) |
+| DEBT-D2 | Process debt (GATE-01) | PR #1 originally committed the implementation before the tests: `fff66d0` (contracts) precedes `7df4489` (tests). This is a test-first ordering defect; the later approval request is not retroactive compliance. Resolution: tests re-submitted via independent test/spec PR `spec/FR-05-contracts` (PR #3, base `main`), reviewed and approved by D **before** implementation is accepted; PR #1 retained unchanged as the original development record (history not rewritten). | Without fix, GATE-01 (test-first) is not met and implementation evades the approval gate. | 2026-11-20 | Close when the spec PR (#3) is approved by D **and** a new implementation PR descends from the spec merge commit (ancestry verified). Owner: E, approver: D. | Open |

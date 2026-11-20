@@ -1,0 +1,42 @@
+# CODEOWNERS — EGTA-CS5351-Group20
+#
+# The author shall not self-review. Refer to GATE-01.
+# (A reviewer/approver may not approve a PR that they authored; required
+#  non-author approval is enforced by branch protection, see G0 branch rules.)
+#
+# GitHub applies the LAST matching pattern, so rules are ordered wide -> narrow:
+# module paths first, then narrower test/child and governance paths after them.
+
+# ===== Application modules =====
+/src/egta/contracts/     @cosine-Y @ZFebron491001
+/src/egta/risk_gate/     @ZFebron491001
+/src/egta/budget/        @cosine-Y
+/src/egta/adapters/      @cosine-Y
+/src/egta/app/           @cosine-Y
+/src/egta/evidence/      @yuxiangdu39
+/src/egta/deliberation/  @wawfggqq
+/src/egta/evaluation/    @jianmin2004
+
+# ===== Prompts =====
+/prompts/                @wawfggqq
+
+# ===== Offline tests =====
+/test/offline/contracts/     @ZFebron491001
+/test/offline/evidence/      @yuxiangdu39 @ZFebron491001
+/test/offline/budget/        @cosine-Y @jianmin2004
+/test/offline/deliberation/  @wawfggqq @cosine-Y
+/test/offline/risk_gate/     @ZFebron491001 @yuxiangdu39
+/test/offline/evaluation/    @jianmin2004 @ZFebron491001
+/test/offline/integration/   @jianmin2004 @ZFebron491001
+/test/live/                  @jianmin2004
+
+# ===== CI / governance machinery (narrower, last) =====
+/.github/workflows/      @jianmin2004 @ZFebron491001
+/.github/CODEOWNERS      @jianmin2004 @ZFebron491001
+/.opencode/              @ZFebron491001
+/.agent/                 @ZFebron491001
+
+# ===== Governance docs (narrower, last) =====
+/docs/approvals/         @ZFebron491001
+/docs/req/               @yuxiangdu39
+/docs/ai-use-log.yaml    @jianmin2004

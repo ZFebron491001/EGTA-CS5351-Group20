@@ -1,0 +1,95 @@
+# AI-use log — EGTA-CS5351-Group20
+#
+# Structured record of AI-assisted sessions and the human interventions around
+# them, per execution_plan §10.1. Facts only: nothing here is fabricated. Any
+# value not observable during the session is written as "unknown".
+#
+# Field legend (per §10.1):
+#   session_id        stable id for this working session
+#   student           member role / GitHub login
+#   agent_tool_model  coding agent + tool + model used
+#   time              timestamps observed (UTC and Asia/Hong_Kong)
+#   task_requirement_ids  requirement / task ids this session covered
+#   writable_path     paths the agent was permitted to write
+#   generated_files   files produced and the commit that carries them
+#   human_intervention  what the human did or rejected (with category)
+#   verification_output  the real command output used as evidence
+#   cost              token/API cost if known, else "unknown"
+#   session_path      path to the raw session transcript (if any)
+
+schema_version: "1.0"
+project: EGTA-CS5351-Group20
+role: E
+github_login: jianmin2004
+date: 2026-11-20
+
+sessions:
+  - session_id: "E-2026-11-20-contracts-ci"
+    student: "E / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    time:
+      - "2026-11-20T02:08:52Z"          # commit fff66d0 authored
+      - "2026-11-20T11:47:23+08:00"     # commit 7df4489
+      - "2026-11-20T12:12:35+08:00"     # commit 2501ff4
+      - "2026-11-20T12:23:00+08:00"     # commit f91c29e
+      - "2026-11-20T12:31:31+08:00"     # ai-use log authored
+    task_requirement_ids:
+      - FR-05    # Comparison & Audit Report contracts + tests
+      - NFR-08   # reproducibility
+      - NFR-09   # observability
+      - DEBT-D1  # reproducibility debt tracking
+      - GATE-01  # test-first approval (requested, pending D)
+    writable_path:
+      - "src/egta/contracts/"
+      - "test/offline/contracts/"
+      - "docs/"
+      - ".github/CODEOWNERS"
+    generated_files:
+      - file: "src/egta/contracts/__init__.py, events.py, manifest.py"
+        commit: "fff66d0"
+        note: "RunEvent + ExperimentManifest contracts (agent-generated, human-approved)"
+      - file: "test/offline/contracts/{__init__,conftest,test_events,test_manifest}.py; src Implements markers"
+        commit: "7df4489"
+        note: "34 offline contract tests, ruff clean"
+      - file: "docs/debt-register.md"
+        commit: "2501ff4"
+        note: "DEBT-D1 reproducibility debt"
+      - file: ".github/CODEOWNERS, docs/code-governance/verification-constraints.md"
+        commit: "f91c29e"
+        note: "ownership + failure-sample accounting rule"
+      - file: "docs/ai-use-log.yaml, docs/baseline.md"
+        commit: "PENDING (this task)"
+        note: "AI-use log + baseline record; commit hash filled at commit time"
+    human_intervention:
+      - category: "human environment/authentication action, not code generation"
+        action: "Configured SSH over port 443 for git; troubleshooted gh login and PAT scopes (fine-grained PAT lacked Pull requests: write, switched to classic ghp_ token with repo scope)."
+        reason: "WSL2 + network limitation; needed working git/gh auth to create the PR and push."
+        requirement_ids: ["NFR-08"]
+      - category: "human environment action, not code generation"
+        action: "Installed Miniconda and created the project conda env `egta`; ran `conda activate egta && pip install -e \".[dev]\"`."
+        reason: "Establish a real, reproducible runnable environment to satisfy NFR-08; the agent must not install conda."
+        requirement_ids: ["NFR-08", "DEBT-D1"]
+      - category: "positive intervention (human quality supervision)"
+        action: "Agent correctly stopped and waited for authorization when gh was unauthenticated, and again when the fine-grained PAT could not create a PR."
+        reason: "Prevented unauthorised push/PR actions; enforced the human-approval gate."
+        requirement_ids: ["GATE-01"]
+      - category: "intervention / rejection"
+        action: "Rejected provisional evidence from a throwaway /tmp/egta-venv and required the tests be rerun in the real `egta` conda environment."
+        reason: "Temporary venv is not reproducible; NFR-08 requires the project environment. Rerun: 34 passed in egta, exit 0."
+        requirement_ids: ["NFR-08", "DEBT-D1"]
+      - category: "intervention / approval"
+        action: "Reviewed and approved each commit (contracts, tests, debt register, CODEOWNERS/verification-constraints); marked PR #1 Ready and requested D's GATE-01 approval."
+        reason: "GATE-01: author may not self-review the contract tests; D must approve."
+        requirement_ids: ["GATE-01"]
+    verification_output:
+      - cmd: "python -m pytest test/offline/contracts -v"
+        env: "egta (Python 3.12.16, pytest 9.2.0)"
+        result: "34 passed in 0.06s, exit 0"
+      - cmd: "python -m ruff check src/egta/contracts test/offline/contracts"
+        env: "egta (ruff 0.17.6)"
+        result: "All checks passed!, exit 0"
+      - cmd: "python -c 'import tradingagents'"
+        env: "egta"
+        result: "TradingAgents import OK"
+    cost: "unknown"
+    session_path: "unknown"
