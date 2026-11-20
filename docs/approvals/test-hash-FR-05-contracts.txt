@@ -2,35 +2,35 @@ PR/task: FR-05 contracts (test-first spec, test/spec ONLY — no implementation)
 branch:   spec/FR-05-contracts
 base:     main
 
-# --- Commit binding (three distinct fields; D.7 disambiguation) --------------
-# 1) test-content commit  : the commit that last changed the test files' content
-# 2) reviewed PR head     : the exact head SHA D reviews (final head before merge)
-# 3) merge commit         : created by GitHub when this PR merges (post-approval)
-test_content_commit:     0e77c425933d7dfeca4c2d0e3806fe54b17eae7e
-reviewed_pr_head:        PENDING  # set to the final head D reviews; this file is committed BEFORE that head
-merge_commit:            PENDING  # filled after merge (record-only; not pushed after approval)
+# --- Approval binding (corrected, D.7) --------------------------------------
+# The AUTHORITATIVE reviewed head is the GitHub review commit_id — it is NOT
+# stored here. The merge commit is recorded in the external registry
+# (docs/approvals/spec-registry.md) / CI artifact / PR comment.
+# This file records ONLY: test_content_commit + aggregate_sha256.
+# After approval, do NOT push this file (or the test files): that would dismiss
+# the stale approval (dismiss_stale_reviews_on_push=true).
 
-# Approval binds to: reviewed_pr_head == the last commit before merge, with the
-# test aggregate hash below. GitHub review is the authoritative approval; this
-# file only records content binding. DO NOT push changes to this file (or the
-# test files) after D approves — that would dismiss the stale approval.
+test_content_commit: 602f6a39f3f6e77045dfea09912ba511e41a39a7
 
 files (per-file SHA-256):
   e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/contracts/__init__.py
   dba3966fc3f0c3e5c73980cabefcba0282f75f25f295bdc3e791a2d4e40af6e8  test/offline/contracts/conftest.py
-  a68fd9bfa10e8af9b7f68759d4ed4dc1a76ea326514d9e99c32d26e22de30d80  test/offline/contracts/test_events.py
-  1130c92f67a06489c1728885b3e6421154981218bd63e7d0e93a256229c0eae2  test/offline/contracts/test_manifest.py
-  dddaa735136a555b213ff89a2956229a967ca2394ac8e57fdf90ae237494a704  test/offline/contracts/test_metrics_serialization.py
+  bd18254b89d482e15b83b3381db33633660895a29bbcbe77d2c9650dd67a8ffa  test/offline/contracts/test_audit.py
+  f8796559413da74d93d83ee3f33bd0cb8fe704a91f8503d386701eb3a73ae998  test/offline/contracts/test_comparison.py
+  556e13345a4f9d63958da6ac95ca6bcf0e72edecd5ea1c2a8edd12b739b5dd1e  test/offline/contracts/test_evaluation_result.py
+  a9bddc39e768161fa07c1b3a95b0b2b125ceb71861363cd5061f5246acfa6d5b  test/offline/contracts/test_events.py
+  77ed1c95e2e3eea2d2a8eef250e142832cea15216d3fc96e0719ff3af4f232ab  test/offline/contracts/test_manifest.py
+  2904173eb8bd179e8e3e1a3ba9348b75b51856723a0e7167d1519f1aa4e5cc75  test/offline/contracts/test_metrics_serialization.py
+  4f3dc311664adca8102984db46c673e9bf29552a1441dda6428b7eb0cbaf6f84  test/offline/contracts/test_replay.py
 
 aggregate_sha256 (sha256sum of per-file lines, sorted by path):
-  2f37955b19c714cade220be5f5283d3391dd3184802166aedc9ba0424e394a23
+  65234e75fd09cb2de7cd4c73354a87772893bdf101473b4239a4b11024069e55
 
-approved_by: D (@ZFebron491001) — PENDING
-approved_at: PENDING
+approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id is authoritative)
 
 Notes:
-- Tests are RED on this branch by design (no src/egta/contracts here). The tests
-  encoding B's not-yet-implemented decisions (four variants B0-B3, MetricDef/
-  QualityRubric) are also expected RED until implementation; no xfail/skip.
-- If any test file changes after approval, the aggregate hash changes and the
-  approval is void (re-review required).
+- 7 files, 60 test functions, 90 cases.
+- Tests are RED on this branch by design (no src/; egta.contracts.audit/evaluation
+  absent). Some manifest/compare tests are RED-dep until the implementation lands.
+- If any test file changes after approval, the aggregate hash changes and approval
+  is void (re-review required).

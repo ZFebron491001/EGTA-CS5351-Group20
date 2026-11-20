@@ -75,3 +75,71 @@ sessions:
         result: "events+serialization: 28 passed; manifest: 14 passed / 11 expected-RED (B2/B3 + rubric deps)"
     cost: "unknown"
     session_path: "unknown"
+    session_path_note: >-
+      The raw OpenCode transcript was not exported from this environment during
+      Batch A, so no path exists yet. It is intentionally recorded as "unknown"
+      rather than a fabricated path. Per the D5 process the transcript will be
+      exported from the coding agent and this field updated to the real file path
+      in docs/ai-use-log.yaml before the code/session freeze (G3).
+
+  - session_id: "E-2026-11-20-spec-FR05-batchB"
+    student: "E / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    time:
+      - "2026-11-20T23:22:54+08:00"   # commit 602f6a3 (Batch B content commit, actual commit time)
+      - "2026-11-20T23:24:57+08:00"   # Batch B docs/approval commit time (approx, this session)
+    task_requirement_ids:
+      - FR-05
+      - NFR-08
+      - NFR-09
+      - GATE-01
+      - GATE-06
+    writable_path:
+      - "test/offline/contracts/"
+      - "docs/"
+      - "pyproject.toml"     # only pytest markers + ruff isort
+    generated_files:
+      - file: "docs/req/contracts-summary.md"
+        change: "spec definition of public audit/evaluation contracts per D (exceptions, Receipt 12 fields, AuditSink/AuditReader, verify/dedupe, CompletionStatus/IncompleteReason)"
+      - file: "test/offline/contracts/test_audit.py (new)"
+        change: "audit contract: exception signatures, Receipt 12 fields, tail-truncation+anchor, AuditSink idempotency, AuditReader.read"
+      - file: "test/offline/contracts/test_evaluation_result.py (new)"
+        change: "incomplete as STATUS (no raise); CompletionStatus/IncompleteReason members"
+      - file: "test/offline/contracts/test_comparison.py (new)"
+        change: "manifest mismatch -> INCOMPLETE, not a win (snapshot/model/prompt; code/policy PENDING B)"
+      - file: "test/offline/contracts/test_replay.py (new)"
+        change: "replay determinism + offline (no LLM/network) + dedupe"
+      - file: "test/offline/contracts/{test_events,test_manifest,test_metrics_serialization}.py"
+        change: "public audit imports; four variants B0-B3 + quality_rubric; metrics reject NaN/inf/object; pytestmark spec"
+      - file: "pyproject.toml"
+        change: "register 'spec' marker (+ strict markers already on)"
+      - file: "docs/approvals/spec-registry.md (new)"
+        change: "spec marker/enablement/expected-RED reason/hash/approval boundary"
+      - file: "docs/approvals/test-hash-FR-05-contracts.txt"
+        change: "test_content_commit + aggregate only; GitHub review commit_id authoritative; merge in external registry"
+      - file: "docs/req/trace-FR-05-contracts.md"
+        change: "mappings for 7 files (60 functions/90 cases); avoids overstatement"
+    human_intervention:
+      - category: "human instruction / supervision (quality control)"
+        action: "Approved Batch B plan with 4 corrections: strictly follow D's audit contract (AuditContractError base + exact exception signatures + Receipt 12 fields), incomplete as status not exception, quality_rubric independent field + PENDING B, code/policy hash PENDING B."
+        reason: "Ensure spec matches D's real definition, not a simplified version."
+        requirement_ids: ["FR-05", "NFR-08", "GATE-01"]
+    verification_output:
+      - cmd: "python -m pytest test/offline/contracts (spec branch, no src)"
+        env: "egta"
+        result: "7 collection errors (ModuleNotFoundError: egta) — RED by design"
+      - cmd: "python -m py_compile test/offline/contracts/*.py"
+        env: "egta"
+        result: "exit 0; AST = 60 test functions"
+      - cmd: "python -m ruff check ."
+        env: "egta"
+        result: "All checks passed!"
+      - cmd: "PYTHONPATH=/tmp/specimpl/src pytest test/offline/contracts (full spec-satisfying impl)"
+        env: "egta"
+        result: "90 passed — proves red is due to unimplemented contracts, not bad tests"
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: >-
+      Same as Batch A: raw coding-agent transcript not yet exported in this
+      environment; recorded as "unknown", to be replaced with the real exported
+      path before G3 freeze per D5.
