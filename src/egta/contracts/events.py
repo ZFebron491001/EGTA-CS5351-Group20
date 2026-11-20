@@ -1,5 +1,7 @@
 """Run-event contract for the audit log.
 
+# Implements: FR-05, NFR-08, NFR-09
+
 Every module (evidence, budget, deliberation, risk_gate, evaluation) emits a
 :class:`RunEvent` when a phase changes. The evaluation module subscribes to
 these events, verifies the hash chain, and replays them to rebuild a run's

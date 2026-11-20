@@ -1,5 +1,7 @@
 """Controlled-experiment manifest contract.
 
+# Implements: FR-05, NFR-08, NFR-09
+
 An :class:`ExperimentManifest` freezes everything that makes a comparison run
 reproducible and fair: the input snapshot, the model configuration, the prompt
 bundle, and the exact variant configurations to run against that one snapshot.
