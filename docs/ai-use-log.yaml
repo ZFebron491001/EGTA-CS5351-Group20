@@ -1,0 +1,77 @@
+# AI-use log — spec/FR-05-contracts (PR #3)
+#
+# Structured record for THIS test/spec session (GATE-06), per execution_plan
+# §10.1. Facts only; unknown values are "unknown". This file lives on the spec
+# branch so the test/spec PR carries its own AI-use record. (PR #1 keeps its own
+# log on its branch; PR #1 is the original development record, retained as-is.)
+#
+# Field legend: session_id, student, agent_tool_model, time, task_requirement_ids,
+# writable_path, generated_files, human_intervention, verification_output, cost,
+# session_path.
+
+schema_version: "1.0"
+project: EGTA-CS5351-Group20
+role: E
+github_login: jianmin2004
+context:
+  spec_pr: 3
+  spec_branch: spec/FR-05-contracts
+  related:
+    pr_1: "original development record (Draft, changes requested); GATE-01 ordering defect (impl fff66d0 before tests 7df4489)"
+    debt_d2: "GATE-01 process debt (docs/debt-register.md on PR #1 branch); closes when this spec is approved and a descendant implementation PR lands"
+
+sessions:
+  - session_id: "E-2026-11-20-spec-FR05-batchA"
+    student: "E / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    time:
+      - "2026-11-20T18:30:00+08:00"   # batch A authored
+    task_requirement_ids:
+      - FR-05
+      - NFR-08
+      - NFR-09
+      - GATE-01
+      - GATE-06
+    writable_path:
+      - "test/offline/contracts/"
+      - "docs/"
+      - "pyproject.toml"     # only [tool.ruff.lint.isort] known-first-party
+    generated_files:
+      - file: "test/offline/contracts/test_events.py"
+        change: "fixed D.8 chain fixture (ev2 hashes its OWN content); added payload-binding, sequence-gap, duplicate-event_id tests; test-local ChainBroken/DuplicateConflict/PayloadMismatch (public placement pending D)"
+      - file: "test/offline/contracts/test_manifest.py"
+        change: "encoded B's decisions: four variants B0/B1/B2/B3 mandatory; MetricDef(7 fields) + QualityRubric; marked 'dependency not yet implemented' (expected RED)"
+      - file: "test/offline/contracts/test_metrics_serialization.py"
+        change: "new: NaN/inf -> null (DEFECT), non-JSON object late failure, positive roundtrip"
+      - file: "docs/req/trace-FR-05-contracts.md"
+        change: "removed false '--collect-only proves collectable'; per-test requirement mapping; existing vs new; links PR #1/DEBT-D2"
+      - file: "pyproject.toml"
+        change: "[tool.ruff.lint.isort] known-first-party = [\"egta\"] (D.3 fix; does not touch hashed test files)"
+      - file: "docs/ai-use-log.yaml"
+        change: "this record"
+      - file: "docs/approvals/test-hash-FR-05-contracts.txt"
+        change: "updated per-file + aggregate; three-field commit binding (test-content commit, reviewed PR head, merge commit); approver PENDING"
+    human_intervention:
+      - category: "human instruction / supervision (quality control)"
+        action: "Directed Batch A execution only (tests + docs, no src); required strict test-first, no xfail/skip; required D.8 fixture fix + payload-binding test."
+        reason: "Close GATE-01 gaps D raised in PR #3 review without pre-empting implementation."
+        requirement_ids: ["GATE-01", "FR-05"]
+      - category: "coordination (human side)"
+        action: "B replied with decisions (four variants B0-B3; MetricDef + QualityRubric); D's review lists required negatives; Batch B items (audit anchor/outbox->AuditSink, ChainBroken/DuplicateConflict public semantics, CI + red-test quarantine) deferred to D+E."
+        reason: "Spec must encode agreed decisions; some semantics pending cross-member confirmation."
+        requirement_ids: ["FR-05", "NFR-08"]
+    verification_output:
+      - cmd: "python -m ruff check ."
+        env: "egta (ruff 0.17.6)"
+        result: "All checks passed! (D.3 fixed)"
+      - cmd: "python -m py_compile test/offline/contracts/*.py"
+        env: "egta"
+        result: "exit 0; AST count = 30 test functions"
+      - cmd: "python -m pytest test/offline/contracts (spec branch, no src)"
+        env: "egta"
+        result: "3 collection errors (ModuleNotFoundError: egta.contracts) — RED by design"
+      - cmd: "against feature-branch src via PYTHONPATH (validation of test logic)"
+        env: "egta"
+        result: "events+serialization: 28 passed; manifest: 14 passed / 11 expected-RED (B2/B3 + rubric deps)"
+    cost: "unknown"
+    session_path: "unknown"

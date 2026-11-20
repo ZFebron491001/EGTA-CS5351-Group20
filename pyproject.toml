@@ -87,3 +87,8 @@ ignore = ["E501"]
 # Keep multiple aliased names from one module in a single combined import block
 # (e.g. the vendor imports in router.py) instead of one statement per name.
 combine-as-imports = true
+# Treat the EGTA application (``src/egta``) as first-party so import sorting is
+# identical whether or not ``src/`` is installed/present. On test/spec branches
+# that carry only tests (no ``src/``), isort would otherwise classify
+# ``egta.contracts`` as third-party and fail I001 against the repo's own order.
+known-first-party = ["egta"]
