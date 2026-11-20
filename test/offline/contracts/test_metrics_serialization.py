@@ -1,27 +1,12 @@
-"""Offline tests: ``RunEvent.metrics`` JSON/non-finite serialization semantics.
+"""Offline tests: ``RunEvent.metrics`` must stay JSON-safe.
 
-``RunEvent`` sets ``allow_inf_nan=False`` on the *model*, but ``metrics`` is a
-``dict[str, Any]``; that flag only guards declared float *fields*, not arbitrary
-values nested inside a dict. These tests pin the CURRENT behavior so the gap is a
-visible, conscious fact rather than a silent surprise.
+Target contract (docs/req/contracts-summary.md §4): a metrics validator rejects
+non-finite floats (NaN, ±inf) and non-serializable objects at construction with
+``pydantic.ValidationError``. This replaces the earlier "pinned null behavior"
+DEFECT tests: the contract is now required to REJECT, not silently corrupt.
 
-Observed against the current contract (feature branch src):
-
-- ``float('nan')`` / ``float('inf')`` inside ``metrics``: construction succeeds,
-  and ``model_dump_json()`` emits JSON ``null`` for them. This is **data-loss /
-  silent corruption**: a NaN metric serializes identically to a missing value
-  (``null``), and the stored payload_hash would hash the pre-serialization object
-  while the persisted JSON differs. DEFECT -- propose a metrics validator that
-  rejects non-finite floats (or a custom encoder), tracked for the implementation.
-- A non-serializable object (``object()``) inside ``metrics``: construction
-  succeeds (``Any`` accepts it) but ``model_dump_json()`` raises
-  ``PydanticSerializationError``. So it fails *late* at serialization, not at
-  reception -- also undesirable; a metrics validator should reject non-JSON
-  values at construction.
-
-These are strict assertions of current behavior (no xfail/skip). When the
-implementation adds a metrics validator, the DEFECT tests will flip to asserting
-rejection, forcing a deliberate change.
+RED on the spec branch (no src/) and RED against the current contract until the
+metrics validator is implemented.
 """
 
 from __future__ import annotations
@@ -32,6 +17,8 @@ import pytest
 from pydantic import ValidationError
 
 from egta.contracts.events import Phase, RunEvent, RunStatus
+
+pytestmark = pytest.mark.spec
 
 VALID_HASH = "a" * 64
 
@@ -50,35 +37,23 @@ def _event(metrics) -> RunEvent:
     )
 
 
-def test_nan_metric_serializes_to_null_defect():
-    """DEFECT: NaN is silently dropped to JSON null (indistinguishable from None).
-
-    Current behavior: construction succeeds and ``model_dump_json`` emits
-    ``"x":null``. This loses information. Recorded as a defect pending a metrics
-    validator. The final two assertions document the loss explicitly.
-    """
-    ev = _event({"x": float("nan")})
-    dumped = ev.model_dump_json()
-    assert '"x":null' in dumped  # NaN -> null (data loss)
-    assert ev.metrics["x"] != ev.metrics["x"]  # NaN is not equal to itself
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_metric_rejected(bad):
+    """NaN / ±inf are not valid JSON numbers -> reject at construction."""
+    with pytest.raises(ValidationError):
+        _event({"x": bad})
 
 
-def test_inf_metric_serializes_to_null_defect():
-    """DEFECT: +inf is silently dropped to JSON null (same loss as NaN)."""
-    ev = _event({"x": float("inf")})
-    assert '"x":null' in ev.model_dump_json()
+def test_non_json_object_metric_rejected():
+    """A non-serializable object must be rejected at construction, not at dump."""
+    with pytest.raises(ValidationError):
+        _event({"x": object()})
 
 
-def test_non_serializable_metric_fails_at_serialization():
-    """A non-JSON object is accepted at construction but fails at dump time.
-
-    Undesirable 'late' failure. Pinned so the implementation adds an early
-    validator; meanwhile the fact that construction raises nothing is asserted.
-    """
-    ev = _event({"x": object()})  # Any accepts it; no error yet
-    with pytest.raises(Exception) as exc:  # PydanticSerializationError
-        ev.model_dump_json()
-    assert "serialize" in str(exc.value).lower() or "unknown type" in str(exc.value).lower()
+def test_nested_non_finite_metric_rejected():
+    """Non-finite nested inside a list/dict value is also rejected."""
+    with pytest.raises(ValidationError):
+        _event({"a": {"b": [1.0, float("nan")]}})
 
 
 def test_json_safe_metrics_roundtrip():
@@ -91,10 +66,6 @@ def test_json_safe_metrics_roundtrip():
 
 
 def test_validation_error_type_is_pydantic():
-    """Guard: the contract raises pydantic.ValidationError for bad field values.
-
-    Ensures downstream tests catching ValidationError are catching the right type.
-    """
     with pytest.raises(ValidationError):
         RunEvent(
             event_id="e", run_id="r", sequence=0, phase=Phase.APP,
