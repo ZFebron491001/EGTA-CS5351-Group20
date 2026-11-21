@@ -24,7 +24,7 @@ aggregate_sha256 (tests, sorted by path):
   ca792f1e9e9dc0abbc57973a8efeb415fa3d6b615f1cb3b960067d4d70b0d960
 
 spec_bundle_sha256 (tests + contracts-summary.md + trace-FR-05-contracts.md + spec-registry.md, sorted):
-  91476bebb57ee79a3a42b7a5c6f40c78ef650fbcf5fc9a3fe31fc34b59dff4a6
+  bcffb7e6fd0e99dbe1a07b60b6d497bd0cfa19a175a3d9bed8d19ff5883d3b59
 
 # E2 unchanged by this PR: aggregate 0aed4cf4... (28 cases) — see test-hash-E2-evaluation.txt.
 approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id authoritative)
