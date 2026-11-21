@@ -2,35 +2,39 @@ PR/task: FR-05 contracts (test-first spec, test/spec ONLY — no implementation)
 branch:   spec/FR-05-contracts
 base:     main
 
-# --- Approval binding (corrected, D.7) --------------------------------------
-# The AUTHORITATIVE reviewed head is the GitHub review commit_id — it is NOT
-# stored here. The merge commit is recorded in the external registry
-# (docs/approvals/spec-registry.md) / CI artifact / PR comment.
-# This file records ONLY: test_content_commit + aggregate_sha256.
-# After approval, do NOT push this file (or the test files): that would dismiss
-# the stale approval (dismiss_stale_reviews_on_push=true).
+# --- Approval binding (D item 13) -------------------------------------------
+# Authoritative reviewed head = GitHub review commit_id (NOT stored here).
+# Merge commit recorded in external registry (docs/approvals/spec-registry.md) /
+# CI artifact / PR comment.
+# This file records ONLY: test_content_commit + aggregate_sha256 +
+# spec_bundle_sha256. Any change to tests/summary/trace/registry updates the
+# bundle hash and triggers re-review.
+# After approval, do NOT push this file (stale-approval trap).
 
-test_content_commit: 602f6a39f3f6e77045dfea09912ba511e41a39a7
+test_content_commit: 0c6b60a041fe41b4e5c9de3fb3f840a4386cc9ae
 
 files (per-file SHA-256):
   e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/contracts/__init__.py
   dba3966fc3f0c3e5c73980cabefcba0282f75f25f295bdc3e791a2d4e40af6e8  test/offline/contracts/conftest.py
-  bd18254b89d482e15b83b3381db33633660895a29bbcbe77d2c9650dd67a8ffa  test/offline/contracts/test_audit.py
-  f8796559413da74d93d83ee3f33bd0cb8fe704a91f8503d386701eb3a73ae998  test/offline/contracts/test_comparison.py
-  556e13345a4f9d63958da6ac95ca6bcf0e72edecd5ea1c2a8edd12b739b5dd1e  test/offline/contracts/test_evaluation_result.py
-  a9bddc39e768161fa07c1b3a95b0b2b125ceb71861363cd5061f5246acfa6d5b  test/offline/contracts/test_events.py
-  77ed1c95e2e3eea2d2a8eef250e142832cea15216d3fc96e0719ff3af4f232ab  test/offline/contracts/test_manifest.py
-  2904173eb8bd179e8e3e1a3ba9348b75b51856723a0e7167d1519f1aa4e5cc75  test/offline/contracts/test_metrics_serialization.py
-  4f3dc311664adca8102984db46c673e9bf29552a1441dda6428b7eb0cbaf6f84  test/offline/contracts/test_replay.py
+  6f436a90fe2c3e7448191defdc98a041463f20edc49e28d478512bef62ee384c  test/offline/contracts/test_audit.py
+  710bf8f71c670935cd78f3971332dcf0782809ae4f31e755fd6fe9c981ada1bb  test/offline/contracts/test_comparison.py
+  2dfa904a8ea47a83d074e5a1048b5a585b3a05ae2a52baf9d15abc9c619672b3  test/offline/contracts/test_evaluation_result.py
+  fbe799211ea6fae0cdd52f9f597baccae401400e8963415a92c9b9b747db65c1  test/offline/contracts/test_events.py
+  11c81e37ae032cbdbdb14b038282c1d7d9d99899276a2f486c42b58146086132  test/offline/contracts/test_manifest.py
+  799bedaf99dc518b393f3ce5099b046a722c5338cfd3204924857e5eb2276829  test/offline/contracts/test_metrics_serialization.py
+  c3d7b6bfbd66518388c105131dc34d7b45ce40ae4fe495b029360724282c1499  test/offline/contracts/test_replay.py
 
 aggregate_sha256 (sha256sum of per-file lines, sorted by path):
-  65234e75fd09cb2de7cd4c73354a87772893bdf101473b4239a4b11024069e55
+  986bb3826a4cd2d1ebb3ed7a7ad97ba415f5b3b9335fb680524f7694c54c16ef
 
-approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id is authoritative)
+spec_bundle_sha256 (tests + docs/req/contracts-summary.md +
+docs/req/trace-FR-05-contracts.md + docs/approvals/spec-registry.md, sorted):
+  244c5adf0a28d6c95f54de6265f1c0b12bfa8e8df5067432202a9399b3cd196d
+
+approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id authoritative)
 
 Notes:
-- 7 files, 60 test functions, 90 cases.
-- Tests are RED on this branch by design (no src/; egta.contracts.audit/evaluation
-  absent). Some manifest/compare tests are RED-dep until the implementation lands.
-- If any test file changes after approval, the aggregate hash changes and approval
-  is void (re-review required).
+- 7 files, 95 test functions, 144 cases.
+- Tests RED on this branch by design (no src/). Some manifest/compare tests are
+  RED-dep until the implementation lands.
+- If any covered file changes after approval, both hashes change -> re-review.

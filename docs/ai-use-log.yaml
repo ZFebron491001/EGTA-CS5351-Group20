@@ -143,3 +143,46 @@ sessions:
       Same as Batch A: raw coding-agent transcript not yet exported in this
       environment; recorded as "unknown", to be replaced with the real exported
       path before G3 freeze per D5.
+
+  - session_id: "E-2026-11-21-spec-FR05-final"
+    student: "E / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    time:
+      - "2026-11-21T11:43:29+08:00"   # commit 0c6b60a (final-round content commit, actual)
+    task_requirement_ids: [FR-05, NFR-08, NFR-09, GATE-01, GATE-06]
+    writable_path: ["test/offline/contracts/", "docs/", "pyproject.toml"]
+    generated_files:
+      - file: "docs/req/contracts-summary.md"
+        change: "D final-round: typed compare_runs/replay_events, ReplayState fields, EvaluationResult §5.1, manifest_hash, code/policy hash, MISSING_RESULT; MISSING_USAGE PENDING(D)"
+      - file: "test/offline/contracts/test_{events,audit,replay,evaluation_result,comparison,manifest,metrics_serialization}.py"
+        change: "immutability, sequence strictness, status↔reason, code/policy/manifest mismatch, ReplayState content, fail-closed, cross-run, quarantine; 95 fns/144 cases"
+      - file: "pyproject.toml"
+        change: "spec marker + default deselect 'not spec' (Option A quarantine)"
+      - file: "docs/approvals/spec-registry.md"
+        change: "quarantine Option A, CI files D must land, bundle hash"
+      - file: "docs/approvals/test-hash-FR-05-contracts.txt"
+        change: "aggregate + spec_bundle_sha256; content-commit binding"
+    human_intervention:
+      - category: "human instruction / supervision"
+        action: "Delivered D's 14-item final review + B confirmations; required exact audit signatures, ReplayState, typed compare_runs, immutability, quarantine Option A, no getattr/xfail/skip."
+        reason: "Freeze the spec to D's definition before approval."
+        requirement_ids: [FR-05, NFR-08, GATE-01]
+    verification_output:
+      - cmd: "pytest -m spec test/offline/contracts (spec branch, no src)"
+        env: "egta"
+        result: "7 collection errors (ModuleNotFoundError: egta) — RED by design"
+      - cmd: "pytest (default, testpaths=tests)"
+        env: "egta"
+        result: "1412 passed, 1 skipped — green; never touches spec"
+      - cmd: "py_compile test/offline/contracts/*.py"
+        env: "egta"
+        result: "exit 0; AST = 95 functions"
+      - cmd: "ruff check ."
+        env: "egta"
+        result: "All checks passed!"
+      - cmd: "PYTHONPATH=/tmp/specimpl/src pytest -m spec test/offline/contracts"
+        env: "egta"
+        result: "144 passed — proves red is due to unimplemented contracts"
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "Coding-agent transcript not yet exported here; 'unknown' (not fabricated). To be replaced with the real exported path before G3 freeze per D5."
