@@ -23,8 +23,10 @@ Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,m
   MUST require each metric on BOTH sides (single-sided → INCOMPLETE/MISSING_METRIC).
   Only the final winner/composite is deferred (DEBT-FR05-D4, closing-pending).
   Covered by `test_report.py` + `test/offline/contracts/test_comparison.py`
-  single-sided/illegal-rubric/observed-value tests. Both-sides threshold breach
-  status is pending D's Q1 (TODO until decided).
+  single-sided/illegal-rubric/observed-value tests. Threshold handling (D Option
+  Y): within → COMPLETE/failures=[]; one/both exceed → REVIEW with per-side
+  `THRESHOLD_VIOLATION:<metric>:<side>:observed=<v>:operator=<op>:threshold=<t>`
+  failures (≥2 when both); THRESHOLD_VIOLATION is not an IncompleteReason.
 - **D#6 empty chain + anchor (fail-closed):** `verify_chain([])` (no anchor) → OK;
   `verify_chain([], anchor=...)` → `ChainBroken`. Covered by `test_replay.py`
   (empty-chain anchor) and the contracts layer.

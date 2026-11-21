@@ -427,14 +427,67 @@ def test_failures_field_present_and_list():
     assert isinstance(r.failures, list)
 
 
-# --- TODO (pending D's Q1 decision): both-sides-exceed-threshold -----------
-# PLACEHOLDER -- do NOT enable until D decides status + reason (Option Y).
-# Status is Y (REVIEW); whether incomplete_reason is set is D's decision (a)/(b).
-#
-# def test_both_sides_exceed_threshold_status():
-#     b = _summary(variant="B0", metrics={"token_cost": 5.0})   # > lte 2.0
-#     e = _summary(variant="B1", metrics={"token_cost": 9.0})   # > lte 2.0
-#     r = compare_runs(b, e, _rubric())
-#     assert r.completion_status is CompletionStatus.REVIEW      # TODO: D
-#     # assert r.incomplete_reason is ...                         # TODO: D (a)/(b)
-#     assert r.winner is None
+# --- D contract: threshold handling (Option Y, D-decided) -------------------
+#   both present & WITHIN threshold      -> COMPLETE, failures=[], winner=None
+#   ONE side exceeds                     -> REVIEW, failures has 1 violation
+#   BOTH sides exceed                    -> REVIEW, failures >= 2 (one per side)
+#   one side lacks metric                -> INCOMPLETE/MISSING_METRIC
+#   illegal rubric                       -> ValidationError
+#   failure format (one per violating side):
+#     THRESHOLD_VIOLATION:<metric>:<side>:observed=<v>:operator=<op>:threshold=<t>
+#   THRESHOLD_VIOLATION is NOT an IncompleteReason.
+
+_FMT = "THRESHOLD_VIOLATION:{metric}:{side}:observed={observed}:operator={op}:threshold={threshold}"
+
+
+def test_both_within_threshold_is_complete_no_failures():
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})   # <= 2.0 (within)
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})   # <= 2.0 (within)
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.COMPLETE
+    assert r.incomplete_reason is None
+    assert r.failures == []
+    assert r.winner is None and r.baseline_win is False and r.enhanced_win is False
+
+
+def test_one_side_exceeds_is_review_with_one_failure():
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})   # within
+    e = _summary(variant="B1", metrics={"token_cost": 3.0})   # exceeds lte 2.0
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.REVIEW
+    assert r.incomplete_reason is None   # REVIEW != INCOMPLETE
+    assert r.winner is None and r.baseline_win is False and r.enhanced_win is False
+    expected = _FMT.format(metric="token_cost", side="enhanced", observed="3.0",
+                           op="lte", threshold="2.0")
+    assert expected in r.failures
+    assert len(r.failures) == 1
+
+
+def test_one_side_exceeds_baseline_is_review():
+    b = _summary(variant="B0", metrics={"token_cost": 5.0})   # exceeds
+    e = _summary(variant="B1", metrics={"token_cost": 1.0})   # within
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.REVIEW
+    expected = _FMT.format(metric="token_cost", side="baseline", observed="5.0",
+                           op="lte", threshold="2.0")
+    assert expected in r.failures
+    assert len(r.failures) == 1
+
+
+def test_both_sides_exceed_is_review_with_two_failures():
+    b = _summary(variant="B0", metrics={"token_cost": 5.0})   # exceeds
+    e = _summary(variant="B1", metrics={"token_cost": 9.0})   # exceeds
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.REVIEW
+    assert r.incomplete_reason is None
+    assert r.winner is None and r.baseline_win is False and r.enhanced_win is False
+    assert len(r.failures) >= 2
+    assert _FMT.format(metric="token_cost", side="baseline", observed="5.0",
+                       op="lte", threshold="2.0") in r.failures
+    assert _FMT.format(metric="token_cost", side="enhanced", observed="9.0",
+                       op="lte", threshold="2.0") in r.failures
+
+
+def test_threshold_violation_not_in_incomplete_reason():
+    """THRESHOLD_VIOLATION must NOT be an IncompleteReason member."""
+    assert "THRESHOLD_VIOLATION" not in {r.name for r in IncompleteReason}

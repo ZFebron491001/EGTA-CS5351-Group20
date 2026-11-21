@@ -166,9 +166,23 @@ illegal → reject) and **MUST** require the metric on **both** sides
 (`MISSING_METRIC` otherwise). The **only deferred part is the final
 winner/composite score**: `winner`/`baseline_win`/`enhanced_win` stay `None`/
 `False` until DEBT-FR05-D4 closes (owner E, due 2026-11-22T18:00+08:00, verifier
-D; winner not reported before FR-05 is reported). Whether a both-sides
-threshold breach yields COMPLETE or REVIEW is **pending D's Q1 decision** (the
-spec keeps that test as a TODO until then).
+D; winner not reported before FR-05 is reported).
+
+**Threshold handling (D-decided, Option Y):** `compare_runs` evaluates each rubric
+metric on **each side separately** (never `{**base, **enh}`):
+- both present & **within** threshold → `COMPLETE`, `incomplete_reason=None`,
+  `failures=[]`, `winner=None`, both `*_win=False`;
+- **one** side exceeds → `REVIEW`, `incomplete_reason=None`, `winner=None`, one
+  failure recorded for the breaching side;
+- **both** sides exceed → `REVIEW`, `failures` has ≥2 (one baseline + one
+  enhanced);
+- one side lacks the metric → `INCOMPLETE/MISSING_METRIC`;
+- illegal rubric → `ValidationError`.
+- **Failure format** (one violation per side):
+  `THRESHOLD_VIOLATION:<metric>:<side>:observed=<v>:operator=<op>:threshold=<t>`
+  e.g. `THRESHOLD_VIOLATION:token_cost:baseline:observed=3.0:operator=lte:threshold=2.0`.
+- `THRESHOLD_VIOLATION` is **NOT** an `IncompleteReason` member (it is a
+  `failures` string; the status is `REVIEW`).
 
 ---
 
