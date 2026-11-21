@@ -20,10 +20,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Protocol
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from egta.contracts.events import RunEvent
 
@@ -95,7 +95,7 @@ class Receipt(BaseModel):
     receipt_id: str
     run_id: str
     event_id: str
-    sequence: int
+    sequence: int = Field(strict=True)
     payload_hash: str
     prev_event_hash: str
     chain_tip_hash: str
@@ -103,6 +103,13 @@ class Receipt(BaseModel):
     store_id: str
     transaction_id: str
     idempotency_key: str
+
+    @field_validator("persisted_at")
+    @classmethod
+    def _require_tz_aware(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("persisted_at must be timezone-aware (UTC)")
+        return value.astimezone(UTC)
 
 
 def recompute_payload_hash(event: RunEvent) -> str:
@@ -181,5 +188,3 @@ class AuditSink(Protocol):
     def append(self, event: RunEvent) -> Receipt: ...
 
     def read(self, run_id: str) -> AuditReader: ...
-
-

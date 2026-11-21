@@ -22,7 +22,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from egta.contracts.audit import verify_chain
+from egta.contracts.audit import dedupe_events, verify_chain
 from egta.contracts.events import RunEvent
 
 _H64 = r"^[0-9a-f]{64}$"
@@ -119,9 +119,16 @@ class ReplayState(BaseModel):
 
 
 def replay_events(events: list[RunEvent], *, anchor: str | None = None) -> ReplayState:
-    """Reconstruct a run's state offline from its events (deterministic)."""
-    verify_chain(events, anchor=anchor)
-    ordered = sorted(events, key=lambda e: (e.run_id, e.sequence))
+    """Reconstruct a run's state offline from its events (deterministic).
+
+    Deduplicates first (``dedupe_events``; conflicting duplicates raise
+    ``DuplicateConflict``), then verifies the chain, sorts by ``(run_id,
+    sequence)``, and folds metrics. ``event_count`` is the number of deduplicated
+    events.
+    """
+    deduped = dedupe_events(events)
+    verify_chain(deduped, anchor=anchor)
+    ordered = sorted(deduped, key=lambda e: (e.run_id, e.sequence))
     metrics: dict[str, float] = {}
     for event in ordered:
         metrics.update(event.metrics)
@@ -129,7 +136,7 @@ def replay_events(events: list[RunEvent], *, anchor: str | None = None) -> Repla
         run_id=ordered[0].run_id,
         last_sequence=ordered[-1].sequence,
         chain_tip_hash=ordered[-1].payload_hash,
-        event_count=len({(e.run_id, e.event_id) for e in ordered}),
+        event_count=len(deduped),
         metrics=metrics,
         events=ordered,
     )
