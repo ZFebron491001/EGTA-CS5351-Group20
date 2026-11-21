@@ -18,11 +18,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13"]
         experimental: [false]
         # One run away from UTC, so a test that only passes in UTC fails here.
-        # 3.14 is non-blocking (experimental) to avoid false reds from a failing
-        # pip install / provider wheel gap on a pre-release interpreter.
+        # 3.14 is include-only and experimental (truly non-blocking) to avoid
+        # false reds from a failing pip install / provider wheel gap.
         include:
           - python-version: "3.14"
             experimental: true
@@ -100,10 +100,11 @@ jobs:
           pip install -e ".[dev]"
       - name: Gate each offline suite
         env:
-          # Exact, real-run assertion counts (A confirmed FR-04 126 + 13 = 139).
-          EXPECT_CONTRACTS: "199"
+          # contracts expected is read from the approval record (F1 scheme 2) so
+          # the spec PR and CI can never drift. E2/risk_gate have no record yet.
+          CONTRACTS_RECORD: "docs/approvals/test-hash-FR-05-contracts.txt"
           EXPECT_EVALUATION: "28"
-          EXPECT_RISK_GATE: "139"
+          EXPECT_RISK_GATE: "139"  # A confirmed FR-04 126 + 13 = 139
         run: |
           python - <<'PY'
           import os
@@ -114,7 +115,7 @@ jobs:
 
           # (suite-name, module-dir, pytest-args, expected-env)
           suites = [
-              ("contracts",  "src/egta/contracts",  ["-m", "spec", "test/offline/contracts"],  "EXPECT_CONTRACTS"),
+              ("contracts",  "src/egta/contracts",  ["-m", "spec", "test/offline/contracts"],  None),  # from record
               ("evaluation", "src/egta/evaluation", ["-m", "spec", "test/offline/evaluation"], "EXPECT_EVALUATION"),
               ("risk_gate",  "src/egta/risk_gate",  ["test/offline/risk_gate"],                "EXPECT_RISK_GATE"),
           ]
@@ -162,12 +163,27 @@ jobs:
                           return counts
               return counts
 
+          def expected_from_record(path):
+              # F1 scheme 2: parse `actual_cases: <n>` from the approval record.
+              text = Path(path).read_text(encoding="utf-8")
+              m = re.search(r"^\s*actual_cases:\s*(\d+)", text, re.MULTILINE)
+              if not m:
+                  return None
+              return int(m.group(1))
+
           failures = []
           for name, moddir, args, env in suites:
               if not Path(moddir).is_dir():
                   print(f"::notice::{name}: {moddir} absent -- N/A (suite skipped, not pass/fail)")
                   continue
-              expected = int(os.environ[env])
+              if env is None:
+                  expected = expected_from_record(os.environ["CONTRACTS_RECORD"])
+              else:
+                  expected = int(os.environ[env])
+              if expected is None:
+                  failures.append(name)
+                  print(f"::error::{name}: could not read expected count from record")
+                  continue
 
               # 1) collect-only consistency (extra guard; not the sole gate).
               collected = collect_count(args)

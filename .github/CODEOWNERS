@@ -5,12 +5,12 @@
 
 # Application modules
 /src/egta/contracts/     @cosine-Y @ZFebron491001
-/src/egta/risk_gate/     @ZFebron491001
-/src/egta/budget/        @cosine-Y
-/src/egta/adapters/      @cosine-Y
-/src/egta/app/           @cosine-Y
+/src/egta/risk_gate/     @ZFebron491001 @jianmin2004
+/src/egta/budget/        @cosine-Y @ZFebron491001
+/src/egta/adapters/      @cosine-Y @ZFebron491001
+/src/egta/app/           @cosine-Y @ZFebron491001
 /src/egta/evidence/      @yuxiangdu39 @ZFebron491001
-/src/egta/evaluation/    @jianmin2004
+/src/egta/evaluation/    @jianmin2004 @ZFebron491001
 
 # Offline tests
 /test/offline/contracts/     @ZFebron491001
