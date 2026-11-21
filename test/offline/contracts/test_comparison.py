@@ -323,3 +323,118 @@ def test_quality_labels_propagated_without_forgery():
     # result carries a quality_labels list consistent with inputs (not invented)
     assert isinstance(r.quality_labels, list)
     assert set(r.quality_labels) <= set(labels) | {"bronze"}
+
+
+# ===========================================================================
+# Follow-up spec (spec/FR-05-compare-fixes): D#1/#2/#4 hardening.
+# These assertions must FAIL on the current #10 implementation (false-green) and
+# PASS on a corrected implementation.
+# ===========================================================================
+
+
+# --- A. Single-sided missing metric -> INCOMPLETE/MISSING_METRIC -----------
+
+
+def test_single_sided_missing_baseline_only_is_missing_metric():
+    """Baseline observes token_cost, enhanced does NOT -> INCOMPLETE/MISSING_METRIC."""
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1")  # no observation
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.INCOMPLETE
+    assert r.incomplete_reason is IncompleteReason.MISSING_METRIC
+    assert r.winner is None and r.baseline_win is False and r.enhanced_win is False
+
+
+def test_single_sided_missing_enhanced_only_is_missing_metric():
+    """Enhanced observes token_cost, baseline does NOT -> INCOMPLETE/MISSING_METRIC."""
+    b = _summary(variant="B0")  # no observation
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.INCOMPLETE
+    assert r.incomplete_reason is IncompleteReason.MISSING_METRIC
+    assert r.winner is None
+
+
+def test_both_sides_present_is_complete():
+    """Both sides observe the metric -> COMPLETE (positive retained)."""
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})
+    r = compare_runs(b, e, _rubric())
+    assert r.completion_status is CompletionStatus.COMPLETE
+
+
+# --- B. Typed rubric validation (illegal rubric rejected) ------------------
+
+
+def test_illegal_rubric_flat_dict_rejected():
+    """A rubric entry that is not a MetricDef (flat dict) must be rejected."""
+    from pydantic import ValidationError
+
+    bad = {"token_cost": {"operator": "lte", "threshold": 2.0}}  # missing fields
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})
+    with pytest.raises((ValidationError, ValueError, TypeError)):
+        compare_runs(b, e, bad)
+
+
+def test_illegal_rubric_non_metricdef_object_rejected():
+    """A non-MetricDef value (arbitrary object) must be rejected, not COMPLETE."""
+    from pydantic import ValidationError
+
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})
+    with pytest.raises((ValidationError, ValueError, TypeError)):
+        compare_runs(b, e, {"token_cost": object()})
+
+
+# --- B. Observed value, not threshold ---------------------------------------
+
+
+def test_compare_runs_scores_observed_value_not_threshold():
+    """The scored value reflects observed data (not the rubric threshold)."""
+    b = _summary(variant="B0", metrics={"token_cost": 0.5})
+    e = _summary(variant="B1", metrics={"token_cost": 1.25})
+    r = compare_runs(b, e, _rubric())  # threshold 2.0
+    assert r.completion_status is CompletionStatus.COMPLETE
+    assert r.metrics["token_cost"] == 1.25
+    assert r.metrics["token_cost"] != _rubric()["token_cost"].threshold
+
+
+# --- C. Strong field assertions (failures / quality_labels / ids) ----------
+
+
+def test_run_pair_and_case_ids_are_really_propagated():
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})
+    r = compare_runs(b, e, _rubric(), run_pair_id="PAIR-XYZ", case_id="CASE-42")
+    assert r.run_pair_id == "PAIR-XYZ"
+    assert r.case_id == "CASE-42"
+    assert r.run_pair_id != "pair" and r.case_id != "case"  # not hardcoded
+
+
+def test_quality_labels_propagated_strong():
+    labels = ["gold", "silver"]
+    b = _summary(variant="B0", metrics={"token_cost": 1.0}, quality_labels=labels)
+    e = _summary(variant="B1", metrics={"token_cost": 1.5}, quality_labels=["bronze"])
+    r = compare_runs(b, e, _rubric())
+    assert r.quality_labels == labels  # propagated verbatim from baseline, no forgery
+
+
+def test_failures_field_present_and_list():
+    b = _summary(variant="B0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1", metrics={"token_cost": 1.5})
+    r = compare_runs(b, e, _rubric())
+    assert isinstance(r.failures, list)
+
+
+# --- TODO (pending D's Q1 decision): both-sides-exceed-threshold -----------
+# PLACEHOLDER -- do NOT enable until D decides status + reason (Option Y).
+# Status is Y (REVIEW); whether incomplete_reason is set is D's decision (a)/(b).
+#
+# def test_both_sides_exceed_threshold_status():
+#     b = _summary(variant="B0", metrics={"token_cost": 5.0})   # > lte 2.0
+#     e = _summary(variant="B1", metrics={"token_cost": 9.0})   # > lte 2.0
+#     r = compare_runs(b, e, _rubric())
+#     assert r.completion_status is CompletionStatus.REVIEW      # TODO: D
+#     # assert r.incomplete_reason is ...                         # TODO: D (a)/(b)
+#     assert r.winner is None

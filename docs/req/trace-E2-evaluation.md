@@ -17,12 +17,14 @@ Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,m
   is supplied, `compute_manifest_hash(manifest)` must equal **both** sides'
   `manifest_hash`, else INCOMPLETE/MANIFEST_MISMATCH. `RunSummary` unchanged.
   Covered by `test_report.py`.
-- **D#4 rubric comparison — DEFERRED (D-allowed):** winner scoring from observed
-  `RunSummary.metrics` vs `MetricDef.operator`/`threshold` is deferred. **Debt:**
-  complete operator/threshold winner scoring. **Required now:** `compare_runs`
-  must NOT return a misleading COMPLETE when rubric observation metrics are
-  missing — it returns INCOMPLETE. Covered by
-  `test_no_rubric_observation_metrics_not_misleading_complete`.
+- **D#4 rubric comparison (NOT deferred except winner):** `compare_runs` MUST use
+  observed values (not threshold) and apply `MetricDef.operator`/`threshold`,
+  recording breaches in `failures`; MUST validate the rubric (illegal → reject);
+  MUST require each metric on BOTH sides (single-sided → INCOMPLETE/MISSING_METRIC).
+  Only the final winner/composite is deferred (DEBT-FR05-D4, closing-pending).
+  Covered by `test_report.py` + `test/offline/contracts/test_comparison.py`
+  single-sided/illegal-rubric/observed-value tests. Both-sides threshold breach
+  status is pending D's Q1 (TODO until decided).
 - **D#6 empty chain + anchor (fail-closed):** `verify_chain([])` (no anchor) → OK;
   `verify_chain([], anchor=...)` → `ChainBroken`. Covered by `test_replay.py`
   (empty-chain anchor) and the contracts layer.
