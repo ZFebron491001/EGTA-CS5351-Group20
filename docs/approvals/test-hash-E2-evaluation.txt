@@ -21,6 +21,6 @@ aggregate_sha256 (tests, sorted by path):
   0aed4cf410b0530d723feeb0ca6c0c6f20e6a06cda75107e35536398c356ed17
 
 spec_bundle_sha256 (tests + trace-E2-evaluation.md + spec-registry-E2.md, sorted):
-  7ae3d5bc10d0b7e8b2d9067d6692c4d9bc1d72564aeeafd603a2d9c42f8c400c
+  bb59446f8fc62e3601662e7d55c553f40662489fbb61915072636b38d18ba559
 
 approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id authoritative)

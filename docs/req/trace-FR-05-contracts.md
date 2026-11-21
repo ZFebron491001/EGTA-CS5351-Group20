@@ -5,7 +5,7 @@ Requirement-to-test trace. **Spec/test only.** Implementation
 descendant implementation PR. Contract definitions: `docs/req/contracts-summary.md`.
 Related: **PR #1** (original record; DEBT-D2).
 
-**Status:** 7 test modules (9 files), **136 test functions → 213 cases** (test_comparison: 34 functions incl. operator boundaries). RED here: imports of
+**Status:** 7 test modules (9 files), **136 test functions → 223 cases** (test_comparison: 34 functions incl. operator boundaries). RED here: imports of
 `egta.contracts.audit`/`evaluation` fail (`ModuleNotFoundError`). Quarantine (D
 item 8, Option A): default `pytest` collects only `tests/` (green); the spec is
 run explicitly on the impl branch via `pytest -m spec test/offline/contracts`

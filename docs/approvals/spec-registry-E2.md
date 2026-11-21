@@ -24,8 +24,8 @@
   (fail-closed).
 
 ## Files & case counts (exact from `--collect-only`)
-- E2 collect-only (actual): **28 cases**. Contracts collect-only (actual): **213 cases**.
-- Gate = exactly the actual collected numbers (do not hardcode; contracts 213 / E2 28). E2 moved
+- E2 collect-only (actual): **28 cases**. Contracts collect-only (actual): **223 cases**.
+- Gate = exactly the actual collected numbers (do not hardcode; contracts 223 / E2 28). E2 moved
   D#6 `verify_chain([], anchor)` tests to `test/offline/contracts/test_replay.py`.
 - `test_replay.py` · `test_report.py` · `test_metrics.py` · `test_sqlite_sink.py`
   (current E2 total 28).
