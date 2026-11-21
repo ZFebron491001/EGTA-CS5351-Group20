@@ -1,0 +1,23 @@
+# CODEOWNERS — EGTA-CS5351-Group20 (minimal)
+#
+# The author shall not self-review. Refer to GATE-01.
+# GitHub applies the LAST matching pattern, so rules are ordered wide -> narrow.
+
+# Application modules
+/src/egta/contracts/     @cosine-Y @ZFebron491001
+/src/egta/risk_gate/     @ZFebron491001
+/src/egta/budget/        @cosine-Y
+/src/egta/adapters/      @cosine-Y
+/src/egta/app/           @cosine-Y
+/src/egta/evidence/      @yuxiangdu39
+/src/egta/deliberation/  @wawfggqq
+/src/egta/evaluation/    @jianmin2004
+
+# Offline tests
+/test/offline/contracts/     @ZFebron491001
+/test/offline/evaluation/    @jianmin2004 @ZFebron491001
+/test/offline/risk_gate/     @ZFebron491001 @yuxiangdu39
+
+# CI / governance (narrower, last)
+/.github/workflows/      @jianmin2004 @ZFebron491001
+/.github/CODEOWNERS      @jianmin2004 @ZFebron491001

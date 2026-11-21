@@ -65,3 +65,99 @@ jobs:
         # The repo is fully clean under the strict select, so we lint everything
         # (generated results/ is excluded via pyproject extend-exclude).
         run: ruff check .
+
+  # Offline spec suites (FR-05 contracts, E2 evaluation, FR-04 risk gate).
+  #
+  # These suites are RED/not-runnable on branches without src/egta (e.g. main
+  # before an implementation PR merges): the test modules import egta.* and fail
+  # at collection. That is the intended test-first "bootstrap not-applicable"
+  # state -- this job reports N/A (does NOT fail) when src/egta is absent, and
+  # only enforces the exact case-count gates once an implementation exists.
+  #
+  # Counting is done in Python by parsing pytest's collect-only TREE, not grep,
+  # so renames/parametrisation cannot silently change or hide the number.
+  offline-tests:
+    name: offline spec suites (exact counts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Detect bootstrap (src/egta present?)
+        id: boot
+        run: |
+          if [ -d src/egta ]; then
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "applicable=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Bootstrap not applicable (no src/egta)
+        if: steps.boot.outputs.applicable == 'false'
+        run: |
+          echo "::notice::src/egta absent -- offline spec suites are not runnable"
+          echo "on this branch (test-first bootstrap). Reporting N/A, not a pass."
+      - name: Install (with dev extras)
+        if: steps.boot.outputs.applicable == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Assert exact collect counts (199 / 28 / 139)
+        if: steps.boot.outputs.applicable == 'true'
+        env:
+          # FR-05 contracts: exactly 199. E2 evaluation: exactly 28.
+          # FR-04 risk gate: exactly 139 (A confirmed 126 + 13 = 139).
+          EXPECT_CONTRACTS: "199"
+          EXPECT_EVALUATION: "28"
+          EXPECT_RISK_GATE: "139"
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import sys
+
+          # (selection-args, expected-env-name) -- selection uses markers where the
+          # suite is @pytest.mark.spec; risk_gate is unmarked and selected by path.
+          suites = [
+              (["-m", "spec", "test/offline/contracts"], "EXPECT_CONTRACTS"),
+              (["-m", "spec", "test/offline/evaluation"], "EXPECT_EVALUATION"),
+              (["test/offline/risk_gate"], "EXPECT_RISK_GATE"),
+          ]
+
+          def collected(args):
+              # Parse pytest's collect-only tree; count only real test ids.
+              out = subprocess.run(
+                  [sys.executable, "-m", "pytest", "-o", "addopts=--strict-markers",
+                   "--collect-only", "-q", *args],
+                  capture_output=True, text=True,
+              )
+              if out.returncode not in (0,):
+                  sys.stderr.write(out.stdout + out.stderr)
+                  raise SystemExit(f"collection failed for {args} (exit {out.returncode})")
+              ids = set()
+              for line in out.stdout.splitlines():
+                  s = line.strip()
+                  if "::" in s and not s.startswith(("<", "=", "collected", "no tests")):
+                      ids.add(s)
+              return len(ids)
+
+          failures = []
+          for args, env_name in suites:
+              expected = int(os.environ[env_name])
+              got = collected(args)
+              status = "OK" if got == expected else "MISMATCH"
+              print(f"{env_name}: expected {expected}, collected {got} -> {status}")
+              if got != expected:
+                  failures.append((args, expected, got))
+          if failures:
+              for args, exp, got in failures:
+                  print(f"::error::{args}: expected exactly {exp}, got {got}")
+              raise SystemExit(1)
+          print("All offline suites collected at the exact expected counts.")
+          PY
+      - name: Run offline suites
+        if: steps.boot.outputs.applicable == 'true'
+        run: |
+          pytest -o addopts="--strict-markers" -m spec test/offline/contracts -q
+          pytest -o addopts="--strict-markers" -m spec test/offline/evaluation -q
+          pytest -o addopts="--strict-markers" test/offline/risk_gate -q
