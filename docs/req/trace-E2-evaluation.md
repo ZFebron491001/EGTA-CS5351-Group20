@@ -74,7 +74,7 @@ Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,m
 | `test_fail_closed_no_partial_write` | fail-closed | NFR-08 |
 | `test_reader_sorted_and_scoped` | reader sorting/scope | NFR-09 |
 
-Cases total: replay 10 + report 6 + metrics 5 + sink 8 = **29**.
+Cases total (actual via --collect-only): **30** (E2). Contracts: **197**. D#6 empty-chain+anchor tests are in `test/offline/contracts/test_replay.py` (moved per D).
 
 ## Approval
 D (@ZFebron491001) under GATE-01; author no self-review. Binding in

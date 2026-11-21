@@ -24,8 +24,11 @@
   (fail-closed).
 
 ## Files & case counts (exact from `--collect-only`)
-- `test_replay.py` 10 · `test_report.py` 6 · `test_metrics.py` 5 · `test_sqlite_sink.py` 8
-- **Total = 29 cases** (gate = exactly 29).
+- E2 collect-only (actual): **30 cases**. Contracts collect-only (actual): **197 cases**.
+- Gate = exactly the actual collected numbers (do not hardcode 188/29). E2 moved
+  D#6 `verify_chain([], anchor)` tests to `test/offline/contracts/test_replay.py`.
+- `test_replay.py` · `test_report.py` · `test_metrics.py` · `test_sqlite_sink.py`
+  (current E2 total 30; recount via `--collect-only`).
 
 ## Hash & approval
 - `docs/approvals/test-hash-E2-evaluation.txt` will hold `test_content_commit`,

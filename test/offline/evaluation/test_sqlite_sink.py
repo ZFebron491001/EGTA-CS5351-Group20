@@ -22,6 +22,7 @@ from egta.contracts.audit import (
     AuditUnavailable,
     DuplicateConflict,
     Receipt,
+    SequenceConflict,
     recompute_payload_hash,
 )
 from egta.contracts.events import Phase, RunEvent, RunStatus
@@ -48,13 +49,20 @@ def _bound(seq: int, event_id: str, run_id: str = "r1", prev: str = "", **extra)
 
 
 def test_sink_satisfies_audit_protocols(tmp_path):
-    """Duck-typed conformance to AuditSink/AuditReader (structural)."""
+    """Conformance to AuditSink/AuditReader: runtime_checkable isinstance or inspect.signature."""
+    import inspect
+
     sink = SqliteAuditSink(str(tmp_path / "audit.db"))
-    assert hasattr(sink, "append") and hasattr(sink, "read")
+    if getattr(AuditSink, "_is_runtime_protocol", False):
+        assert isinstance(sink, AuditSink)
+    else:
+        sig = inspect.signature(SqliteAuditSink.append)
+        params = list(sig.parameters.values())
+        assert params[1].name == "event"  # append(self, event)
+        assert inspect.signature(SqliteAuditSink.read).parameters.get("run_id") is not None
     reader = sink.read("r1")
-    assert hasattr(reader, "read")
-    # both callables are used elsewhere; reference the protocol names for traceability
-    assert AuditSink is not None and AuditReader is not None
+    assert inspect.signature(reader.read).parameters.get("run_id") is not None
+    assert AuditReader is not None
 
 
 def test_append_returns_receipt_with_12_fields(tmp_path):
@@ -89,19 +97,19 @@ def test_cross_run_same_event_id_ok(tmp_path):
     assert len(sink.read("rB").read("rB")) == 1
 
 
-def test_unique_run_sequence_enforced(tmp_path):
-    """Two different event_ids at the same (run_id, sequence) violate UNIQUE."""
+def test_unique_run_sequence_is_sequence_conflict(tmp_path):
+    """Two different event_ids at the same (run_id, sequence) -> SequenceConflict."""
     sink = SqliteAuditSink(str(tmp_path / "audit.db"))
     sink.append(_bound(0, "e0"))
-    with pytest.raises(AuditUnavailable):
+    with pytest.raises(SequenceConflict):
         sink.append(_bound(0, "e1"))  # same sequence 0, different id
 
 
 def test_fail_closed_no_partial_write(tmp_path):
+    """A refused append leaves nothing persisted (no partial rows / receipt)."""
     sink = SqliteAuditSink(str(tmp_path / "audit.db"))
-    # A same-sequence event must be refused and leave nothing persisted beyond e0
     sink.append(_bound(0, "e0"))
-    with pytest.raises(AuditUnavailable):
+    with pytest.raises(SequenceConflict):
         sink.append(_bound(0, "e1"))
     assert [e.event_id for e in sink.read("r1").read("r1")] == ["e0"]
 
@@ -116,3 +124,20 @@ def test_reader_sorted_and_scoped(tmp_path):
     read = sink.read("r1").read("r1")
     assert [e.sequence for e in read] == [0, 1]
     assert all(e.run_id == "r1" for e in read)
+
+
+def test_fail_closed_real_midprocess_failure_rolls_back(tmp_path):
+    """A storage error after the event insert but before commit -> AuditUnavailable,
+    transaction rolled back: no partial event row, no receipt."""
+    sink = SqliteAuditSink(str(tmp_path / "audit.db"))
+    # Force a failure on the receipts insert via a SQLite trigger.
+    sink.conn.execute(
+        "CREATE TRIGGER fail_receipt BEFORE INSERT ON receipts "
+        "BEGIN SELECT RAISE(ABORT, 'injected receipt failure'); END;"
+    )
+    with pytest.raises(AuditUnavailable):
+        sink.append(_bound(0, "e0"))
+    # rollback: neither the event row nor a receipt persisted
+    n_events = sink.conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+    n_receipts = sink.conn.execute("SELECT COUNT(*) FROM receipts").fetchone()[0]
+    assert n_events == 0 and n_receipts == 0

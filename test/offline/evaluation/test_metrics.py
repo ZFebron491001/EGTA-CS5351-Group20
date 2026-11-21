@@ -91,12 +91,10 @@ def test_missing_usage_incomplete_not_ok():
 
 
 def test_invalid_rubric_rejected():
-    """A rubric entry that is not a valid MetricDef must be rejected."""
+    """aggregate must reject an illegal rubric (not just MetricDef construction)."""
     from pydantic import ValidationError
 
-    # an invalid MetricDef (operator not in the allowed set)
+    bad = {"token_cost": {"operator": "approximately", "threshold": "x"}}
+    results = [_result(CompletionStatus.COMPLETE, metrics={"token_cost": 1.0})]
     with pytest.raises((ValueError, TypeError, ValidationError)):
-        MetricDef(
-            metric="token_cost", operator="approximately", threshold="x",
-            verification="v", source="s", aggregation="a", unit="u",
-        )
+        aggregate(results, bad)

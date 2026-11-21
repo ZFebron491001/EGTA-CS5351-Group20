@@ -89,6 +89,7 @@ def test_equal_manifest_complete():
 
 
 def test_delegates_to_compare_runs():
+    # empty metrics -> both sides INCOMPLETE (MISSING_METRIC); pair must equal compare_runs
     b, e = _summary(variant="B0"), _summary(variant="B1")
     assert pair_report(b, e, _rubric()) == compare_runs(b, e, _rubric())
 
@@ -131,10 +132,10 @@ def test_manifest_param_side_inconsistent_incomplete():
 
 
 def test_no_rubric_observation_metrics_not_misleading_complete():
-    """With no observed metric data, compare_runs must NOT return COMPLETE."""
+    """With no observed metric data, pair_report must be INCOMPLETE/MISSING_METRIC."""
     b = _summary(variant="B0")  # metrics={} (no observation)
     e = _summary(variant="B1")
     r = pair_report(b, e, _rubric())
-    assert r.completion_status is not CompletionStatus.COMPLETE
     assert r.completion_status is CompletionStatus.INCOMPLETE
-    assert r.winner is None
+    assert r.incomplete_reason is IncompleteReason.MISSING_METRIC
+    assert r.winner is None and r.baseline_win is False and r.enhanced_win is False
