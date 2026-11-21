@@ -8,7 +8,7 @@ base:     main
 # 2) reviewed PR head     : the exact head D reviews (final head before merge)
 # 3) merge commit         : created by GitHub when this PR merges (post-approval)
 test_content_commit:     511ef7d2f059
-merge_commit:            PENDING  # recorded in an external registry or a PR comment after merge
+merge_commit:            2c93eca6f6e00f4b783f301b0832adfe517f4c7d  # Test PR #4, merged by D
 
 # Approval binds to: the reviewed head is the commit_id recorded by reviewer D's
 # GitHub review; merge_commit is recorded in an external registry or a PR comment
