@@ -40,6 +40,8 @@ Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,m
 | `test_replay_anchor_tail_truncation` | anchor tip mismatch → ChainBroken | NFR-08 |
 | `test_replay_offline_no_network` | socket poisoned; content asserts | NFR-08 |
 | `test_replay_scopes_to_run_id` | run_id scoping | FR-05 |
+| `test_empty_chain_without_anchor_ok` | D#6: `verify_chain([])` OK | NFR-08 |
+| `test_empty_chain_with_anchor_fail_closed` | D#6: `verify_chain([], anchor)` → ChainBroken | NFR-08 |
 
 ### `test_report.py` — `egta.evaluation.report.pair_report(...)`
 | Test | Covers | REQ |
@@ -71,6 +73,8 @@ Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,m
 | `test_unique_run_sequence_enforced` | UNIQUE(run_id, sequence) | FR-05 |
 | `test_fail_closed_no_partial_write` | fail-closed | NFR-08 |
 | `test_reader_sorted_and_scoped` | reader sorting/scope | NFR-09 |
+
+Cases total: replay 10 + report 6 + metrics 5 + sink 8 = **29**.
 
 ## Approval
 D (@ZFebron491001) under GATE-01; author no self-review. Binding in

@@ -24,8 +24,8 @@
   (fail-closed).
 
 ## Files & case counts (exact from `--collect-only`)
-- `test_replay.py` 8 · `test_report.py` 6 · `test_metrics.py` 5 · `test_sqlite_sink.py` 8
-- **Total = 27 cases** (gate = exactly 27).
+- `test_replay.py` 10 · `test_report.py` 6 · `test_metrics.py` 5 · `test_sqlite_sink.py` 8
+- **Total = 29 cases** (gate = exactly 29).
 
 ## Hash & approval
 - `docs/approvals/test-hash-E2-evaluation.txt` will hold `test_content_commit`,
