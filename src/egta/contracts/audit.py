@@ -3,10 +3,11 @@
 # Implements: FR-05, NFR-08, NFR-09
 
 Defines the typed exceptions (``AuditContractError`` base), the 12-field
-``Receipt``, the ``AuditSink``/``AuditReader`` protocols, the free functions
+``Receipt``, the ``AuditSink``/``AuditReader`` protocols, and the free functions
 ``recompute_payload_hash`` / ``verify_payload`` / ``verify_chain`` /
-``dedupe_events``, and a real ``SqliteAuditSink`` (fail-closed, idempotent,
-cross-run-unique). Definitions: docs/req/contracts-summary.md §1.
+``dedupe_events``. The real ``SqliteAuditSink`` lives in
+``src/egta/evaluation/sink.py`` (Phase 2, delivered with its own test/spec PR).
+Definitions: docs/req/contracts-summary.md §1.
 
 Tamper-evidence: ``verify_chain`` proves internal consistency (payload binding,
 gap-free ``(run_id, sequence)``, ``prev_event_hash`` links) and, given an
@@ -19,8 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import sqlite3
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict
@@ -183,105 +183,3 @@ class AuditSink(Protocol):
     def read(self, run_id: str) -> AuditReader: ...
 
 
-class SqliteAuditReader:
-    """``AuditReader`` backed by a SQLite audit store."""
-
-    def __init__(self, conn: sqlite3.Connection, run_id: str):
-        self._conn = conn
-        self._run_id = run_id
-
-    def read(self, run_id: str) -> list[RunEvent]:
-        rows = self._conn.execute(
-            "SELECT payload FROM events WHERE run_id = ? ORDER BY sequence ASC",
-            (run_id,),
-        ).fetchall()
-        return [RunEvent.model_validate_json(r[0]) for r in rows]
-
-
-class SqliteAuditSink:
-    """Real, fail-closed SQLite audit sink.
-
-    One transaction per ``append`` writes the event and its receipt atomically.
-    UNIQUE(run_id, sequence) and UNIQUE(run_id, event_id) enforce the cross-run
-    identity constraint ``(run_id, sequence)``/``(run_id, event_id)``. Identical
-    re-append returns the existing ``Receipt`` (idempotent by ``idempotency_key``);
-    different content under the same ``(run_id, event_id)`` raises
-    ``DuplicateConflict``; any storage error raises ``AuditUnavailable`` and the
-    transaction is rolled back (no partial write).
-    """
-
-    store_id = "sqlite"
-
-    def __init__(self, path: str = ":memory:"):
-        self._conn = sqlite3.connect(path)
-        self._conn.execute("PRAGMA foreign_keys = ON")
-        self._conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS events (
-                run_id TEXT NOT NULL,
-                event_id TEXT NOT NULL,
-                sequence INTEGER NOT NULL,
-                content_hash TEXT NOT NULL,
-                payload TEXT NOT NULL,
-                PRIMARY KEY (run_id, event_id),
-                UNIQUE (run_id, sequence)
-            );
-            CREATE TABLE IF NOT EXISTS receipts (
-                idempotency_key TEXT PRIMARY KEY,
-                run_id TEXT NOT NULL,
-                event_id TEXT NOT NULL,
-                payload TEXT NOT NULL
-            );
-            """
-        )
-
-    def append(self, event: RunEvent) -> Receipt:
-        content = recompute_payload_hash(event)
-        key = f"{event.run_id}:{event.event_id}"
-        try:
-            with self._conn:  # transaction: commit on success, rollback on error
-                row = self._conn.execute(
-                    "SELECT content_hash, payload FROM receipts WHERE idempotency_key = ?",
-                    (key,),
-                ).fetchone()
-                if row is not None:
-                    existing_content, payload_json = row
-                    if existing_content != content:
-                        raise DuplicateConflict(
-                            event.run_id, event.event_id, existing_content, content
-                        )
-                    return Receipt.model_validate_json(payload_json)
-
-                receipt = Receipt(
-                    schema_version="1.0",
-                    receipt_id=f"rcpt-{event.run_id}-{event.event_id}",
-                    run_id=event.run_id,
-                    event_id=event.event_id,
-                    sequence=event.sequence,
-                    payload_hash=event.payload_hash,
-                    prev_event_hash=event.prev_event_hash,
-                    chain_tip_hash=content,
-                    persisted_at=datetime.now(UTC),
-                    store_id=self.store_id,
-                    transaction_id=key,
-                    idempotency_key=key,
-                )
-                self._conn.execute(
-                    "INSERT INTO events (run_id, event_id, sequence, content_hash, payload) "
-                    "VALUES (?, ?, ?, ?, ?)",
-                    (event.run_id, event.event_id, event.sequence, content,
-                     event.model_dump_json()),
-                )
-                self._conn.execute(
-                    "INSERT INTO receipts (idempotency_key, run_id, event_id, payload) "
-                    "VALUES (?, ?, ?, ?)",
-                    (key, event.run_id, event.event_id, receipt.model_dump_json()),
-                )
-                return receipt
-        except AuditContractError:
-            raise
-        except sqlite3.Error as exc:
-            raise AuditUnavailable(event.run_id, "append", str(exc)) from exc
-
-    def read(self, run_id: str) -> AuditReader:
-        return SqliteAuditReader(self._conn, run_id)
