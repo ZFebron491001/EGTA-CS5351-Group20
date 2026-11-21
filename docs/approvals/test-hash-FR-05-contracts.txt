@@ -6,14 +6,14 @@ base:     main
 # stored). Merge commit in external registry/CI/PR comment. This file records
 # ONLY test_content_commit + aggregate + bundle. Do not push after approval.
 
-test_content_commit: 84d253354eb807dcdb2bad727046a5f488312732
-actual_cases: 213            # pytest -m spec test/offline/contracts --collect-only (was 199 -> 208 -> 213)
+test_content_commit: a05e24611093449b7973e3ddbb9e69e511ec069e
+actual_cases: 223            # pytest -m spec test/offline/contracts --collect-only
 
 files (per-file SHA-256):
   e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/contracts/__init__.py
   dba3966fc3f0c3e5c73980cabefcba0282f75f25f295bdc3e791a2d4e40af6e8  test/offline/contracts/conftest.py
   527aff88800869b8b91307e405690990336edab128f4678afcf0112d12703dd6  test/offline/contracts/test_audit.py
-  6a0e2c14d7ef05f23a6931f6998fa4110ccb3a3c33bc55ce04df68e91d7c9592  test/offline/contracts/test_comparison.py
+  47a89d26bc8e3da6edf1165e0f942ce0c21fc73d20d9094ef454cd0df87c9990  test/offline/contracts/test_comparison.py
   0cdd47611fbc87ccc53737d51e85bf1df3347cf279fb892acbb5b5dc534bb287  test/offline/contracts/test_evaluation_result.py
   fbe799211ea6fae0cdd52f9f597baccae401400e8963415a92c9b9b747db65c1  test/offline/contracts/test_events.py
   5f21946a70bf91bc3aa4acd67630ba44cadc8a65c3619de83fb2b3b5a8dbec8d  test/offline/contracts/test_manifest.py
@@ -21,10 +21,10 @@ files (per-file SHA-256):
   313793e9dcebfb210b57337385a0e36d8a54628d3ec4cd76e934559e56835ff4  test/offline/contracts/test_replay.py
 
 aggregate_sha256 (tests, sorted by path):
-  641f02707f13a13255e6310a407c14112b7da2f45a80e8c070c8004116dec47e
+  ca792f1e9e9dc0abbc57973a8efeb415fa3d6b615f1cb3b960067d4d70b0d960
 
 spec_bundle_sha256 (tests + contracts-summary.md + trace-FR-05-contracts.md + spec-registry.md, sorted):
-  4bd69d8b0c271f7727fac524b8b1b0586ff977c747b879a0e04569c970df2e48
+  ce11d6e11d178d31119527ee2cb18c581353f39282628c54662e672b85f1a92c
 
 # E2 unchanged by this PR: aggregate 0aed4cf4... (28 cases) — see test-hash-E2-evaluation.txt.
 approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id authoritative)
