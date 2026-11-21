@@ -38,5 +38,6 @@
   externally. Do not push the approval file after approval.
 
 ## Dependencies
-- E2 impl depends on `egta.contracts.*` (Phase-1 PR #6). **E2 impl waits for #6
-  to merge**; this spec may proceed in parallel off `main`.
+- E2 impl depends on `egta.contracts.*` — the contracts implementation **#10**
+  (successor of #6). **E2 impl waits for #10 to merge**; this spec may proceed in
+  parallel off `main`.

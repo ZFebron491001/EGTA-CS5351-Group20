@@ -68,7 +68,7 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
   incoming_event_id) for differing `(run_id, sequence)`. `DuplicateConflict` ONLY
   for differing `(run_id, event_id)`; `AuditUnavailable` ONLY store/anchor
   unavailable. Real mid-process failure → AuditUnavailable + rollback.
-- **D#4 (deferred winner only):** typed rubric validation, MISSING_METRIC
+- **D#4 (winner deferred only; threshold = Option Y):** threshold breach → REVIEW + `failures` (per-side `THRESHOLD_VIOLATION`), `quality_labels` source = **enhanced**; typed rubric validation, MISSING_METRIC
   existence, operator/threshold applied (scored value = observed), quality_labels
   propagated (no forgery), run_pair_id/case_id from inputs (no hardcoded
   pair/case). Debt: winner/composite (owner E, due 2026-11-22T18:00+08:00,

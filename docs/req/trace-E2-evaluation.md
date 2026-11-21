@@ -5,7 +5,7 @@ in a **descendant implementation PR** after this spec merges. Tests only here;
 no `src/`. RED via `ModuleNotFoundError: egta.evaluation.*`.
 
 Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,manifest}`
-(the Phase-1 contract PR #6). E2 implementation waits for #6 to merge.
+(the contracts implementation **#10**, successor of #6). E2 implementation waits for #10 to merge.
 
 ## Scope changes folded in (from D's PR #6 review)
 - **D#3 sink placement:** `contracts/audit.py` keeps only
@@ -78,7 +78,7 @@ Dependencies (reused, not redefined): `egta.contracts.{audit,evaluation,events,m
 | `test_fail_closed_no_partial_write` | fail-closed | NFR-08 |
 | `test_reader_sorted_and_scoped` | reader sorting/scope | NFR-09 |
 
-Cases total (actual via --collect-only): **28** (E2). Contracts: **199**. D#6 empty-chain+anchor tests are in `test/offline/contracts/test_replay.py` (moved per D).
+Cases total (actual via --collect-only): **28** (E2). Contracts: **223**. D#6 empty-chain+anchor tests are in `test/offline/contracts/test_replay.py` (moved per D).
 
 ## Approval
 D (@ZFebron491001) under GATE-01; author no self-review. Binding in

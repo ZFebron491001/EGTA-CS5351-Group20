@@ -151,7 +151,7 @@ a missing required variant/result ⇒ INCOMPLETE `MISSING_RESULT`; unknown usage
 INCOMPLETE `MISSING_USAGE`; a rubric metric **not observed on BOTH sides** (either
 side missing it) ⇒ INCOMPLETE `MISSING_METRIC` (single-sided absence is not a
 COMPLETE comparison). An **illegal rubric** (entry not a `MetricDef`) is
-**rejected** (`ValidationError`/`TypeError`), never COMPLETE. Optional `manifest: ExperimentManifest | None = None`: when
+**rejected** (`ValidationError` only), never COMPLETE. Optional `manifest: ExperimentManifest | None = None`: when
 supplied, `compute_manifest_hash(manifest)` must equal **both** sides'
 `manifest_hash`, else INCOMPLETE `MANIFEST_MISMATCH`. Check order: manifest →
 snapshot/model/prompt/code/policy → result/usage → rubric observation (so the
