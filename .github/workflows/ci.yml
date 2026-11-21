@@ -103,7 +103,6 @@ jobs:
           # contracts expected is read from the approval record (F1 scheme 2) so
           # the spec PR and CI can never drift. E2/risk_gate have no record yet.
           CONTRACTS_RECORD: "docs/approvals/test-hash-FR-05-contracts.txt"
-          FR01_RECORD: "docs/approvals/test-hash-FR-01-contracts.txt"
           EXPECT_EVALUATION: "28"
           EXPECT_RISK_GATE: "139"  # A confirmed FR-04 126 + 13 = 139
         run: |
@@ -114,11 +113,12 @@ jobs:
           import sys
           from pathlib import Path
 
-          # FR-05 contracts are grouped with OTHER specs in test/offline/contracts
-          # (e.g. FR-01 test_evidence_contracts.py lands there via #5). To keep the
-          # FR-05 gate isolated we list FR-05's files explicitly and --ignore any
-          # non-FR-05 file, so its expected count (actual_cases) cannot be
-          # contaminated by evidence/other spec files.
+          # FR-05 contracts share test/offline/contracts with OTHER specs (e.g.
+          # FR-01 test_evidence_contracts.py lands there via #5), so we list
+          # FR-05's files explicitly to keep its actual_cases uncontaminated.
+          # NOTE: FR-01 evidence is NOT gated here yet — it needs #5 merged + B's
+          # EvidenceItem/EvidencePack types + an actual_cases record. Tracked as a
+          # follow-up debt (owner E, verifier A), not a suite in this job.
           _CONTRACTS_DIR = "test/offline/contracts"
           _FR05_FILES = [
               "_crash_child.py",  # not selected; harmless if absent
@@ -134,7 +134,6 @@ jobs:
           #                    "ENV:NAME" => env var; "RECORD:path" => approval record
           suites = [
               ("contracts",  "src/egta/contracts",  ["-m", "spec", *_fr05_paths], None),
-              ("evidence",   "src/egta/evidence",   ["-m", "spec", f"{_CONTRACTS_DIR}/test_evidence_contracts.py"], "RECORD:docs/approvals/test-hash-FR-01-contracts.txt"),
               ("evaluation", "src/egta/evaluation", ["-m", "spec", "test/offline/evaluation"], "ENV:EXPECT_EVALUATION"),
               ("risk_gate",  "src/egta/risk_gate",  ["test/offline/risk_gate"],                "ENV:EXPECT_RISK_GATE"),
           ]
