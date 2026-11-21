@@ -1,55 +1,55 @@
 # Spec registry — FR-05 contracts (test-first)
 
-Registry for the `@pytest.mark.spec` test range (per execution_plan:372 bootstrap:
-red tests are validated as "expected failure" on the branch without implementation,
-recorded here as the not-yet-enabled range; the implementation PR enables them).
+## Marker & quarantine (D item 8 — Option A)
 
-## Marker & enablement
-
-- Marker: `spec` — registered in `pyproject.toml` `[tool.pytest.ini_options].markers`
-  (`--strict-markers` is active, so an unregistered marker fails).
-- Every file under `test/offline/contracts/test_*.py` sets
-  `pytestmark = pytest.mark.spec`.
-- **Not enabled on `main`/spec as a gate:** `testpaths = ["tests"]` does not collect
-  `test/offline/contracts` by default, so the spec's red does not break `main`.
-  The implementation PR **enables** this range (runs it as a required check). We
-  do **not** rely on `testpaths` omission as the quarantine mechanism at merge
-  time; this registry records the intended enablement boundary explicitly.
-- Deselect/verify: `pytest -m spec test/offline/contracts` (runs only spec tests).
+- Marker: `spec`, registered in `pyproject.toml` (`--strict-markers` on).
+  Every spec file sets `pytestmark = pytest.mark.spec`.
+- **Default run excludes spec:** `addopts = -ra --strict-markers -m "not integration
+  and not spec"` and `testpaths = ["tests"]`. So `pytest` on the spec branch runs
+  the upstream suite (**green**) and never touches the RED spec — **without relying
+  on testpaths omission to hide it**.
+- **Spec branch command:** `pytest tests -m "not integration"` + `py_compile` +
+  AST count + (planned) hash check.
+- **Implementation/main branch command (required, gated):**
+  `pytest tests` + `pytest -m spec test/offline/contracts`. The gate MUST verify
+  **≥ 90 spec cases actually ran**; silently deselected/zero-selected ⇒ fail.
+- Explicit show-RED on spec branch: `pytest -m spec test/offline/contracts` →
+  7 collection errors (`ModuleNotFoundError: egta`).
 
 ## Expected-RED reason
+No `src/` on spec branch ⇒ `egta.contracts.audit`/`evaluation` imports fail.
+`--collect-only` is not a green proof (collection imports modules).
 
-On the spec branch (no `src/`), importing `egta.contracts.audit` /
-`egta.contracts.evaluation` fails (`ModuleNotFoundError: egta.contracts...`).
-That import failure is the test-first signal. `--collect-only` is **not** a green
-proof here (collection imports modules); CI proves well-formedness via
-`py_compile` + AST test-count, not green collection.
+## CI / required checks — files D must land (D item 9)
+This PR prepares/records the verification inputs; **Admin D** must add the checks:
+- Spec-syntax job: `py_compile test/offline/contracts/*.py` + AST test-count +
+  (hash check of `aggregate_sha256` / `spec_bundle_sha256`).
+- Trace/AI-log presence check.
+- Implementation-PR required job: run `pytest -m spec test/offline/contracts`
+  (≥90 cases), verify impl branch descends from spec merge commit, verify test
+  aggregate hash == approved value, first impl commit after approval commit.
+- Add these to `protect-main` required status checks + CODEOWNERS review.
 
 ## Coverage
+- 7 files, 95 test functions, **144 cases**.
+- `_InMemorySink` (test_audit.py) is a **reference double**; impl PR must add a
+  real `SqliteAuditSink` integration test.
 
-- 7 test files, 60 test functions, 90 cases.
-- RED-dep (expected red until implementation): four-variant manifest, unknown
-  variant, typed `metrics_rubric` (MetricDef 7 fields), `quality_rubric`
-  (4 fields / levels≥3 / bool), non-finite/non-JSON metrics rejection,
-  audit exceptions/Receipt/AuditSink/anchor, evaluation INCOMPLETE status,
-  compare_runs mismatch, replay determinism/offline.
-- PENDING (B): code/policy mismatch (manifest lacks `code_hash`/`policy_hash`);
-  `quality_rubric` placement confirmed separate field (adjust to B if reverted).
+## Hash & approval (D item 13)
+- `docs/approvals/test-hash-FR-05-contracts.txt` holds `test_content_commit`,
+  `aggregate_sha256`, and `spec_bundle_sha256` (tests + contracts-summary + trace +
+  this registry). Any change updates the bundle hash ⇒ re-review.
+- Authoritative reviewed head = GitHub review `commit_id`; merge commit recorded in
+  this registry / CI artifact / PR comment. Do not push the approval file after
+  approval.
 
-## Hash & approval
+## Verification evidence (this round)
+- Spec branch: `pytest -m spec test/offline/contracts` → 7 collection errors (RED).
+- `py_compile` exit 0; AST = 95 functions.
+- `ruff check .` green.
+- Full spec-satisfying impl in `/tmp` → `pytest -m spec test/offline/contracts`
+  → **144 passed**.
 
-- Test content hash + `test_content_commit`: see
-  `docs/approvals/test-hash-FR-05-contracts.txt`.
-- Authoritative reviewed head = GitHub review `commit_id`.
-- Merge commit recorded in this registry / CI artifact / PR comment after merge.
-
-## Verification evidence
-
-- Spec branch: `pytest test/offline/contracts` → collection errors
-  (`ModuleNotFoundError: egta`), **RED by design**.
-- `py_compile test/offline/contracts/*.py` → exit 0; AST = 60 test functions.
-- `ruff check .` → green.
-- Full spec-satisfying implementation built in `/tmp` (audit/evaluation/manifest/
-  events-with-validator) → `pytest test/offline/contracts` → **90 passed**. This
-  proves each new test turns green when its contract is implemented (red is due
-  to unimplemented contracts, not bad tests).
+## PENDING
+- **B:** quality_rubric nested-vs-separate; code/policy hash semantics.
+- **D:** `MISSING_USAGE` enum; frozen/duration deferrals.

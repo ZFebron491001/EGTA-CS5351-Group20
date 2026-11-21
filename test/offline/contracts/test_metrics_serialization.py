@@ -25,11 +25,13 @@ VALID_HASH = "a" * 64
 
 def _event(metrics) -> RunEvent:
     return RunEvent(
+        schema_version="1.0",
         event_id="e",
         run_id="r",
         sequence=0,
         phase=Phase.APP,
         timestamp=datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC),
+        duration_ms=0,
         status=RunStatus.OK,
         payload_hash=VALID_HASH,
         prev_event_hash="",
@@ -54,6 +56,27 @@ def test_nested_non_finite_metric_rejected():
     """Non-finite nested inside a list/dict value is also rejected."""
     with pytest.raises(ValidationError):
         _event({"a": {"b": [1.0, float("nan")]}})
+
+
+def test_bytes_metric_rejected():
+    """bytes are not JSON-serializable -> reject at construction."""
+    with pytest.raises(ValidationError):
+        _event({"x": b"raw"})
+
+
+def test_decimal_metric_rejected():
+    """Decimal is not JSON-native here -> reject (use float/int/str instead)."""
+    from decimal import Decimal
+
+    with pytest.raises(ValidationError):
+        _event({"x": Decimal("1.5")})
+
+
+@pytest.mark.parametrize("not_a_dict", [["list"], "string", 42, None])
+def test_metrics_must_be_dict(not_a_dict):
+    """metrics is dict[str, Any]; a non-dict top-level is rejected."""
+    with pytest.raises(ValidationError):
+        _event(not_a_dict)
 
 
 def test_json_safe_metrics_roundtrip():

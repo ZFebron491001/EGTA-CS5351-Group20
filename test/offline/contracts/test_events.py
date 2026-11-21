@@ -1,12 +1,12 @@
 """Offline contract tests for :mod:`egta.contracts.events` (+ public audit helpers).
 
-Every negative case raises strictly (no ``xfail``/``skip``). The hash/chain
-behaviour is exercised through the PUBLIC audit contract
-(:mod:`egta.contracts.audit`): ``recompute_payload_hash``, ``verify_payload``,
-``verify_chain``, ``dedupe_events`` and the typed exceptions. On the spec branch
-``egta.contracts.audit`` does not exist yet -> import error = RED (test-first).
+Strict negatives (no xfail/skip). Hash/chain via the PUBLIC audit contract
+(:mod:`egta.contracts.audit`). RED on the spec branch (imports of
+``egta.contracts.audit`` do not exist yet) = test-first signal.
 
-Contract definitions: docs/req/contracts-summary.md.
+Also covers D items 10/11: immutability (frozen/validate_assignment), sequence
+strictness (negative/bool/string), status↔reason consistency, schema_version,
+duration (NFR-09). Definitions: docs/req/contracts-summary.md.
 """
 
 from __future__ import annotations
@@ -38,11 +38,13 @@ def _utc() -> datetime:
 
 def _event(**overrides) -> RunEvent:
     base = {
+        "schema_version": "1.0",
         "event_id": "e1",
         "run_id": "r1",
         "sequence": 0,
         "phase": Phase.EVIDENCE,
         "timestamp": _utc(),
+        "duration_ms": 0,
         "status": RunStatus.OK,
         "payload_hash": VALID_HASH,
         "prev_event_hash": "",
@@ -52,7 +54,6 @@ def _event(**overrides) -> RunEvent:
 
 
 def _bound(event_kwargs: dict) -> RunEvent:
-    """Build an event whose payload_hash is the hash of its OWN content."""
     draft = _event(**event_kwargs)
     return draft.model_copy(update={"payload_hash": recompute_payload_hash(draft)})
 
@@ -69,9 +70,56 @@ def test_run_event_constructs():
     assert ev.reason_code is None
 
 
+def test_schema_version_present_and_validated():
+    ev = _event(schema_version="1.0")
+    assert ev.schema_version == "1.0"
+    with pytest.raises(ValidationError):
+        _event(schema_version="")
+
+
 def test_reason_code_accepts_canonical_value():
     ev = _event(status=RunStatus.BLOCKED, reason_code=ReasonCode.BUDGET_DENIED)
     assert ev.reason_code is ReasonCode.BUDGET_DENIED
+
+
+# --- immutability (F-05 / item 10) -----------------------------------------
+
+
+def test_event_is_frozen_assignment_rejected():
+    ev = _event()
+    with pytest.raises(ValidationError):
+        ev.sequence = 5  # type: ignore[misc]
+
+
+# --- sequence strictness (F-20 / item 10/11) --------------------------------
+
+
+@pytest.mark.parametrize("bad", [-1, True, "0", 1.5])
+def test_sequence_must_be_strict_non_negative_int(bad):
+    with pytest.raises(ValidationError):
+        _event(sequence=bad)
+
+
+# --- status <-> reason consistency (item 10) --------------------------------
+
+
+def test_ok_must_not_carry_reason_code():
+    with pytest.raises(ValidationError):
+        _event(status=RunStatus.OK, reason_code=ReasonCode.BUDGET_DENIED)
+
+
+def test_blocked_must_carry_reason_code():
+    with pytest.raises(ValidationError):
+        _event(status=RunStatus.BLOCKED, reason_code=None)
+
+
+# --- duration (NFR-09) ------------------------------------------------------
+
+
+def test_duration_non_negative():
+    assert _event(duration_ms=0).duration_ms == 0
+    with pytest.raises(ValidationError):
+        _event(duration_ms=-1)
 
 
 # --- negative: hashes --------------------------------------------------------
@@ -119,7 +167,7 @@ def test_extra_field_forbidden():
 @pytest.mark.parametrize("bad", ["NOPE", "budget_denied", ""])
 def test_illegal_reason_code_rejected(bad):
     with pytest.raises(ValidationError):
-        _event(reason_code=bad)
+        _event(status=RunStatus.BLOCKED, reason_code=bad)
 
 
 # --- public audit: payload binding + chain ----------------------------------
@@ -128,7 +176,6 @@ def test_illegal_reason_code_rejected(bad):
 def test_recompute_payload_hash_is_deterministic():
     ev = _event(metrics={"b": 2, "a": 1})
     assert recompute_payload_hash(ev) == recompute_payload_hash(ev)
-    # canonical: insertion order of nested keys must not change the digest
     ev2 = _event(metrics={"a": 1, "b": 2})
     assert recompute_payload_hash(ev) == recompute_payload_hash(ev2)
 
@@ -145,9 +192,7 @@ def test_hash_chain_links_and_tamper_breaks_it():
     ev1 = _bound({"sequence": 0})
     ev2 = _bound({"sequence": 1, "event_id": "e2",
                   "prev_event_hash": ev1.payload_hash})
-    # valid chain: no raise
     assert verify_chain([ev1, ev2]) is None
-    # tamper ev1's stored payload_hash without re-binding -> PayloadMismatch
     tampered = [ev1.model_copy(update={"payload_hash": "f" * 64}), ev2]
     with pytest.raises(PayloadMismatch):
         verify_chain(tampered)
@@ -157,7 +202,6 @@ def test_chain_link_break_is_chainbroken():
     ev1 = _bound({"sequence": 0})
     ev2 = _bound({"sequence": 1, "event_id": "e2",
                   "prev_event_hash": ev1.payload_hash})
-    # forge ev1 content and re-bind -> ev1 valid but its hash != ev2.prev
     ev1_forged = _bound({"sequence": 0, "metrics": {"forged": True}})
     with pytest.raises(ChainBroken):
         verify_chain([ev1_forged, ev2])
@@ -186,3 +230,11 @@ def test_dedupe_conflicting_event_id_raises():
                   "metrics": {"different": True}})
     with pytest.raises(DuplicateConflict):
         dedupe_events([ev0, ev1])
+
+
+def test_dedupe_preserves_order():
+    ev0 = _bound({"sequence": 0, "event_id": "e0"})
+    ev1 = _bound({"sequence": 1, "event_id": "e1",
+                  "prev_event_hash": ev0.payload_hash})
+    out = dedupe_events([ev1, ev0, ev1])
+    assert [e.event_id for e in out] == ["e1", "e0"]

@@ -57,7 +57,13 @@ tradingagents = ["assets/*.svg"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers -m \"not integration\""
+# Quarantine (D item 8, Option A): the default run excludes integration AND the
+# test-first `spec` marker, so the RED spec does NOT break the default suite and
+# we do NOT rely on testpaths omission to hide it. The implementation/main branch
+# enables it explicitly with: `pytest -m spec test/offline/contracts` (required
+# in CI); the spec branch runs `pytest tests -m "not integration"` + py_compile/
+# AST/hash. `-m "spec"` selects only spec tests.
+addopts = "-ra --strict-markers -m \"not integration and not spec\""
 markers = [
     "unit: fast isolated unit tests",
     "integration: tests requiring external services; run only when asked for, with -m integration",
