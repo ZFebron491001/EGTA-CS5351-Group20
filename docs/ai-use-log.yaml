@@ -267,3 +267,30 @@ sessions:
     cost: "unknown"
     session_path: "unknown"
     session_path_note: "Coding-agent transcript not exported; 'unknown' (not fabricated). Updated at G3."
+
+  - session_id: "E-impl-FR05-contracts-v2"
+    student: "E / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    pr: 10
+    branch: impl/FR-05-contracts-v2
+    time:
+      - "2026-11-21T20:22:02+08:00"   # commit 00a9695 (contracts)
+      - "2026-11-21T20:24:17+08:00"   # commit 31440ee (E2 evaluation)
+    task_requirement_ids: [FR-05, NFR-08, NFR-09, GATE-01, GATE-06]
+    generated_files:
+      - "src/egta/contracts/*.py (events/manifest reused; evaluation D#1/D#4/MISSING_METRIC; audit SequenceConflict + D#6; events/manifest)"
+      - "src/egta/evaluation/*.py (replay/report/metrics/sink — real SqliteAuditSink + fail-closed rollback)"
+    commits: ["00a9695", "31440ee"]
+    verification_output:
+      - "contracts 199 passed (collect 199)"
+      - "E2 28 passed (collect 28)"
+      - "upstream 1412 passed, 1 skipped, 1 deselected"
+      - "ruff check . clean"
+      - "mypy src/egta: 0 errors (11 files)"
+      - "GATE-01: first impl 00a9695 20:22 > #8 merge e4d32aa 19:35; ancestry=0; fresh commits not cherry-pick"
+    human_intervention:
+      - "D Request changes (5 items) on #10 (31440ee); follow-up test/spec PR decision."
+      - "B custodian review of contracts scope."
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "Raw OpenCode transcript to be exported before G3 (per plan); recorded 'unknown' (not fabricated)."
