@@ -225,3 +225,50 @@ sessions:
     cost: "unknown"
     session_path: "unknown"
     session_path_note: "Coding-agent transcript not yet exported here; 'unknown' (not fabricated). The G3 step previously provides the exported transcript; this field is updated then."
+
+  - session_id: "E-2026-11-21-impl-FR05-contracts"
+    student: "E / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    time:
+      - "2026-11-21T15:10:00+08:00"
+    task_requirement_ids: [FR-05, NFR-08, NFR-09, GATE-01, GATE-06]
+    context:
+      pr: 6
+      branch: impl/FR-05-contracts
+      relates_to:
+        - "spec PR #3 (merged 2fb2813) — approved tests, unchanged"
+    writable_path: ["src/egta/contracts/", "docs/"]
+    generated_files:
+      - file: "src/egta/contracts/{events,audit,evaluation,manifest}.py"
+        commit: "f642479"
+        change: "contract implementation making the approved 188 spec cases pass"
+      - file: "src/egta/contracts/{events,audit}.py"
+        commit: "cacf5ee"
+        change: "ReasonCode=13 (8+5, no NONE) per B; remove SqliteAuditSink/SqliteAuditReader from contracts (sink -> Phase 2 evaluation/sink.py)"
+      - file: "src/egta/contracts/{audit,evaluation}.py"
+        commit: "939c409"
+        change: "D#2 replay dedupe-first; D#5 Receipt strict sequence + tz persisted_at; D#8 trim EOF blank (--check clean)"
+    human_intervention:
+      - category: "human instruction / review-driven fixes"
+        action: "Applied D's PR #6 requests #2/#5/#8 (immediately fixable) only; #1/#4/#6 deferred to Phase 2 spec PR; did not change approved tests; new commit, no amend."
+        reason: "Keep GATE-01 lineage; leave spec-changing items to a test-first spec PR."
+        requirement_ids: [FR-05, GATE-01]
+    verification_output:
+      - cmd: "pytest -m spec test/offline/contracts"
+        env: "egta"
+        result: "188 passed, exit 0 (tests unmodified)"
+      - cmd: "pytest tests"
+        env: "egta"
+        result: "1412 passed, 1 skipped, exit 0"
+      - cmd: "ruff check ."
+        env: "egta"
+        result: "All checks passed! exit 0"
+      - cmd: "mypy src/egta"
+        env: "egta"
+        result: "no issues found in 6 source files"
+      - cmd: "git diff 2fb2813...HEAD -- test/offline/contracts ; --check"
+        env: "git"
+        result: "0 lines; --check empty"
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "Coding-agent transcript not yet exported; 'unknown' (not fabricated). Updated at G3."
