@@ -82,8 +82,12 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
 ## PENDING
 - **None.** No PENDING (B) or PENDING (D) items remain.
 
-## Debt (CI)
-- **FR-01 evidence suite exact-count gate:** once the evidence implementation
-  lands (`src/egta/evidence`), add an exact-count gate for `test/offline/evidence`
-  (currently **13** cases) to the `offline-tests` job, mirroring contracts/E2.
-  Owner: E; verifier: D. (Tracked here until a debt-register entry exists on main.)
+## Debt (CI) — two distinct items (do not conflate)
+- **Debt A — `test/offline/evidence/` (FR-01 evidence time-strategy / pack tests):**
+  **13** cases, not yet CI-gated. Add an exact-count gate (path `test/offline/evidence`)
+  once the evidence implementation lands. **Verifier: D.** Owner: E.
+- **Debt B — `test/offline/contracts/test_evidence_contracts.py` (B's evidence
+  contract spec):** **23** cases, this is **DEBT-FR01-CI** in
+  `docs/debt-register.md`. Gate it only when `EvidenceItem`/`EvidencePack` are
+  importable from `egta.contracts` (not `egta.evidence`) AND an `actual_cases`
+  record exists; expected from the record. **Verifier: A.** Owner: E.

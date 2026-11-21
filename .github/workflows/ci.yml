@@ -78,9 +78,12 @@ jobs:
   #
   # Each suite independently detects its module directory so one unimplemented
   # module never reds another:
-  #   contracts  ⇔ src/egta/contracts   (exactly 199, -m spec test/offline/contracts)
-  #   evaluation ⇔ src/egta/evaluation  (exactly 28,  -m spec test/offline/evaluation)
-  #   risk_gate  ⇔ src/egta/risk_gate   (exactly 139, test/offline/risk_gate by path)
+  #   contracts  ⇔ src/egta/contracts   (7 explicit FR-05 files; count read from
+  #                docs/approvals/test-hash-FR-05-contracts.txt actual_cases, NOT
+  #                hardcoded 199; not the whole directory -m spec, so other specs
+  #                such as FR-01 evidence cannot contaminate it)
+  #   evaluation ⇔ src/egta/evaluation  (-m spec test/offline/evaluation, 28)
+  #   risk_gate  ⇔ src/egta/risk_gate   (test/offline/risk_gate by path, 139)
   # If a suite's dir is absent it reports ::notice:: N/A (skip only that suite).
   #
   # The gate runs pytest (not just --collect-only): the run's terminal summary
