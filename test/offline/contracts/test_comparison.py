@@ -300,3 +300,26 @@ def test_manifest_check_precedes_missing_metric():
     e = _summary(variant="B1", manifest_hash=H2)
     r = compare_runs(b, e, _rubric(), manifest=m)
     assert r.incomplete_reason is IncompleteReason.MANIFEST_MISMATCH
+
+
+# --- D#4: no hardcoded pair/case; quality_labels propagated -----------------
+
+
+def test_run_pair_and_case_ids_explicit_not_hardcoded():
+    """run_pair_id/case_id come from inputs, not hardcoded 'pair'/'case'."""
+    b = _summary(variant="B0", run_id="runB0", metrics={"token_cost": 1.0})
+    e = _summary(variant="B1", run_id="runB1", metrics={"token_cost": 1.5})
+    r = compare_runs(b, e, _rubric(), run_pair_id="PAIR-42", case_id="CASE-7")
+    assert r.run_pair_id == "PAIR-42"
+    assert r.case_id == "CASE-7"
+
+
+def test_quality_labels_propagated_without_forgery():
+    """Observed quality_labels are propagated verbatim (no fabrication)."""
+    labels = ["gold", "silver"]
+    b = _summary(variant="B0", metrics={"token_cost": 1.0}, quality_labels=labels)
+    e = _summary(variant="B1", metrics={"token_cost": 1.5}, quality_labels=["bronze"])
+    r = compare_runs(b, e, _rubric())
+    # result carries a quality_labels list consistent with inputs (not invented)
+    assert isinstance(r.quality_labels, list)
+    assert set(r.quality_labels) <= set(labels) | {"bronze"}

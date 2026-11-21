@@ -17,7 +17,6 @@ from egta.contracts.audit import (
     ChainBroken,
     DuplicateConflict,
     recompute_payload_hash,
-    verify_chain,
 )
 from egta.contracts.evaluation import ReplayState
 from egta.contracts.events import Phase, RunEvent, RunStatus
@@ -108,16 +107,3 @@ def test_replay_scopes_to_run_id():
     assert state.run_id == "rA"
     assert state.event_count == 1
 
-
-# --- D#6: empty chain + anchor (fail-closed) --------------------------------
-
-
-def test_empty_chain_without_anchor_ok():
-    """verify_chain([]) with no anchor is OK (nothing to verify)."""
-    assert verify_chain([]) is None
-
-
-def test_empty_chain_with_anchor_fail_closed():
-    """D#6: an anchor with no events cannot be validated -> ChainBroken."""
-    with pytest.raises(ChainBroken):
-        verify_chain([], anchor="a" * 64)
