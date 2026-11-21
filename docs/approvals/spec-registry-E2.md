@@ -17,9 +17,10 @@
 - **D#1:** `compare_runs(..., manifest: ExperimentManifest | None = None)`;
   supplied manifest's `compute_manifest_hash` must equal both sides'
   `manifest_hash` → else INCOMPLETE/MANIFEST_MISMATCH. `RunSummary` unchanged.
-- **D#4:** only **final winner/composite** deferred; operator/threshold/failures/quality_labels/ids are **required** now (completed)
-  winner scoring); required now = **no misleading COMPLETE** when rubric
-  observation metrics are missing (returns INCOMPLETE).
+- **D#4:** winner/composite scoring is deferred (DEBT-FR05-D4, owner E, due
+  2026-11-22 18:00, verifier D). **Required now and tested:** operator/threshold
+  scoring with per-side `THRESHOLD_VIOLATION` failures, `quality_labels` (source =
+  enhanced), and explicit `run_pair_id`/`case_id` propagation.
 - **D#6:** `verify_chain([])` OK; `verify_chain([], anchor=...)` → `ChainBroken`
   (fail-closed).
 
