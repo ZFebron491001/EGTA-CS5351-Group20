@@ -162,7 +162,7 @@ a win. `variant` is propagated to `EvaluationResult.variant`.
 **observed** value (never the threshold as the metric) and **MUST** apply each
 `MetricDef.operator`/`threshold` to the observed values, recording any breach in
 `failures`; it **MUST** validate the rubric (`TypeAdapter(dict[str, MetricDef])`,
-illegal → reject) and **MUST** require the metric on **both** sides
+illegal → **raise `ValidationError`** (only) ) and **MUST** require the metric on **both** sides
 (`MISSING_METRIC` otherwise). The **only deferred part is the final
 winner/composite score**: `winner`/`baseline_win`/`enhanced_win` stay `None`/
 `False` until DEBT-FR05-D4 closes (owner E, due 2026-11-22T18:00+08:00, verifier
@@ -177,10 +177,12 @@ metric on **each side separately** (never `{**base, **enh}`):
 - **both** sides exceed → `REVIEW`, `failures` has ≥2 (one baseline + one
   enhanced);
 - one side lacks the metric → `INCOMPLETE/MISSING_METRIC`;
-- illegal rubric → `ValidationError`.
+- illegal rubric → `ValidationError` (only; no ValueError/TypeError tolerance).
 - **Failure format** (one violation per side):
   `THRESHOLD_VIOLATION:<metric>:<side>:observed=<v>:operator=<op>:threshold=<t>`
   e.g. `THRESHOLD_VIOLATION:token_cost:baseline:observed=3.0:operator=lte:threshold=2.0`.
+- **`quality_labels` source = ENHANCED** (consistent with `result.variant=enhanced`
+  and the observed metrics), propagated verbatim from the enhanced `RunSummary`.
 - `THRESHOLD_VIOLATION` is **NOT** an `IncompleteReason` member (it is a
   `failures` string; the status is `REVIEW`).
 

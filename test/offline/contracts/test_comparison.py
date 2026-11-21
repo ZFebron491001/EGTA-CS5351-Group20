@@ -373,7 +373,7 @@ def test_illegal_rubric_flat_dict_rejected():
     bad = {"token_cost": {"operator": "lte", "threshold": 2.0}}  # missing fields
     b = _summary(variant="B0", metrics={"token_cost": 1.0})
     e = _summary(variant="B1", metrics={"token_cost": 1.5})
-    with pytest.raises((ValidationError, ValueError, TypeError)):
+    with pytest.raises(ValidationError):
         compare_runs(b, e, bad)
 
 
@@ -383,7 +383,7 @@ def test_illegal_rubric_non_metricdef_object_rejected():
 
     b = _summary(variant="B0", metrics={"token_cost": 1.0})
     e = _summary(variant="B1", metrics={"token_cost": 1.5})
-    with pytest.raises((ValidationError, ValueError, TypeError)):
+    with pytest.raises(ValidationError):
         compare_runs(b, e, {"token_cost": object()})
 
 
@@ -413,11 +413,15 @@ def test_run_pair_and_case_ids_are_really_propagated():
 
 
 def test_quality_labels_propagated_strong():
-    labels = ["gold", "silver"]
-    b = _summary(variant="B0", metrics={"token_cost": 1.0}, quality_labels=labels)
-    e = _summary(variant="B1", metrics={"token_cost": 1.5}, quality_labels=["bronze"])
+    """quality_labels source = ENHANCED (result.variant=enhanced / observed metrics); baseline differs to prove source."""
+    baseline_labels = ["gold", "silver"]
+    enhanced_labels = ["bronze", "platinum"]
+    b = _summary(variant="B0", metrics={"token_cost": 1.0}, quality_labels=baseline_labels)
+    e = _summary(variant="B1", metrics={"token_cost": 1.5}, quality_labels=enhanced_labels)
     r = compare_runs(b, e, _rubric())
-    assert r.quality_labels == labels  # propagated verbatim from baseline, no forgery
+    assert r.variant == "B1"
+    assert r.quality_labels == enhanced_labels          # from ENHANCED (option A)
+    assert r.quality_labels != baseline_labels          # not baseline; source proven
 
 
 def test_failures_field_present_and_list():
@@ -491,3 +495,48 @@ def test_both_sides_exceed_is_review_with_two_failures():
 def test_threshold_violation_not_in_incomplete_reason():
     """THRESHOLD_VIOLATION must NOT be an IncompleteReason member."""
     assert "THRESHOLD_VIOLATION" not in {r.name for r in IncompleteReason}
+
+
+# --- A5: operator coverage + boundaries (D contract) ------------------------
+# lte 2.0: obs==2.0 passes; lt 2.0: obs==2.0 fails; gte/gt equal-boundary mirror.
+# Each failing side yields the exact THRESHOLD_VIOLATION format.
+
+def _rubric_op(op: str, threshold: float):
+    return {"token_cost": MetricDef(
+        metric="token_cost", operator=op, threshold=threshold,
+        verification="pytest", source="budget", aggregation="median", unit="USD")}
+
+
+@pytest.mark.parametrize(
+    "op,observed,expected_status",
+    [
+        ("eq", 2.0, "COMPLETE"),   # equal passes
+        ("eq", 2.5, "REVIEW"),     # not equal fails
+        ("lte", 2.0, "COMPLETE"),  # == boundary passes
+        ("lte", 2.5, "REVIEW"),
+        ("gte", 2.0, "COMPLETE"),  # == boundary passes
+        ("gte", 1.5, "REVIEW"),
+        ("lt", 2.0, "REVIEW"),     # == boundary FAILS (strict)
+        ("lt", 1.5, "COMPLETE"),
+        ("gt", 2.0, "REVIEW"),     # == boundary FAILS (strict)
+        ("gt", 2.5, "COMPLETE"),
+    ],
+)
+def test_operator_boundaries(op, observed, expected_status):
+    rubric = _rubric_op(op, 2.0)
+    # both sides same observed value -> both pass or both fail together
+    b = _summary(variant="B0", metrics={"token_cost": observed})
+    e = _summary(variant="B1", metrics={"token_cost": observed})
+    r = compare_runs(b, e, rubric)
+    if expected_status == "COMPLETE":
+        assert r.completion_status is CompletionStatus.COMPLETE
+        assert r.failures == []
+    else:
+        assert r.completion_status is CompletionStatus.REVIEW
+        assert r.incomplete_reason is None
+        assert r.winner is None and r.baseline_win is False and r.enhanced_win is False
+        # both sides fail (same observed) -> exactly two violations, correct format
+        assert len(r.failures) == 2
+        for side in ("baseline", "enhanced"):
+            assert (f"THRESHOLD_VIOLATION:token_cost:{side}:observed={observed}"
+                    f":operator={op}:threshold=2.0") in r.failures

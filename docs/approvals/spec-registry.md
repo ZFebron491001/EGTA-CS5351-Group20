@@ -12,7 +12,7 @@
   AST count + (planned) hash check.
 - **Implementation/main branch command (required, gated):**
   `pytest tests` + `pytest -m spec test/offline/contracts`. The gate MUST verify
-  **exactly the actual collected number** (no hardcoded 188; `--collect-only`); silently
+  **exactly the real-run passed count** (contracts 213; not hardcoded 188); silently
   deselected/zero-selected ⇒ fail.
 - Explicit show-RED on spec branch: `pytest -m spec test/offline/contracts` →
   7 collection errors (`ModuleNotFoundError: egta`).
@@ -27,7 +27,7 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
   (hash check of `aggregate_sha256` / `spec_bundle_sha256`).
 - Trace/AI-log presence check.
 - Implementation-PR required job: run `pytest -m spec test/offline/contracts`
-  (exactly 188 cases), verify impl branch descends from spec merge commit, verify test
+  (exactly 213 contracts cases), verify impl branch descends from spec merge commit, verify test
   aggregate hash == approved value, first impl commit after approval commit.
 - Add these to `protect-main` required status checks + CODEOWNERS review.
 
@@ -46,10 +46,10 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
 
 ## Verification evidence (this round)
 - Spec branch: `pytest -m spec test/offline/contracts` → 7 collection errors (RED).
-- `py_compile` exit 0; AST = 111 functions.
+- `py_compile` exit 0; AST = 136 functions.
 - `ruff check .` green.
 - Full spec-satisfying impl in `/tmp` → `pytest -m spec test/offline/contracts`
-  → **188 passed**.
+  → **213 passed**.
 
 ## Finalized (NOT PENDING)
 - `quality_rubric` = independent field at the same level as `metrics_rubric`.
