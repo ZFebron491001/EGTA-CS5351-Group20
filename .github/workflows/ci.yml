@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, 'v[0-9]+.[0-9]+.[0-9]+']
+    branches: [main, 'v*']
   pull_request:
 
 concurrency:
@@ -13,14 +13,22 @@ jobs:
   test:
     name: tests (py${{ matrix.python-version }}${{ matrix.tz && format(', {0}', matrix.tz) || '' }})
     runs-on: ubuntu-latest
+    # Experimental interpreters (e.g. 3.14) are non-blocking.
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
+        experimental: [false]
         # One run away from UTC, so a test that only passes in UTC fails here.
+        # 3.14 is non-blocking (experimental) to avoid false reds from a failing
+        # pip install / provider wheel gap on a pre-release interpreter.
         include:
+          - python-version: "3.14"
+            experimental: true
           - python-version: "3.12"
             tz: America/New_York
+            experimental: false
     env:
       TZ: ${{ matrix.tz }}
     steps:
@@ -66,98 +74,124 @@ jobs:
         # (generated results/ is excluded via pyproject extend-exclude).
         run: ruff check .
 
-  # Offline spec suites (FR-05 contracts, E2 evaluation, FR-04 risk gate).
+  # Offline spec suites, gated per-suite (A review: Block 1 + Block 2).
   #
-  # These suites are RED/not-runnable on branches without src/egta (e.g. main
-  # before an implementation PR merges): the test modules import egta.* and fail
-  # at collection. That is the intended test-first "bootstrap not-applicable"
-  # state -- this job reports N/A (does NOT fail) when src/egta is absent, and
-  # only enforces the exact case-count gates once an implementation exists.
+  # Each suite independently detects its module directory so one unimplemented
+  # module never reds another:
+  #   contracts  ⇔ src/egta/contracts   (exactly 199, -m spec test/offline/contracts)
+  #   evaluation ⇔ src/egta/evaluation  (exactly 28,  -m spec test/offline/evaluation)
+  #   risk_gate  ⇔ src/egta/risk_gate   (exactly 139, test/offline/risk_gate by path)
+  # If a suite's dir is absent it reports ::notice:: N/A (skip only that suite).
   #
-  # Counting is done in Python by parsing pytest's collect-only TREE, not grep,
-  # so renames/parametrisation cannot silently change or hide the number.
+  # The gate runs pytest (not just --collect-only): the run's terminal summary
+  # `passed` count must equal the expected number, and any skip/xfail/xpass/error
+  # fails the gate. --collect-only is also checked for an extra consistency guard.
   offline-tests:
-    name: offline spec suites (exact counts)
+    name: offline spec suites (per-suite gate)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Detect bootstrap (src/egta present?)
-        id: boot
-        run: |
-          if [ -d src/egta ]; then
-            echo "applicable=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "applicable=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Bootstrap not applicable (no src/egta)
-        if: steps.boot.outputs.applicable == 'false'
-        run: |
-          echo "::notice::src/egta absent -- offline spec suites are not runnable"
-          echo "on this branch (test-first bootstrap). Reporting N/A, not a pass."
       - name: Install (with dev extras)
-        if: steps.boot.outputs.applicable == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
-      - name: Assert exact collect counts (199 / 28 / 139)
-        if: steps.boot.outputs.applicable == 'true'
+      - name: Gate each offline suite
         env:
-          # FR-05 contracts: exactly 199. E2 evaluation: exactly 28.
-          # FR-04 risk gate: exactly 139 (A confirmed 126 + 13 = 139).
+          # Exact, real-run assertion counts (A confirmed FR-04 126 + 13 = 139).
           EXPECT_CONTRACTS: "199"
           EXPECT_EVALUATION: "28"
           EXPECT_RISK_GATE: "139"
         run: |
           python - <<'PY'
           import os
+          import re
           import subprocess
           import sys
+          from pathlib import Path
 
-          # (selection-args, expected-env-name) -- selection uses markers where the
-          # suite is @pytest.mark.spec; risk_gate is unmarked and selected by path.
+          # (suite-name, module-dir, pytest-args, expected-env)
           suites = [
-              (["-m", "spec", "test/offline/contracts"], "EXPECT_CONTRACTS"),
-              (["-m", "spec", "test/offline/evaluation"], "EXPECT_EVALUATION"),
-              (["test/offline/risk_gate"], "EXPECT_RISK_GATE"),
+              ("contracts",  "src/egta/contracts",  ["-m", "spec", "test/offline/contracts"],  "EXPECT_CONTRACTS"),
+              ("evaluation", "src/egta/evaluation", ["-m", "spec", "test/offline/evaluation"], "EXPECT_EVALUATION"),
+              ("risk_gate",  "src/egta/risk_gate",  ["test/offline/risk_gate"],                "EXPECT_RISK_GATE"),
           ]
 
-          def collected(args):
-              # Parse pytest's collect-only tree; count only real test ids.
+          # pytest terminal summary, e.g. "123 passed, 2 skipped in 0.4s".
+          _SUMMARY = re.compile(
+              r"(\d+)\s+passed|(\d+)\s+failed|(\d+)\s+error|(\d+)\s+skipped"
+              r"|(\d+)\s+xfailed|(\d+)\s+xpassed"
+          )
+
+          def run_pytest(args):
+              return subprocess.run(
+                  [sys.executable, "-m", "pytest", "-o", "addopts=--strict-markers",
+                   "-q", "-rsx", *args],
+                  capture_output=True, text=True,
+              )
+
+          def collect_count(args):
               out = subprocess.run(
                   [sys.executable, "-m", "pytest", "-o", "addopts=--strict-markers",
                    "--collect-only", "-q", *args],
                   capture_output=True, text=True,
               )
-              if out.returncode not in (0,):
-                  sys.stderr.write(out.stdout + out.stderr)
-                  raise SystemExit(f"collection failed for {args} (exit {out.returncode})")
-              ids = set()
-              for line in out.stdout.splitlines():
-                  s = line.strip()
-                  if "::" in s and not s.startswith(("<", "=", "collected", "no tests")):
-                      ids.add(s)
+              if out.returncode != 0:
+                  return None
+              ids = {
+                  line.strip() for line in out.stdout.splitlines()
+                  if "::" in line and not line.strip().startswith(("<", "=", "collected", "no tests"))
+              }
               return len(ids)
 
+          def summary_passed(text):
+              # Take the LAST line that looks like the terminal summary.
+              counts = {}
+              for line in reversed(text.splitlines()):
+                  if "passed" in line or "failed" in line or "error" in line or "skipped" in line:
+                      for m in _SUMMARY.finditer(line):
+                          if m.group(1) is not None: counts["passed"] = int(m.group(1))
+                          elif m.group(2) is not None: counts["failed"] = int(m.group(2))
+                          elif m.group(3) is not None: counts["error"] = int(m.group(3))
+                          elif m.group(4) is not None: counts["skipped"] = int(m.group(4))
+                          elif m.group(5) is not None: counts["xfailed"] = int(m.group(5))
+                          elif m.group(6) is not None: counts["xpassed"] = int(m.group(6))
+                      if counts:
+                          return counts
+              return counts
+
           failures = []
-          for args, env_name in suites:
-              expected = int(os.environ[env_name])
-              got = collected(args)
-              status = "OK" if got == expected else "MISMATCH"
-              print(f"{env_name}: expected {expected}, collected {got} -> {status}")
-              if got != expected:
-                  failures.append((args, expected, got))
+          for name, moddir, args, env in suites:
+              if not Path(moddir).is_dir():
+                  print(f"::notice::{name}: {moddir} absent -- N/A (suite skipped, not pass/fail)")
+                  continue
+              expected = int(os.environ[env])
+
+              # 1) collect-only consistency (extra guard; not the sole gate).
+              collected = collect_count(args)
+              print(f"{name}: collect-only={collected} expected={expected}")
+
+              # 2) REAL run; terminal summary must show exactly `expected` passed.
+              res = run_pytest(args)
+              sys.stdout.write(res.stdout)
+              sys.stderr.write(res.stderr)
+              counts = summary_passed(res.stdout)
+              passed = counts.get("passed", 0)
+              bad = {k: counts.get(k, 0) for k in ("failed", "error", "skipped", "xfailed", "xpassed")}
+              bad = {k: v for k, v in bad.items() if v}
+
+              ok = (res.returncode == 0 and passed == expected and not bad
+                    and (collected is None or collected == expected))
+              status = "OK" if ok else "FAIL"
+              print(f"{name}: passed={passed} expected={expected} bad={bad} rc={res.returncode} -> {status}")
+              if not ok:
+                  failures.append(name)
+                  print(f"::error::{name}: expected exactly {expected} passed, no skip/xfail/"
+                        f"error; got passed={passed} bad={bad} rc={res.returncode}")
+
           if failures:
-              for args, exp, got in failures:
-                  print(f"::error::{args}: expected exactly {exp}, got {got}")
-              raise SystemExit(1)
-          print("All offline suites collected at the exact expected counts.")
+              raise SystemExit(f"offline gate failed: {', '.join(failures)}")
+          print("All applicable offline suites passed at their exact expected counts.")
           PY
-      - name: Run offline suites
-        if: steps.boot.outputs.applicable == 'true'
-        run: |
-          pytest -o addopts="--strict-markers" -m spec test/offline/contracts -q
-          pytest -o addopts="--strict-markers" -m spec test/offline/evaluation -q
-          pytest -o addopts="--strict-markers" test/offline/risk_gate -q

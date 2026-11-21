@@ -12,7 +12,7 @@
   AST count + (planned) hash check.
 - **Implementation/main branch command (required, gated):**
   `pytest tests` + `pytest -m spec test/offline/contracts`. The gate MUST verify
-  **exactly the actual collected number** (no hardcoded 188; `--collect-only`); silently
+  **exactly the real-run passed count** (contracts 199 / E2 28; not hardcoded 188; run assertion); silently
   deselected/zero-selected ⇒ fail.
 - Explicit show-RED on spec branch: `pytest -m spec test/offline/contracts` →
   7 collection errors (`ModuleNotFoundError: egta`).
@@ -27,7 +27,7 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
   (hash check of `aggregate_sha256` / `spec_bundle_sha256`).
 - Trace/AI-log presence check.
 - Implementation-PR required job: run `pytest -m spec test/offline/contracts`
-  (exactly 188 cases), verify impl branch descends from spec merge commit, verify test
+  (exactly 199 contracts / 28 E2 cases, real run, no skip/xfail), verify impl branch descends from spec merge commit, verify test
   aggregate hash == approved value, first impl commit after approval commit.
 - Add these to `protect-main` required status checks + CODEOWNERS review.
 
@@ -49,7 +49,7 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
 - `py_compile` exit 0; AST = 111 functions.
 - `ruff check .` green.
 - Full spec-satisfying impl in `/tmp` → `pytest -m spec test/offline/contracts`
-  → **188 passed**.
+  → **199 contracts / 28 E2 passed**.
 
 ## Finalized (NOT PENDING)
 - `quality_rubric` = independent field at the same level as `metrics_rubric`.
@@ -81,3 +81,9 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
 
 ## PENDING
 - **None.** No PENDING (B) or PENDING (D) items remain.
+
+## Debt (CI)
+- **FR-01 evidence suite exact-count gate:** once the evidence implementation
+  lands (`src/egta/evidence`), add an exact-count gate for `test/offline/evidence`
+  (currently **13** cases) to the `offline-tests` job, mirroring contracts/E2.
+  Owner: E; verifier: D. (Tracked here until a debt-register entry exists on main.)

@@ -9,15 +9,18 @@
 /src/egta/budget/        @cosine-Y
 /src/egta/adapters/      @cosine-Y
 /src/egta/app/           @cosine-Y
-/src/egta/evidence/      @yuxiangdu39
-/src/egta/deliberation/  @wawfggqq
+/src/egta/evidence/      @yuxiangdu39 @ZFebron491001
 /src/egta/evaluation/    @jianmin2004
 
 # Offline tests
 /test/offline/contracts/     @ZFebron491001
 /test/offline/evaluation/    @jianmin2004 @ZFebron491001
 /test/offline/risk_gate/     @ZFebron491001 @yuxiangdu39
+/test/offline/evidence/      @ZFebron491001 @yuxiangdu39
 
 # CI / governance (narrower, last)
 /.github/workflows/      @jianmin2004 @ZFebron491001
 /.github/CODEOWNERS      @jianmin2004 @ZFebron491001
+
+# NOTE: /src/egta/deliberation (C @wawfggqq) and /prompts (C) will be added
+# after C is invited as a collaborator (adding now would block PRs).
