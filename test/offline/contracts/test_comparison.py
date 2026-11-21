@@ -129,3 +129,99 @@ def test_matching_inputs_complete_and_rubric_used():
     # rubric must influence the result: its metric appears in scored metrics
     assert "token_cost" in result.metrics
     assert isinstance(result, EvaluationResult)
+
+
+# --- RunSummary typed contract (D item 1) -----------------------------------
+
+
+def test_run_summary_positive():
+    s = RunSummary(
+        run_id="r0", variant="B0", target_snapshot_id="snap1",
+        model_config_hash=H, prompt_hash=H, code_hash="c" * 40, policy_hash=H,
+        manifest_hash=H,
+    )
+    assert s.has_result is True
+    assert s.metrics == {}
+    assert s.quality_labels == []
+
+
+def test_run_summary_rejects_bare_construction_as_dict():
+    """RunSummary itself rejects unknown/extra keys (extra=forbid)."""
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        RunSummary(
+            run_id="r0", variant="B0", target_snapshot_id="s",
+            model_config_hash=H, prompt_hash=H, code_hash="c" * 40,
+            policy_hash=H, manifest_hash=H, bogus=1,
+        )
+
+
+@pytest.mark.parametrize("missing", ["run_id", "variant", "target_snapshot_id",
+                                     "model_config_hash", "prompt_hash",
+                                     "code_hash", "policy_hash", "manifest_hash"])
+def test_run_summary_missing_required_field_rejected(missing):
+    from pydantic import ValidationError
+
+    fields = {
+        "run_id": "r0", "variant": "B0", "target_snapshot_id": "s",
+        "model_config_hash": H, "prompt_hash": H, "code_hash": "c" * 40,
+        "policy_hash": H, "manifest_hash": H,
+    }
+    fields.pop(missing)
+    with pytest.raises(ValidationError):
+        RunSummary(**fields)
+
+
+@pytest.mark.parametrize("field", ["model_config_hash", "prompt_hash",
+                                   "policy_hash", "manifest_hash"])
+@pytest.mark.parametrize("bad", ["XYZ", "A" * 64, "a" * 63, ""])
+def test_run_summary_bad_64_hex_rejected(field, bad):
+    from pydantic import ValidationError
+
+    base = {
+        "run_id": "r0", "variant": "B0", "target_snapshot_id": "s",
+        "model_config_hash": H, "prompt_hash": H, "code_hash": "c" * 40,
+        "policy_hash": H, "manifest_hash": H,
+    }
+    base[field] = bad
+    with pytest.raises(ValidationError):
+        RunSummary(**base)
+
+
+@pytest.mark.parametrize("bad", ["XYZ", "c" * 39, ""])
+def test_run_summary_bad_code_hash_rejected(bad):
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        RunSummary(
+            run_id="r0", variant="B0", target_snapshot_id="s",
+            model_config_hash=H, prompt_hash=H, code_hash=bad,
+            policy_hash=H, manifest_hash=H,
+        )
+
+
+# --- variant propagation (D item 5d) ----------------------------------------
+
+
+def test_variant_propagated_to_result():
+    baseline = _summary(variant="B0")
+    enhanced = _summary(variant="B1")
+    result = compare_runs(baseline, enhanced, _rubric())
+    assert result.variant == "B1"
+
+
+# --- MISSING_USAGE (D item 5a) ----------------------------------------------
+
+
+def test_missing_usage_is_incomplete_not_win():
+    """Unknown usage (has_usage=False) -> INCOMPLETE/MISSING_USAGE, not a win."""
+    result = compare_runs(
+        _summary(variant="B0", has_usage=False),
+        _summary(variant="B1", has_usage=False),
+        _rubric(),
+    )
+    assert result.completion_status is CompletionStatus.INCOMPLETE
+    assert result.incomplete_reason is IncompleteReason.MISSING_USAGE
+    assert result.winner is None
+    assert result.baseline_win is False and result.enhanced_win is False

@@ -42,7 +42,14 @@ def test_incomplete_reason_members():
     names = {r.name for r in IncompleteReason}
     assert {"MANIFEST_MISMATCH", "SNAPSHOT_MISMATCH", "MODEL_MISMATCH",
             "PROMPT_MISMATCH", "CODE_MISMATCH", "POLICY_MISMATCH",
-            "MISSING_RESULT"} <= names
+            "MISSING_RESULT", "MISSING_USAGE"} <= names
+
+
+def test_missing_usage_enum_member():
+    assert IncompleteReason.MISSING_USAGE is not None
+    r = _result(completion_status=CompletionStatus.INCOMPLETE,
+                incomplete_reason=IncompleteReason.MISSING_USAGE)
+    assert r.incomplete_reason is IncompleteReason.MISSING_USAGE
 
 
 def test_manifest_hash_required():
@@ -97,3 +104,16 @@ def test_winner_fields_typed():
                 winner="B1", baseline_win=False, enhanced_win=True)
     assert r.winner == "B1"
     assert r.enhanced_win is True
+
+
+def test_hold_is_not_a_completion_status():
+    """HOLD is an AdvisoryProposal.action, NOT a RunStatus/CompletionStatus."""
+    names = {s.name for s in CompletionStatus}
+    assert "HOLD" not in names
+
+
+def test_hold_outcome_can_be_expressed_as_complete_result():
+    """A HOLD recommendation is a normal COMPLETE outcome, not a system failure."""
+    r = _result(completion_status=CompletionStatus.COMPLETE)
+    assert r.completion_status is CompletionStatus.COMPLETE
+    assert r.incomplete_reason is None

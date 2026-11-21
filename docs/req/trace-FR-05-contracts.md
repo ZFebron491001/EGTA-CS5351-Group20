@@ -5,7 +5,7 @@ Requirement-to-test trace. **Spec/test only.** Implementation
 descendant implementation PR. Contract definitions: `docs/req/contracts-summary.md`.
 Related: **PR #1** (original record; DEBT-D2).
 
-**Status:** 7 files, **95 test functions → 144 cases**. RED here: imports of
+**Status:** 7 test modules (9 files), **111 test functions → 188 cases**. RED here: imports of
 `egta.contracts.audit`/`evaluation` fail (`ModuleNotFoundError`). Quarantine (D
 item 8, Option A): default `pytest` collects only `tests/` (green); the spec is
 run explicitly on the impl branch via `pytest -m spec test/offline/contracts`
@@ -43,13 +43,16 @@ defined in `egta.contracts.evaluation` (see contracts-summary §2).
 Duplicate handling is via `AuditSink.append` / `dedupe_events`; rubric via the
 independent `quality_rubric` + typed `metrics_rubric`. Stated once per contract.
 
-## Finalized (B, not PENDING)
+## Finalized (NOT PENDING)
 - quality_rubric independent field; code_hash/policy_hash/manifest_hash in v1
   (code/policy mismatch → INCOMPLETE CODE_MISMATCH/POLICY_MISMATCH, no win).
+- `MISSING_USAGE` in `IncompleteReason`; frozen/validate_assignment/duration/
+  status-reason/schema_version are enforced (not deferred).
+- `HOLD` = `AdvisoryProposal.action` (not RunStatus/CompletionStatus; not a
+  system failure). `RunSummary.variant` propagates to `EvaluationResult.variant`.
 
-## PENDING (D only)
-- `MISSING_USAGE` in `IncompleteReason`; whether deferrals for
-  frozen/validate_assignment/duration/status-reason enforcement are accepted.
+## PENDING
+- None (no PENDING B/D).
 
 ## Approval
 D under GATE-01; author no self-review. Binding: `docs/approvals/test-hash-FR-05-

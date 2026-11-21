@@ -45,7 +45,14 @@ class AuditReader(Protocol):
   success).
 - Cross-run: same `event_id` under a **different** `run_id` is **not** a conflict
   (identity is `(run_id, event_id)`).
-- `read(run_id)` returns only that run's events, sorted by `sequence`.
+- **Hybrid read API (intentional, D item 6 — do not delete):** `AuditSink.read(
+  run_id) -> AuditReader` and `AuditReader.read(run_id) -> list[RunEvent]` are
+  **both** part of the contract, implemented in both layers. Only one read style is
+  used per call site; `_InMemorySink` in tests uses this reference-double shape, and
+  the implementation PR integrates a real `SqliteAuditSink` test. The two-layer
+  design is the accepted hybrid.
+- `read(run_id)` (via `AuditReader`) returns only that run's events, sorted by
+  `sequence`.
 
 ### Free functions
 ```python
@@ -69,9 +76,17 @@ Ordering keys: `(run_id, sequence)` and `(run_id, event_id)`.
 class CompletionStatus(StrEnum):   # COMPLETE, INCOMPLETE, BLOCKED, REVIEW, FAILED
 class IncompleteReason(StrEnum):
     MANIFEST_MISMATCH, SNAPSHOT_MISMATCH, MODEL_MISMATCH, PROMPT_MISMATCH,
-    CODE_MISMATCH, POLICY_MISMATCH, MISSING_RESULT
-    # MISSING_USAGE: PENDING (D) — reserved placeholder; not frozen.
+    CODE_MISMATCH, POLICY_MISMATCH, MISSING_RESULT, MISSING_USAGE
 ```
+`MISSING_USAGE` is now a first-class member (D resolved; no longer PENDING).
+
+**HOLD is not a system status.** `HOLD` is an `AdvisoryProposal.action` value
+(a valid "do not trade" recommendation), distinct from `RunStatus` and from
+`CompletionStatus`. It MUST NOT appear as a `CompletionStatus` member and is not
+counted as a system failure/block. It may be expressed in an `EvaluationResult`
+as a normal outcome (per `docs/code-governance/verification-constraints.md`, which
+defines `OK`/`HOLD` as outcomes that DO count in the success denominator while
+BLOCKED/INCOMPLETE/REVIEW/FAILED do not).
 
 ### `EvaluationResult` (§5.1 complete — D item 2)
 Typed fields:
@@ -96,15 +111,40 @@ pair is **not counted as a win** (`baseline_win == enhanced_win == False`,
 dedupe by `(run_id, event_id)`, `anchor` applied (tip/last_sequence) → tail
 truncation detected. Fully offline (no LLM/network).
 
-### `compare_runs(baseline, enhanced, rubric) -> EvaluationResult` (D item 1)
-**Typed inputs** (reject bare `dict`; accept `RunSummary`/`RunSpec`); `rubric`
-is a typed ``QualityRubric``/``MetricDef`` set and **must be used** (assert it
-influences scoring/verification). Comparability requires matching
-`target_snapshot_id`, `model_config_hash`, `prompt_hash`, `code_hash`,
-`policy_hash`. Any mismatch ⇒ INCOMPLETE with the specific reason
-(SNAPSHOT/MODEL/PROMPT/CODE/POLICY_MISMATCH); a missing required variant/result
-⇒ INCOMPLETE `MISSING_RESULT`. `manifest_hash` mismatch ⇒ INCOMPLETE
-`MANIFEST_MISMATCH`. None of these count as a win.
+### `RunSummary` (typed input to compare_runs — D item 1)
+```python
+class RunSummary(BaseModel):        # extra="forbid"
+    run_id: str                              # required
+    variant: str                             # required
+    target_snapshot_id: str                  # required
+    model_config_hash: str                   # required, 64 lower-hex
+    prompt_hash: str                         # required, 64 lower-hex
+    code_hash: str                           # required, 40 OR 64 lower-hex
+    policy_hash: str                         # required, 64 lower-hex
+    manifest_hash: str                       # required, 64 lower-hex
+    has_result: bool = True                  # default
+    has_usage: bool = True                   # default; False => MISSING_USAGE
+    metrics: dict[str, float] = {}           # default
+    quality_labels: list[str] = []           # default
+```
+Mandatory (no default) vs default shown above; hash formats validated. A bare
+`dict` is rejected by `compare_runs`. `variant` is carried through to
+`EvaluationResult.variant` (the run_id→variant mapping source is the
+`RunSummary.variant` field; the implementation obtains it from the run manifest/
+RunSpec when building summaries).
+
+### `compare_runs(baseline: RunSummary, enhanced: RunSummary, rubric) -> EvaluationResult`
+**Typed inputs only** (reject bare `dict`); accepts `RunSummary` (RunSpec
+normalized into a `RunSummary` upstream). `rubric` is a typed
+`QualityRubric`/`MetricDef` set and **must be used** (assert it influences
+scoring/verification). Comparability requires matching `target_snapshot_id`,
+`model_config_hash`, `prompt_hash`, `code_hash`, `policy_hash`. Any mismatch ⇒
+INCOMPLETE with the specific reason (SNAPSHOT/MODEL/PROMPT/CODE/POLICY_MISMATCH);
+a missing required variant/result ⇒ INCOMPLETE `MISSING_RESULT`; unknown usage ⇒
+INCOMPLETE `MISSING_USAGE`. `manifest_hash` is **recomputed via
+`compute_manifest_hash`** and compared to the recorded value; a mismatch ⇒
+INCOMPLETE `MANIFEST_MISMATCH`. None of these count as a win. `variant` is
+propagated to `EvaluationResult.variant`.
 
 ---
 
@@ -124,15 +164,23 @@ influences scoring/verification). Comparability requires matching
   test/covenant distinguishes *pre-declared variant differences* from *unstated
   configuration drift* — i.e. a code/policy mismatch **between comparable arms**
   is INCOMPLETE, not a silent difference.)
-- **`manifest_hash: str`** — required; the spec hash function:
-  `sha256(canonical_json(manifest without manifest_hash))` (sort_keys, separators
-  `(",",":")`), lowercase hex. A mismatch vs the run's recorded `manifest_hash`
-  ⇒ INCOMPLETE/MANIFEST_MISMATCH.
-- **Finalized by B (not PENDING):** `quality_rubric` is an independent field at
-  the same level as `metrics_rubric`; `code_hash` (= complete Git commit SHA of
-  the running code) and `policy_hash` (= `RunSpec.policy_hash`) are included in
-  v1; `ExperimentManifest` adds `manifest_hash`.
-- **PENDING (D) only:** `MISSING_USAGE` in `IncompleteReason` = **PENDING (D)**.
+- **`manifest_hash: str`** — required. Computed by `compute_manifest_hash(m)`:
+  ```python
+  def compute_manifest_hash(m) -> str:
+      data = m.model_dump(mode="json", exclude={"manifest_hash"})
+      return sha256(json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+  ```
+  (also exposed as `ExperimentManifest.recompute_hash()`). Deterministic over
+  snapshot/model/prompt/code/policy/variants/rubrics. Verification: if
+  `manifest_hash != compute_manifest_hash(m)` → construction rejects OR
+  `compare_runs` returns INCOMPLETE/MANIFEST_MISMATCH (the implementation must do
+  at least one; `compare_runs` recomputes and compares).
+- **`ExperimentManifest` immutability:** `frozen=True`, `validate_assignment=True`
+  (assignment after construction raises) — enforced by the implementation and
+  tested (`test_manifest_is_frozen_assignment_rejected`).
+- **Finalized by B (not PENDING):** `quality_rubric` independent; `code_hash` /
+  `policy_hash` / `manifest_hash` in v1.
+- **No PENDING (B/D) remain.** `MISSING_USAGE` is now a real enum member.
 
 ## 4. `RunEvent` (immutability & strictness — F-05/F-14/F-20, D item 10)
 - **Immutable/frozen:** `frozen=True`, `validate_assignment=True` (assignment
@@ -141,8 +189,10 @@ influences scoring/verification). Comparability requires matching
 - `status`/reason consistency: `OK` **must not** carry a `reason_code`;
   `BLOCKED` **must** have one (validated). `schema_version`/contract-version
   field present and validated.
-- `duration` (NFR-09): per-phase duration recorded (non-negative).
-- Where a rule cannot be enforced yet, the test is marked `PENDING (D deferral)`.
+- `duration_ms` (NFR-09): per-phase duration recorded, `>= 0` (strict int,
+  non-negative). These are **enforced** (not deferred): the implementation must
+  provide frozen RunEvent, `duration_ms >= 0`, `OK` without `reason_code`,
+  `BLOCKED` with `reason_code`, and `schema_version` validation.
 
 ## 5. `RunEvent.metrics` validation
 JSON-safe only: non-finite floats (`NaN`,`±inf`), non-serializable objects,

@@ -12,7 +12,8 @@
   AST count + (planned) hash check.
 - **Implementation/main branch command (required, gated):**
   `pytest tests` + `pytest -m spec test/offline/contracts`. The gate MUST verify
-  **≥ 90 spec cases actually ran**; silently deselected/zero-selected ⇒ fail.
+  **exactly 188 spec cases actually ran** (collected==run==188); silently
+  deselected/zero-selected ⇒ fail.
 - Explicit show-RED on spec branch: `pytest -m spec test/offline/contracts` →
   7 collection errors (`ModuleNotFoundError: egta`).
 
@@ -26,12 +27,12 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
   (hash check of `aggregate_sha256` / `spec_bundle_sha256`).
 - Trace/AI-log presence check.
 - Implementation-PR required job: run `pytest -m spec test/offline/contracts`
-  (≥90 cases), verify impl branch descends from spec merge commit, verify test
+  (exactly 188 cases), verify impl branch descends from spec merge commit, verify test
   aggregate hash == approved value, first impl commit after approval commit.
 - Add these to `protect-main` required status checks + CODEOWNERS review.
 
 ## Coverage
-- 7 files, 95 test functions, **144 cases**.
+- 7 test modules (9 files incl. `__init__.py`, `conftest.py`), **111 test functions**, **188 cases**.
 - `_InMemorySink` (test_audit.py) is a **reference double**; impl PR must add a
   real `SqliteAuditSink` integration test.
 
@@ -45,19 +46,22 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
 
 ## Verification evidence (this round)
 - Spec branch: `pytest -m spec test/offline/contracts` → 7 collection errors (RED).
-- `py_compile` exit 0; AST = 95 functions.
+- `py_compile` exit 0; AST = 111 functions.
 - `ruff check .` green.
 - Full spec-satisfying impl in `/tmp` → `pytest -m spec test/offline/contracts`
-  → **144 passed**.
+  → **188 passed**.
 
-## Finalized (NOT PENDING — B confirmed)
+## Finalized (NOT PENDING)
 - `quality_rubric` = independent field at the same level as `metrics_rubric`.
-- `code_hash` (= complete Git commit SHA of running code), `policy_hash`
-  (= `RunSpec.policy_hash`), and `manifest_hash` are in v1 and tested
-  (code/policy mismatch → INCOMPLETE CODE_MISMATCH/POLICY_MISMATCH, no win).
+- `code_hash` / `policy_hash` / `manifest_hash` are in v1 and tested; code/policy
+  mismatch → INCOMPLETE CODE_MISMATCH/POLICY_MISMATCH, no win.
+- `MISSING_USAGE` is a first-class `IncompleteReason` member (D resolved) and
+  tested (compare_runs unknown usage → INCOMPLETE/MISSING_USAGE, no win).
+- Enforced (not deferred): RunEvent frozen + validate_assignment, `duration_ms>=0`,
+  `OK` without `reason_code`, `BLOCKED` with `reason_code`, `schema_version`
+  validation; `ExperimentManifest` frozen.
+- `HOLD` is an `AdvisoryProposal.action` (valid non-transaction result), NOT a
+  `RunStatus`/`CompletionStatus`; not a system failure (see verification-constraints).
 
-## PENDING (D only)
-- `MISSING_USAGE` in `IncompleteReason` (reserved placeholder).
-- Whether D accepts the deferrals for frozen/duration/status-reason enforcement
-  (currently specified+tested where possible; any unenforced item is marked
-  `PENDING (D deferral)`).
+## PENDING
+- **None.** No PENDING (B) or PENDING (D) items remain.

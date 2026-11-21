@@ -15,7 +15,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from egta.contracts.manifest import ExperimentManifest
+from egta.contracts.manifest import ExperimentManifest, compute_manifest_hash
 
 pytestmark = pytest.mark.spec
 
@@ -241,3 +241,71 @@ def test_quality_rubric_extra_field_rejected():
     q["bogus"] = True
     with pytest.raises(ValidationError):
         _manifest(quality_rubric=q)
+
+
+# --- manifest_hash normalization (D item 2) ---------------------------------
+
+
+def _build_with_hash(**overrides):
+    """Construct a manifest whose manifest_hash is its own computed hash."""
+    base = {
+        "manifest_id": "m1", "created_at": _utc(), "target_snapshot_id": "snap1",
+        "model_config_hash": VALID_HASH, "prompt_hash": VALID_HASH,
+        "code_hash": CODE_HASH, "policy_hash": VALID_HASH, "manifest_hash": VALID_HASH,
+        "variants": {k: dict(v) for k, v in ALL_VARIANTS.items()},
+        "metrics_rubric": {"token_cost": dict(_METRIC_DEF)},
+        "quality_rubric": dict(_VALID_QUALITY),
+    }
+    base.update(overrides)
+    draft = ExperimentManifest(**base)
+    return draft.model_copy(update={"manifest_hash": compute_manifest_hash(draft)})
+
+
+def test_manifest_hash_is_deterministic():
+    a = _build_with_hash()
+    b = _build_with_hash()
+    assert compute_manifest_hash(a) == compute_manifest_hash(b)
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("target_snapshot_id", "snap2"),
+        ("model_config_hash", "b" * 64),
+        ("prompt_hash", "b" * 64),
+        ("policy_hash", "b" * 64),
+        ("code_hash", "d" * 40),
+    ],
+)
+def test_manifest_hash_changes_when_field_changes(field, value):
+    base_hash = compute_manifest_hash(_build_with_hash())
+    changed = compute_manifest_hash(_build_with_hash(**{field: value}))
+    assert changed != base_hash
+
+
+def test_manifest_hash_changes_when_variant_or_rubric_changes():
+    base_hash = compute_manifest_hash(_build_with_hash())
+    v = {k: dict(val) for k, val in ALL_VARIANTS.items()}
+    v["B1"] = {"mode": "changed"}
+    assert compute_manifest_hash(_build_with_hash(variants=v)) != base_hash
+    q = dict(_VALID_QUALITY)
+    q["double_blind"] = False
+    assert compute_manifest_hash(_build_with_hash(quality_rubric=q)) != base_hash
+
+
+def test_manifest_hash_absent_from_hash_input():
+    """model_dump excludes manifest_hash so changing only it does not change the computed hash."""
+    m = _build_with_hash()
+    other = m.model_copy(update={"manifest_hash": "f" * 64})
+    assert compute_manifest_hash(m) == compute_manifest_hash(other)
+
+
+def test_manifest_recompute_hash_matches():
+    m = _build_with_hash()
+    assert m.recompute_hash() == compute_manifest_hash(m)
+
+
+def test_manifest_is_frozen_assignment_rejected():
+    m = _build_with_hash()
+    with pytest.raises(ValidationError):
+        m.manifest_id = "changed"  # type: ignore[misc]
