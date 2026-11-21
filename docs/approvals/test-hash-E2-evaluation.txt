@@ -1,0 +1,26 @@
+PR/task: E2 evaluation (test-first spec, test/spec ONLY — no implementation)
+branch:   spec/E2-evaluation
+base:     main
+
+# Approval binding: authoritative reviewed head = GitHub review commit_id (not
+# stored). Merge commit in external registry/CI/PR comment. This file records
+# ONLY test_content_commit + aggregate + bundle. Do not push after approval.
+
+test_content_commit: 346ba007f7e1e77d9b8c522029ec57d557353290
+actual_cases: 30             # from: pytest -m spec test/offline/evaluation --collect-only
+
+files (per-file SHA-256):
+  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/evaluation/__init__.py
+  226b8b9d4cf3b9a0a95501cbf16e1f8558fd700e1f6e938f6160a649e174491f  test/offline/evaluation/conftest.py
+  fcb546a813daba4af8ca88550bf646e3d6a3f8840e1a92f65a241565b6b215b6  test/offline/evaluation/test_metrics.py
+  cfd18b7167994074af9ad97a55cdb4012e5bfc7b0aa2e41b576919a43b50591d  test/offline/evaluation/test_replay.py
+  c0a8143df261ee177844508716d4f73f7aba59c723d367ae4d5e93275821ebc9  test/offline/evaluation/test_report.py
+  52bcf30bdbdddb15a5dda00a6f3434a8fa47be4843908934d4bf786f22415803  test/offline/evaluation/test_sqlite_sink.py
+
+aggregate_sha256 (tests, sorted by path):
+  51e7bdc76587b24d1c4658f076fd326f1648b8360c1b365f37ad95eef2435d51
+
+spec_bundle_sha256 (tests + trace-E2-evaluation.md + spec-registry-E2.md, sorted):
+  0d6243f97654a3b99cc4db4fd6f016b32d45dd8dca171613a114335fb1952b0b
+
+approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id authoritative)
