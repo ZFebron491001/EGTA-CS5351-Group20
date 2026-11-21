@@ -43,11 +43,13 @@ defined in `egta.contracts.evaluation` (see contracts-summary §2).
 Duplicate handling is via `AuditSink.append` / `dedupe_events`; rubric via the
 independent `quality_rubric` + typed `metrics_rubric`. Stated once per contract.
 
-## PENDING
-- **PENDING (B):** quality_rubric nested-vs-separate if B reverts; code/policy hash
-  semantics finalized by B (currently 40-hex commit SHA / 64-hex).
-- **PENDING (D):** `MISSING_USAGE` in `IncompleteReason`; frozen/validate_assignment
-  deferrals if not enforced; duration schema if deferred.
+## Finalized (B, not PENDING)
+- quality_rubric independent field; code_hash/policy_hash/manifest_hash in v1
+  (code/policy mismatch → INCOMPLETE CODE_MISMATCH/POLICY_MISMATCH, no win).
+
+## PENDING (D only)
+- `MISSING_USAGE` in `IncompleteReason`; whether deferrals for
+  frozen/validate_assignment/duration/status-reason enforcement are accepted.
 
 ## Approval
 D under GATE-01; author no self-review. Binding: `docs/approvals/test-hash-FR-05-

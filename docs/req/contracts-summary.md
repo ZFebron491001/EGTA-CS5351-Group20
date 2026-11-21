@@ -7,7 +7,8 @@ implementation PR. On this spec branch the imports raise `ModuleNotFoundError` =
 **RED by design** (test-first). No `src/` file exists here.
 
 Definitions follow **D's** specification (final round) and **B's** confirmations.
-`PENDING (D)` / `PENDING (B)` mark items not yet frozen.
+B's decisions on quality_rubric / code_hash / policy_hash / manifest_hash are
+**finalized** (not PENDING). `PENDING (D)` marks the only remaining open item.
 
 ---
 
@@ -127,8 +128,11 @@ influences scoring/verification). Comparability requires matching
   `sha256(canonical_json(manifest without manifest_hash))` (sort_keys, separators
   `(",",":")`), lowercase hex. A mismatch vs the run's recorded `manifest_hash`
   ⇒ INCOMPLETE/MANIFEST_MISMATCH.
-- **PENDING (B):** if B later reverts `quality_rubric` to nested, adjust here and
-  in tests. `MISSING_USAGE` in `IncompleteReason` = **PENDING (D)**.
+- **Finalized by B (not PENDING):** `quality_rubric` is an independent field at
+  the same level as `metrics_rubric`; `code_hash` (= complete Git commit SHA of
+  the running code) and `policy_hash` (= `RunSpec.policy_hash`) are included in
+  v1; `ExperimentManifest` adds `manifest_hash`.
+- **PENDING (D) only:** `MISSING_USAGE` in `IncompleteReason` = **PENDING (D)**.
 
 ## 4. `RunEvent` (immutability & strictness — F-05/F-14/F-20, D item 10)
 - **Immutable/frozen:** `frozen=True`, `validate_assignment=True` (assignment

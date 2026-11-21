@@ -29,7 +29,7 @@ aggregate_sha256 (sha256sum of per-file lines, sorted by path):
 
 spec_bundle_sha256 (tests + docs/req/contracts-summary.md +
 docs/req/trace-FR-05-contracts.md + docs/approvals/spec-registry.md, sorted):
-  244c5adf0a28d6c95f54de6265f1c0b12bfa8e8df5067432202a9399b3cd196d
+  7da1d6a4b797121419b7293221acaf8523f0148b6346c080e08953d67c474f4f
 
 approved_by: D (@ZFebron491001) — PENDING (GitHub review commit_id authoritative)
 

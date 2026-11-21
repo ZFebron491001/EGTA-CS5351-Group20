@@ -50,6 +50,14 @@ This PR prepares/records the verification inputs; **Admin D** must add the check
 - Full spec-satisfying impl in `/tmp` → `pytest -m spec test/offline/contracts`
   → **144 passed**.
 
-## PENDING
-- **B:** quality_rubric nested-vs-separate; code/policy hash semantics.
-- **D:** `MISSING_USAGE` enum; frozen/duration deferrals.
+## Finalized (NOT PENDING — B confirmed)
+- `quality_rubric` = independent field at the same level as `metrics_rubric`.
+- `code_hash` (= complete Git commit SHA of running code), `policy_hash`
+  (= `RunSpec.policy_hash`), and `manifest_hash` are in v1 and tested
+  (code/policy mismatch → INCOMPLETE CODE_MISMATCH/POLICY_MISMATCH, no win).
+
+## PENDING (D only)
+- `MISSING_USAGE` in `IncompleteReason` (reserved placeholder).
+- Whether D accepts the deferrals for frozen/duration/status-reason enforcement
+  (currently specified+tested where possible; any unenforced item is marked
+  `PENDING (D deferral)`).
