@@ -1,28 +1,26 @@
 # Final verification — E (G3 evidence)
 
 §0 Header
-- Date (UTC): 2026-11-22T11:39:21Z
-- main HEAD: `6830926c44e7a16bae0cac1992f43a6aac8b26f6`
+- Date (UTC): 2026-11-22 (re-run on synced head)
+- run HEAD: `9cd829d497cc79cac4e429300784a5a8fc3ee033` (synced from main `dc59be1`)
+- (old snapshot 6830926 results retained below as historical context)
 - Env: conda `egta` · Python 3.12.16 · pytest 9.2.0 · ruff 0.17.6 · mypy 2.4.1
 
 ## 1. Offline suites (real output)
 | Suite | Command | Result |
 |---|---|---|
-| FR-05 contracts (isolated 7 files) | `pytest -m spec test/offline/contracts/{test_comparison,test_events,test_audit,test_replay,test_evaluation_result,test_manifest,test_metrics_serialization}.py -q` | **223 passed** |
+| FR-05 contracts — **7-file gate** | `pytest -m spec test/offline/contracts/{test_comparison,test_events,test_audit,test_replay,test_evaluation_result,test_manifest,test_metrics_serialization}.py -q` | **223 passed** |
+| contracts — **full directory** | `pytest -m spec test/offline/contracts -q` | **288 passed** (incl. FR-01 `test_evidence_contracts.py`, now importable after #21) |
 | E2 evaluation | `pytest -m spec test/offline/evaluation -q` | **28 passed** |
 | FR-04 risk gate | `pytest test/offline/risk_gate -q` | **139 passed** |
 | FR-02 budget | `pytest -m spec test/offline/budget -q` | **N/A — no `src/egta/budget`** (FR-02 spec-only, #22); `0 tests collected`; NOT skip-green |
 | upstream | `pytest -q` | **1412 passed, 1 skipped, 1 deselected** |
 
-**Note (truthful):** invoking the *whole* `test/offline/contracts` directory currently
-errors at collection because `test_evidence_contracts.py` (FR-01, from main) imports
-`EvidenceItem` from `egta.contracts`, which is not yet implemented (FR-01 pack/contracts
-pending — A #21/#25). This is why the CI gate isolates FR-05's **7 explicit files**
-(→ 223). The full-directory error is an FR-01 dependency gap, not an FR-05 failure.
+**Note (truthful, updated on synced head):** the CI gate isolates FR-05's **7 explicit files** (→ 223). The **full directory now also collects green (288)** because FR-01 `test_evidence_contracts.py` imports `EvidenceItem` from `egta.contracts`, which is implemented after #21. (On the older snapshot `6830926` the full directory errored at collection for that FR-01 import; that gap is now closed.)
 
 ## 2. Quality gates
 - `ruff check .` → **All checks passed!** (exit 0)
-- `mypy src/egta` → **Success: no issues found in 20 source files**
+- `mypy src/egta` → **Success: no issues found in 21 source files**
 
 ## 3. CI — 7 required checks on main HEAD `6830926`
 ```
@@ -40,7 +38,7 @@ which contain no logic). Actual output:
 ```
 normal      | compare=COMPLETE | verdict=APPROVED | version 1->2 | entries +1 | cash 10000.00->9899.90 | OK
 declined    | verdict=REJECTED | version 1->1 | entries +0 | cash 10000.00->10000.00 | OK
-declined-2  | verdict=REJECTED | OK
+declined-2  | verdict=REJECTED | version 1->1 | entries +0 | cash 10000.00->10000.00 | OK
 over-budget | N/A — budget module not implemented (FR-02 spec-only, #22); contract expects BudgetDenied / MISSING_USAGE; documented gap, owner B, pending FR-02 implementation
 ```
 
@@ -50,6 +48,8 @@ over-budget | N/A — budget module not implemented (FR-02 spec-only, #22); cont
 | declined (oversized: qty 100 @ 100.00 ≫ 10% NAV) | — | REJECTED | 1 → 1 | +0 | unchanged |
 | declined-2 (stale caller portfolio version) | — | REJECTED | unchanged | +0 | unchanged |
 | over-budget | — | N/A (budget not implemented) | — | — | — |
+
+**Scope of this e2e (truthful):** only the **decline/stale** paths and the **normal approved** path are demonstrated at the module level; the **over-budget** path is **NOT** demonstrated (budget not implemented). This does **not** claim all three G1 routes (normal / declined / over-budget) are complete — over-budget remains a documented gap (owner B). The `declined-2` (stale caller portfolio version) path is now **asserted** in the driver (version unchanged / 0 entries / cash unchanged), so a regression there exits non-zero.
 
 **CLI gap (documented):** there is **no unified `egta` CLI/runner** on `main`; this
 e2e drives the modules directly (`compare_runs` → `evaluation` → `RiskGate` →
@@ -65,7 +65,6 @@ e2e drives the modules directly (`compare_runs` → `evaluation` → `RiskGate` 
 ## 6. Known gaps / non-claims
 - No unified `egta` CLI/runner (modules exist, not wired) — e2e is module-level (§4).
 - Budget not implemented (`src/egta/budget` absent) — FR-02 spec-only (#22); N/A.
-- Full `test/offline/contracts` dir errors on FR-01 `test_evidence_contracts.py`
-  (EvidenceItem not yet implemented) — FR-05 gate isolates its 7 files (223).
+- Full `test/offline/contracts` dir **now passes (288)** on the synced head (FR-01 `EvidenceItem` implemented via #21); the CI gate still isolates FR-05's 7 files (223) so FR-01 cannot contaminate that count.
 - Six-gate: only the `offline-tests` gate is wired; permission/approval (#29
   `tools/check_*.py`), schema, ai-log and semantic checks are **follow-up E3** work.

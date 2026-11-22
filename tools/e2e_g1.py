@@ -157,9 +157,19 @@ def main() -> int:
         v0, n0, cash0 = _ledger_state_init(db, portfolio)
         stale = replace(portfolio, version=portfolio.version + 99)
         verdict = run_gate(db, clock, policy, portfolio, proposal, evidence, stale=stale)
+        v1, n1, cash1 = _ledger_state(db)
+        declined2_ok = (
+            verdict.status in (
+                VerdictStatus.STALE_PORTFOLIO,
+                VerdictStatus.REJECTED,
+                VerdictStatus.BLOCKED,
+            )
+            and v1 == v0 and n1 == n0 and cash1 == cash0
+        )
+        ok &= declined2_ok
         print(
-            f"declined-2  | verdict={verdict.status.name} | "
-            f"{'OK' if verdict.status in (VerdictStatus.STALE_PORTFOLIO, VerdictStatus.REJECTED, VerdictStatus.BLOCKED) else 'INFO'}"
+            f"declined-2  | verdict={verdict.status.name} | version {v0}->{v1} | "
+            f"entries +{n1 - n0} | cash {cash0}->{cash1} | {'OK' if declined2_ok else 'FAIL'}"
         )
 
     # ---- over-budget: documented gap (no budget module) ----
