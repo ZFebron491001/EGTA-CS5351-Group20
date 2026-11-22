@@ -1,0 +1,31 @@
+PR/task: FR-01 evidence classification-precedence spec (test-first spec, test/spec ONLY — no implementation)
+branch:   test/FR-01-pack-precedence
+base:     main
+
+# Approval binding: authoritative reviewed head = GitHub review commit_id.
+# This file records ONLY test_content_commit + per-file/aggregate test hashes.
+# approved_by is filled by D (approver) after review; the author must not fill it.
+
+# Scope: the 4 additive FR-01 precedence cases that the frozen pack spec
+# test-hash-FR-01-pack.txt (actual_cases: 33) does NOT cover. Together they pin
+# the classification order integrity -> staleness -> time -> dedupe so that:
+#   - a tampered cache item is INTEGRITY_VIOLATION (not STALE),
+#   - a well-formed cache item is STALE_DATA (E-26 unchanged),
+#   - a future-dated cache item is STALE_DATA (cache staged before time filter),
+#   - a future-dated non-cache item is FUTURE_DATA.
+# The STALE-vs-FUTURE_DATA choice for cache is a contract-level decision recorded
+# in docs/req/trace-FR-01-evidence-impl.md (classification precedence), not merely
+# whatever the implementation happens to do.
+
+actual_cases: 4
+# 4 functions / 4 cases in test/offline/evidence/test_pack_precedence.py, selected by -m spec.
+
+files (per-file SHA-256):
+  68be998b0c289463575631d234d472a96e093e55784fbe36ebe46d1268c15a2e  test/offline/evidence/test_pack_precedence.py
+
+aggregate_sha256 (sha256sum of per-file "hash  path" lines, sorted by path):
+  04fdffcbff274d06abbb7289ff006ffe3c817a7bf828871ef9bd8762e66bc9a1
+
+reviewed_pr_head:        PENDING   # filled by D at review on this head
+merge_commit:            PENDING   # filled after merge
+approved_by:             PENDING   # filled by D after review
