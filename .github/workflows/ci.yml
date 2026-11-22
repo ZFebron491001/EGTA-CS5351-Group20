@@ -122,6 +122,7 @@ jobs:
           BUDGET_RECORD: "docs/approvals/test-hash-FR-02-budget.txt"
           EXPECT_EVALUATION: "28"
           EXPECT_RISK_GATE: "139"  # A confirmed FR-04 126 + 13 = 139
+          EXPECT_REQUIREMENTS: "24"  # D1 registry checker unit tests (A)
         run: |
           python - <<'PY'
           import os
@@ -154,6 +155,9 @@ jobs:
               ("evaluation", "src/egta/evaluation", ["-m", "spec", "test/offline/evaluation"], "ENV:EXPECT_EVALUATION"),
               ("risk_gate",  "src/egta/risk_gate",  ["test/offline/risk_gate"],                "ENV:EXPECT_RISK_GATE"),
               ("budget",     "src/egta/budget",     ["-m", "spec", "test/offline/budget"],      "RECORD:docs/approvals/test-hash-FR-02-budget.txt"),
+              # D1 registry checker: presence detected by the tool FILE, so it is
+              # N/A until the tool exists on the branch that adds it.
+              ("requirements", "tools/check_requirements.py", ["test/offline/requirements"], "ENV:EXPECT_REQUIREMENTS"),
           ]
 
           # pytest terminal summary, e.g. "123 passed, 2 skipped in 0.4s".
@@ -211,7 +215,7 @@ jobs:
 
           failures = []
           for name, moddir, args, env in suites:
-              if not Path(moddir).is_dir():
+              if not Path(moddir).exists():
                   print(f"::notice::{name}: {moddir} absent -- N/A (suite skipped, not pass/fail)")
                   continue
               if env is None:
@@ -253,3 +257,189 @@ jobs:
               raise SystemExit(f"offline gate failed: {', '.join(failures)}")
           print("All applicable offline suites passed at their exact expected counts.")
           PY
+
+  # ---------------------------------------------------------------------------
+  # Governance suite — exact 38. `test/offline/governance` is unmarked and has NO
+  # src/ dependency (the tests build synthetic git diffs), so it always applies.
+  # ---------------------------------------------------------------------------
+  governance:
+    name: governance (exact 38)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - name: Install (with dev extras)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Gate governance at exactly 38
+        env: { EXPECT_GOVERNANCE: "38" }
+        run: |
+          pytest test/offline/governance -q -rsx > /tmp/gov.log 2>&1 || { cat /tmp/gov.log; exit 1; }
+          python - <<'PY'
+          import os, re, sys
+          text = open('/tmp/gov.log').read()
+          m = {}
+          for line in reversed(text.splitlines()):
+              for n, kind in re.findall(r'(\d+)\s+(passed|failed|error|skipped|xfailed|xpassed)', line):
+                  m[kind] = m.get(kind, 0) + int(n)
+              if m:
+                  break
+          exp = int(os.environ["EXPECT_GOVERNANCE"])
+          passed = m.get('passed', 0)
+          bad = {k: m.get(k, 0) for k in ('failed', 'error', 'skipped', 'xfailed', 'xpassed') if m.get(k, 0)}
+          print(f"governance: passed={passed} expected={exp} bad={bad}")
+          if passed != exp or bad:
+              print("::error::governance count/skip mismatch"); sys.exit(1)
+          print(f"governance: exactly {exp} passed")
+          PY
+
+  # ---------------------------------------------------------------------------
+  # GATE-02 — role-scoped permission checker. `role:build-X` PR label overrides;
+  # else infer from the changed module prefix; a non-`src/` diff uses `verify`
+  # (covers docs/evidence, docs/verification; transcripts/ + docs/report/ are NOT
+  # in the `plan` allowlist -> E docs PRs run as `verify`).
+  # ---------------------------------------------------------------------------
+  check-permissions:
+    name: check-permissions (GATE-02)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - name: Infer role (label override > module prefix > verify)
+        id: role
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          git fetch --no-tags origin "$base" "$head" || true
+          changed=$(git diff --name-only "$base" "$head")
+          role=""
+          lbl=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} \
+                --json labels --jq '[.labels[].name|select(startswith("role:"))][0] // ""')
+          if [ -n "$lbl" ]; then role=${lbl#role:}; fi
+          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/evidence/\|^test/offline/evidence/'; then role=build-a; fi
+          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/budget/\|^src/egta/adapters/\|^src/egta/app/\|^test/offline/budget/'; then role=build-b; fi
+          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/deliberation/\|^test/offline/deliberation/\|^prompts/'; then role=build-c; fi
+          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/risk_gate/\|^test/offline/risk_gate/'; then role=build-d; fi
+          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/evaluation/\|^test/offline/evaluation/'; then role=build-e; fi
+          # B.2 fail-closed: if the diff touches src/test but NO role label and NO
+          # module matched, do NOT default to verify -- mark unknown (fail later).
+          if [ -z "$role" ]; then
+            if echo "$changed" | grep -qE '^(src|test)/'; then
+              role="__UNKNOWN__"
+            else
+              role=verify   # non-src/test (docs/etc.) -> Option 2 N/A path below
+            fi
+          fi
+          echo "role=$role" >> "$GITHUB_OUTPUT"
+          echo "inferred role: $role"
+          # Option 2: scope decision. GATE-02 only polices SRC/TEST module paths.
+          # N/A (exit 0) when the diff has NO src/ and NO test/ at all (CI-only
+          # .github/, docs-only, transcripts/, docs/report/) -> reviewed out by D's
+          # code-owner review. B.1: an approval-record update (docs/approvals/) with
+          # no module change is also N/A (AUTHORIZED human exception) -> D review.
+          nonsrc=$(echo "$changed" | grep -vE '^(src|test)/' || true)
+          if [ "$role" = "__UNKNOWN__" ]; then
+            echo "::error::could not infer a permission role for a src/test change (no role: label, no module match) -- fail closed"
+            echo "applicable=false" >> "$GITHUB_OUTPUT"
+            echo "unknown_role=true" >> "$GITHUB_OUTPUT"
+          elif [ -z "$changed" ]; then
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
+          elif ! echo "$changed" | grep -qE '^(src|test)/'; then
+            echo "::notice::diff touches no src/ or test/ (CI/docs/transcripts/approvals) -- GATE-02 N/A; reviewed by code-owner"
+            echo "applicable=false" >> "$GITHUB_OUTPUT"
+          elif echo "$changed" | grep -qE '^docs/approvals/' && echo "$changed" | grep -qE '^(src|test)/'; then
+            # approval-record edit ALONGSIDE a module change: still gate the module,
+            # but do not fail on APPROVAL_PROTECTED alone (authorized record update).
+            echo "::notice::approval-record change present (docs/approvals/) -- APPROVAL_PROTECTED is an authorized human exception, not a gate failure"
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Fail closed on unknown role
+        if: steps.role.outputs.unknown_role == 'true'
+        run: |
+          echo "::error::unknown permission role (src/test changed, unmapped) -- GATE-02 fails closed"; exit 1
+      - name: Run permission checker (APPROVAL_PROTECTED is an authorized exception)
+        if: steps.role.outputs.applicable == 'true'
+        run: |
+          set +e
+          out=$(python tools/check_permissions.py --repo . \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}" \
+            --role "${{ steps.role.outputs.role }}" 2>&1)
+          rc=$?
+          echo "$out"
+          if [ $rc -ne 0 ]; then
+            # B.1: an A-directed approval-record edit (docs/approvals/) raises
+            # APPROVAL_PROTECTED; that is a human-authorized exception, NOT a gate
+            # failure. Pass ONLY when every violation is APPROVAL_PROTECTED.
+            other=$(echo "$out" | grep -E '^[A-Z_]+:' | grep -v '^APPROVAL_PROTECTED:' || true)
+            if [ -z "$other" ]; then
+              echo "::notice::only APPROVAL_PROTECTED (authorized approval-record edit) -- pass; D code-owner review required"
+            else
+              echo "::error::permission violations other than APPROVAL_PROTECTED"; exit 1
+            fi
+          fi
+
+  # ---------------------------------------------------------------------------
+  # GATE-01 — approval-record checker. N/A (exit 0 + ::notice::) when
+  # requirements.yaml is absent, no src/test change, or no matched record.
+  # Module -> record MAP uses PRECISE paths so FR-01 evidence tests (which live
+  # under test/offline/contracts/) route to FR-01-evidence, NOT FR-05-contracts.
+  #   src/egta/contracts/ | src/egta/evaluation/ | test/offline/contracts/  (minus evidence) -> FR-05-contracts
+  #   src/egta/evidence/  | test/offline/evidence/  | test/offline/contracts/test_evidence_contracts.py -> FR-01-evidence
+  #   src/egta/risk_gate/ | test/offline/risk_gate/ -> FR-04-risk-gate
+  #   src/egta/budget/ ... -> FR-02-budget
+  # A single change may match several modules -> the loop checks EACH record.
+  # ---------------------------------------------------------------------------
+  check-approval:
+    name: check-approval (GATE-01)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - name: Check approval records for each changed module
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          git fetch --no-tags origin "$base" "$head" || true
+          changed=$(git diff --name-only "$base" "$head")
+          if [ ! -f docs/req/requirements.yaml ]; then echo "::notice::requirements.yaml absent -- N/A"; exit 0; fi
+          if ! echo "$changed" | grep -qE '^(src|test)/'; then echo "::notice::no src/test change -- N/A"; exit 0; fi
+
+          # Precise module detectors (evidence first, then contract/eval).
+          hit_evidence=$(echo "$changed" | grep -E '^src/egta/evidence/|^test/offline/evidence/|^test/offline/contracts/test_evidence_contracts\.py' || true)
+          hit_fr05=$(echo "$changed" | grep -E '^src/egta/contracts/|^src/egta/evaluation/|^test/offline/contracts/' | grep -v '^test/offline/contracts/test_evidence_contracts\.py' || true)
+          hit_risk=$(echo "$changed" | grep -E '^src/egta/risk_gate/|^test/offline/risk_gate/' || true)
+          hit_budget=$(echo "$changed" | grep -E '^src/egta/budget/' || true)
+
+          fail=0; ran=0
+          check() {
+            mod="$1"; hit="$2"
+            if [ -n "$hit" ]; then
+              rec="docs/approvals/test-hash-${mod}.txt"
+              if [ ! -f "$rec" ]; then echo "::notice::no record $rec -- N/A for $mod"; return; fi
+              apbase=$(grep -E '^test_content_commit:' "$rec" | awk '{print $2}')
+              echo "--- check-approval $mod (base=$apbase) ---"
+              ran=$((ran+1))
+              python tools/check_approval.py --repo . --record "$rec" \
+                --implementation-base "$apbase" --implementation-head "$head" \
+                --registry docs/req/requirements.yaml \
+                --author "${{ github.event.pull_request.user.login }}" || fail=1
+            fi
+          }
+          check FR-01-evidence   "$hit_evidence"
+          check FR-05-contracts  "$hit_fr05"
+          check FR-04-risk-gate  "$hit_risk"
+          check FR-02-budget     "$hit_budget"
+          if [ "$ran" -eq 0 ]; then echo "::notice::no module record matched -- N/A"; fi
+          exit $fail
