@@ -523,32 +523,30 @@ sessions:
   - session_id: "A-2026-11-22-d1-check-requirements"
     student: "A / yuxiangdu39"
     agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
-    pr: 27
+    pr: 30
     branch: spec/D1-check-requirements (spec) -> feat/D1-check-requirements (impl)
     time:
-      - "2026-11-22T16:20:00+08:00"   # initial implementation + unit tests
+      - "2026-11-22T16:20:00+08:00"   # checker implementation + first tests
       - "2026-11-22T17:10:00+08:00"   # rework after D request-changes on PR #27
-      - "2026-11-22T17:40:00+08:00"   # split into test-first spec PR + impl PR (GATE-01)
+      - "2026-11-22T18:40:00+08:00"   # split into spec #30 + impl #31; id-type + real-schema tests
     task_requirement_ids: [NFR-10, GATE-03, GATE-06]
     writable_path: ["tools/check_requirements.py", "test/offline/requirements/", "pyproject.toml", ".github/workflows/ci.yml", ".github/CODEOWNERS", "docs/req/", "docs/approvals/", "docs/ai-use-log.yaml"]
     generated_files:
-      - "test/offline/requirements/test_check_requirements.py (18 CLI/subprocess contract tests; spec branch RED because tool absent)"
-      - "tools/check_requirements.py (schema layer via jsonschema + semantic layer) — impl branch only"
+      - "test/offline/requirements/test_check_requirements.py (20 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression; spec branch RED because tool + schema absent)"
+      - "tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage) — impl PR #31"
       - "docs/req/trace-D1-check-requirements.md"
-      - "docs/approvals/test-hash-D1-check-requirements.txt"
-      - "pyproject.toml (dev extras: jsonschema, PyYAML) — impl branch only"
-      - ".github/workflows/ci.yml (requirements suite wired) — impl branch only"
-      - ".github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements) — impl branch only"
+      - "docs/approvals/test-hash-D1-check-requirements.txt (actual_cases 24)"
+      - "pyproject.toml (dev extras: jsonschema, PyYAML) — impl PR #31"
+      - ".github/workflows/ci.yml (requirements suite wired, EXPECT_REQUIREMENTS 24) — impl PR #31"
+      - ".github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements/) — impl PR #31"
     human_intervention:
-      - "D request-changes on PR #27 with 7 items; A drove all fixes and, per D item 1, split the mixed PR into a test-first spec PR (RED, no tool) and an implementation PR (tool + CI + CODEOWNERS) descending from the spec merge commit."
-      - "A decided the spec tests invoke the tool via subprocess (not module import) so the spec branch fails per-test (RED) instead of aborting collection, matching the FR-04 governance spec model."
+      - "D request-changes on PR #27 with 7 items and on PR #15 item 2; A drove all fixes and split the mixed PR into test-first spec #30 (RED) + impl #31 (tool + CI + CODEOWNERS), matching the FR-04 governance spec model."
+      - "A placed the 4 real-schema regression tests in the checker spec per D #15 item 6; merge order #15 -> #30 -> #31 so the real-schema cases resolve against #15."
     verification_output:
-      - "spec branch: pytest test/offline/requirements -q -> 18 failed (tool absent, collection OK) — expected RED"
-      - "impl branch: pytest test/offline/requirements -q -> 18 passed"
-      - "impl: python tools/check_requirements.py --registry <real#9> --schema <real#15> -> OK, exit 0"
-      - "impl negative: INV-01 gte/1 -> exit 1 '[semantic] ... not zero-tolerance'"
-      - "ruff check tools/check_requirements.py test/offline/requirements/ -> All checks passed"
-      - "pytest (testpaths=tests) -> 1412 passed, 1 skipped (upstream unaffected)"
+      - "spec #30: pytest test/offline/requirements -q -> 24 failed (tool + schema absent, collection OK) — expected RED"
+      - "impl #31: pytest test/offline/requirements -q -> 24 passed (against #15 schema)"
+      - "impl e2e: python tools/check_requirements.py --registry <#9> --schema <#15> -> OK, exit 0"
+      - "impl negative: FR-01 + type governance -> exit 1 'does not match its id prefix'"
+      - "CI offline gate: requirements: collect-only=24 expected=24 -> OK"
+      - "ruff clean; upstream pytest -> 1412 passed, 1 skipped"
     cost: "unknown"
-    session_path: "unknown"
-    session_path_note: "To be exported before G3; recorded 'unknown' (not fabricated)."
