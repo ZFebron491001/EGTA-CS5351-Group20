@@ -519,36 +519,3 @@ sessions:
     cost: "unknown"
     session_path: "unknown"
     session_path_note: "To be exported before G3; recorded 'unknown' (not fabricated)."
-
-  - session_id: "A-2026-11-22-d1-check-requirements"
-    student: "A / yuxiangdu39"
-    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
-    pr: 27
-    branch: spec/D1-check-requirements (spec) -> feat/D1-check-requirements (impl)
-    time:
-      - "2026-11-22T16:20:00+08:00"   # initial implementation + unit tests
-      - "2026-11-22T17:10:00+08:00"   # rework after D request-changes on PR #27
-      - "2026-11-22T17:40:00+08:00"   # split into test-first spec PR + impl PR (GATE-01)
-    task_requirement_ids: [NFR-10, GATE-03, GATE-06]
-    writable_path: ["tools/check_requirements.py", "test/offline/requirements/", "pyproject.toml", ".github/workflows/ci.yml", ".github/CODEOWNERS", "docs/req/", "docs/approvals/", "docs/ai-use-log.yaml"]
-    generated_files:
-      - "test/offline/requirements/test_check_requirements.py (18 CLI/subprocess contract tests; spec branch RED because tool absent)"
-      - "tools/check_requirements.py (schema layer via jsonschema + semantic layer) — impl branch only"
-      - "docs/req/trace-D1-check-requirements.md"
-      - "docs/approvals/test-hash-D1-check-requirements.txt"
-      - "pyproject.toml (dev extras: jsonschema, PyYAML) — impl branch only"
-      - ".github/workflows/ci.yml (requirements suite wired) — impl branch only"
-      - ".github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements) — impl branch only"
-    human_intervention:
-      - "D request-changes on PR #27 with 7 items; A drove all fixes and, per D item 1, split the mixed PR into a test-first spec PR (RED, no tool) and an implementation PR (tool + CI + CODEOWNERS) descending from the spec merge commit."
-      - "A decided the spec tests invoke the tool via subprocess (not module import) so the spec branch fails per-test (RED) instead of aborting collection, matching the FR-04 governance spec model."
-    verification_output:
-      - "spec branch: pytest test/offline/requirements -q -> 18 failed (tool absent, collection OK) — expected RED"
-      - "impl branch: pytest test/offline/requirements -q -> 18 passed"
-      - "impl: python tools/check_requirements.py --registry <real#9> --schema <real#15> -> OK, exit 0"
-      - "impl negative: INV-01 gte/1 -> exit 1 '[semantic] ... not zero-tolerance'"
-      - "ruff check tools/check_requirements.py test/offline/requirements/ -> All checks passed"
-      - "pytest (testpaths=tests) -> 1412 passed, 1 skipped (upstream unaffected)"
-    cost: "unknown"
-    session_path: "unknown"
-    session_path_note: "To be exported before G3; recorded 'unknown' (not fabricated)."
