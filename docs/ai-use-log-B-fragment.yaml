@@ -272,3 +272,45 @@ budget_spec_sessions:
       - "Frozen: reserve(call_spec)->Reservation|BudgetDenied; settle(id, actual_usage_or_unknown)->BudgetState."
       - "Frozen result type: reserve(...) -> Reservation | BudgetDenied. Candidate (needs E): the public import path (from egta.budget import BudgetGovernor, Reservation, BudgetDenied); BudgetGovernor(limits=, db_path=) construction; call_spec keys; unknown = settle(...=None); Reservation.reservation_id; known usage shape {'tokens': N}."
     status: "spec drafted, RED by design; awaiting E pre-review; not committed."
+
+# -----------------------------------------------------------------------
+# Admission increment added to the #22 budget spec (concurrency governor test)
+# -----------------------------------------------------------------------
+budget_admission_increment:
+  session_id: "ses_e0451298bffeYlnqHo00GSewD2"
+  agent_tool_model: "OpenCode / opencode CLI / cityu/CS5351/DeepSeek-V4-Flash"
+  date: 2026-11-22
+  task_requirement_ids: [FR-02, INV-03]
+  scope: "Add ONE honest governor-layer test (concurrency no-oversell) to #22; move gateway-dependent cases (tool-binding, structured fallback, one-entry zero-budget, send-then-interrupt) to a PENDING-gateway acceptance list instead of fakes that would pass despite a real bypass."
+  worktree: "/tmp/opencode/b-budget-v2 (#22 branch spec/B-budget-reservation-v2)"
+  head_at_run: "efa4bbe1d4aa5b3c0e9530e95eee58b637f92adc (+ local uncommitted increment)"
+  origin_main_queried: "141547a87f6781abf85ee51fba33898d7c0db671"
+  note_no_rerun_on_newer_main: "Increment was not separately re-run on a 141547a checkout; it ran on the efa4bbe worktree."
+  files:
+    - "test/offline/budget/test_admission.py (new, 1 test: two threads race one call slot -> exactly one Reservation + one BudgetDenied; no transport count)"
+    - "docs/req/trace-FR-02-admission.md (new)"
+    - "test/offline/budget/fakes.py (append ONE_CALL_LIMITS, ONE_CALL_ASK only)"
+  reused_unchanged:
+    - "test/offline/budget/conftest.py (byte-identical to efa4bbe)"
+    - "test/offline/budget/test_reservation_holds.py (byte-identical to efa4bbe; #22's three cases unchanged)"
+  removed_as_would_pass_despite_bypass:
+    - "tool-binding / structured-fallback / one-entry zero-budget / send-then-interrupt tests (no unified gateway entry exists; they are in the trace's PENDING-gateway acceptance list)"
+  verification_output:
+    - command: "python -m ruff check ."
+      exit_code: 0
+      result: "All checks passed"
+    - command: "python -m py_compile test/offline/budget/*.py"
+      exit_code: 0
+      result: "ok"
+    - command: "python -m pytest -m spec test/offline/budget/ --collect-only -q"
+      exit_code: 0
+      result: "4 collected (3 reservation + 1 admission)"
+    - command: "python -m pytest -m spec test/offline/budget/ -q --tb=line"
+      exit_code: 1
+      result: "4 collected, 4 executed, 4 failed at conftest.py:64 (No module named egta.budget); business assertions executed: 0"
+  observed_client_timeout_type: "OpenAITimeoutError (subclass of openai.APITimeoutError) surfaced to caller; httpx.MockTransport records in-process receipt only"
+  human_intervention:
+    - category: "intervention / correction"
+      action: "Human source review found the earlier draft could pass despite a real budget bypass; removed those tests and kept one genuine governor test."
+      limit: "Local increment only; no implementation; #21 untouched; #22 head unchanged until confirmed."
+  status: "increment ready for local diff review; not committed; #22 unchanged."

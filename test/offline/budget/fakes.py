@@ -60,3 +60,20 @@ LOW_KNOWN_USAGE: dict[str, Any] = {"tokens": 100}
 
 def base_limits() -> dict[str, Any]:
     return dict(BUDGET_LIMITS)
+
+
+# --- Admission-spec extras (concurrency: one call slot) ---------------------
+# A budget with room for exactly ONE call on the call axis, so two concurrent
+# calls compete for a single admission slot (the no-oversell case).
+ONE_CALL_LIMITS: dict[str, Any] = {
+    "max_total_tokens": 10_000,
+    "max_calls": 1,
+    "max_cost_usd": "1.00",
+}
+
+# One ordinary call ask; tokens/cost are not the bottleneck here — the call axis is.
+ONE_CALL_ASK: dict[str, Any] = {
+    "max_tokens": 100,
+    "max_calls": 1,
+    "max_cost_usd": "0.01",
+}
