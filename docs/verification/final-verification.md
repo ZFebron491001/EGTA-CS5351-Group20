@@ -2,7 +2,7 @@
 
 §0 Header
 - Date (UTC): 2026-11-22 (re-run on synced head)
-- run HEAD: `ab0fc0bc71bdd843fb76b288fe4c961ad730b8aa` (PR #34, synced from main `4d4b98d`)
+- run HEAD: `71cd6381406d8625d3e78a62292b39640fe53b55` (PR #34 final head, synced to main `81f25f5`; prior runs on `ab0fc0b` from main `4d4b98d`, and snapshot `6830926`)
 - (old snapshot `6830926` results retained below as historical context)
 - Env: conda `egta` · Python 3.12.16 · pytest 9.2.0 · ruff 0.17.6 · mypy 2.4.1
 
@@ -22,7 +22,7 @@
 - `ruff check .` → **All checks passed!** (exit 0)
 - `mypy src/egta` → **Success: no issues found in 21 source files**
 
-## 3. CI — 7 required checks (main HEAD `4d4b98d`; last recorded CI-green main run was `6830926` — 7/7 success; re-run on the current head is the same 7-check set)
+## 3. CI — 7 required checks (final head `71cd638` @ main `81f25f5` — 7/7 success; the 10-check set incl. E3 gates applies only after #40 merges into main)
 ```
 tests (py3.11)=success | tests (py3.12, America/New_York)=success | tests (py3.13)=success
 tests (py3.14)=success | clean-install smoke=success | ruff (strict, full repo)=success
