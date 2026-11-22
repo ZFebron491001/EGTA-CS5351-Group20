@@ -327,22 +327,45 @@ jobs:
           echo "role=$role" >> "$GITHUB_OUTPUT"
           echo "inferred role: $role"
           # Option 2: scope decision. GATE-02 only polices SRC/TEST module paths.
-          # A diff touching NO src/ and NO test/ (CI-only .github/, docs-only,
-          # transcripts/, docs/report/) is N/A here and is reviewed out by D's
-          # code-owner review instead.
-          if [ -n "$changed" ] && ! echo "$changed" | grep -qE '^(src|test)/'; then
-            echo "::notice::diff touches no src/ or test/ (CI/docs/transcripts-only) -- GATE-02 N/A; reviewed by code-owner"
+          # N/A (exit 0) when the diff has NO src/ and NO test/ at all (CI-only
+          # .github/, docs-only, transcripts/, docs/report/) -> reviewed out by D's
+          # code-owner review. B.1: an approval-record update (docs/approvals/) with
+          # no module change is also N/A (AUTHORIZED human exception) -> D review.
+          nonsrc=$(echo "$changed" | grep -vE '^(src|test)/' || true)
+          if [ -z "$changed" ]; then
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
+          elif ! echo "$changed" | grep -qE '^(src|test)/'; then
+            echo "::notice::diff touches no src/ or test/ (CI/docs/transcripts/approvals) -- GATE-02 N/A; reviewed by code-owner"
             echo "applicable=false" >> "$GITHUB_OUTPUT"
+          elif echo "$changed" | grep -qE '^docs/approvals/' && echo "$changed" | grep -qE '^(src|test)/'; then
+            # approval-record edit ALONGSIDE a module change: still gate the module,
+            # but do not fail on APPROVAL_PROTECTED alone (authorized record update).
+            echo "::notice::approval-record change present (docs/approvals/) -- APPROVAL_PROTECTED is an authorized human exception, not a gate failure"
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
           else
             echo "applicable=true" >> "$GITHUB_OUTPUT"
           fi
-      - name: Run permission checker
+      - name: Run permission checker (APPROVAL_PROTECTED is an authorized exception)
         if: steps.role.outputs.applicable == 'true'
         run: |
-          python tools/check_permissions.py --repo . \
+          set +e
+          out=$(python tools/check_permissions.py --repo . \
             --base "${{ github.event.pull_request.base.sha }}" \
             --head "${{ github.event.pull_request.head.sha }}" \
-            --role "${{ steps.role.outputs.role }}"
+            --role "${{ steps.role.outputs.role }}" 2>&1)
+          rc=$?
+          echo "$out"
+          if [ $rc -ne 0 ]; then
+            # B.1: an A-directed approval-record edit (docs/approvals/) raises
+            # APPROVAL_PROTECTED; that is a human-authorized exception, NOT a gate
+            # failure. Pass ONLY when every violation is APPROVAL_PROTECTED.
+            other=$(echo "$out" | grep -E '^[A-Z_]+:' | grep -v '^APPROVAL_PROTECTED:' || true)
+            if [ -z "$other" ]; then
+              echo "::notice::only APPROVAL_PROTECTED (authorized approval-record edit) -- pass; D code-owner review required"
+            else
+              echo "::error::permission violations other than APPROVAL_PROTECTED"; exit 1
+            fi
+          fi
 
   # ---------------------------------------------------------------------------
   # GATE-01 — approval-record checker. N/A (exit 0 + ::notice::) when
