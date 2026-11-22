@@ -18,7 +18,7 @@ aggregate_sha256 (tests, sorted by path):
   9e05922f5086097821e524c7d5bc1c5eadf5df9cd2239f642936cfd3db3d9726
 
 spec_bundle_sha256 (tests + trace-D1-check-requirements.md, sorted):
-  5622aeca443a86e949c816f30cf5b9e2e2f35228336da2f8e7e8f7edd4e6ee17
+  91e3239c195fa471ea0fc4976f58af9f06284b5f3f3d41fed5807beb948b90da
 
 # Deferred dependencies: #9 (registry) and #15 (schema) not yet on main.
 # Spec branch RED because the tool is absent. Implementation branch (#31) adds
