@@ -44,18 +44,31 @@ H = "a" * 64
 
 def _summary(**o) -> RunSummary:
     base = {
-        "run_id": "run-1", "variant": "B0", "target_snapshot_id": "snap-1",
-        "model_config_hash": H, "prompt_hash": H, "code_hash": "c" * 40,
-        "policy_hash": H, "manifest_hash": H,
+        "run_id": "run-1",
+        "variant": "B0",
+        "target_snapshot_id": "snap-1",
+        "model_config_hash": H,
+        "prompt_hash": H,
+        "code_hash": "c" * 40,
+        "policy_hash": H,
+        "manifest_hash": H,
     }
     base.update(o)
     return RunSummary(**base)
 
 
 def _rubric():
-    return {"token_cost": MetricDef(
-        metric="token_cost", operator="lte", threshold=2.0,
-        verification="pytest", source="budget", aggregation="median", unit="USD")}
+    return {
+        "token_cost": MetricDef(
+            metric="token_cost",
+            operator="lte",
+            threshold=2.0,
+            verification="pytest",
+            source="budget",
+            aggregation="median",
+            unit="USD",
+        )
+    }
 
 
 def _ledger_state(db) -> tuple[int, int, Decimal]:
@@ -94,12 +107,16 @@ def main() -> int:
         normal_ok = (
             cmp.completion_status is CompletionStatus.COMPLETE
             and verdict.status is VerdictStatus.APPROVED
-            and v1 == v0 + 1 and n1 == n0 + 1 and cash1 < cash0
+            and v1 == v0 + 1
+            and n1 == n0 + 1
+            and cash1 < cash0
         )
         ok &= normal_ok
-        print(f"normal      | compare={cmp.completion_status.name} | "
-              f"verdict={verdict.status.name} | version {v0}->{v1} | "
-              f"entries +{n1 - n0} | cash {cash0}->{cash1} | {'OK' if normal_ok else 'FAIL'}")
+        print(
+            f"normal      | compare={cmp.completion_status.name} | "
+            f"verdict={verdict.status.name} | version {v0}->{v1} | "
+            f"entries +{n1 - n0} | cash {cash0}->{cash1} | {'OK' if normal_ok else 'FAIL'}"
+        )
 
     # ---- declined: oversized order ----
     with tempfile.TemporaryDirectory() as tmp:
@@ -108,18 +125,27 @@ def main() -> int:
         portfolio = make_portfolio(cash=Decimal("10000.00"))
         evidence = make_evidence()
         # nominal 100 * 100 = 10000 >> 10% NAV(1000) -> oversized
-        proposal = make_proposal(policy=policy, evidence=evidence, portfolio=portfolio,
-                                 quantity=100, reference_price="100.00")
+        proposal = make_proposal(
+            policy=policy,
+            evidence=evidence,
+            portfolio=portfolio,
+            quantity=100,
+            reference_price="100.00",
+        )
         v0, n0, cash0 = _ledger_state_init(db, portfolio)
         verdict = run_gate(db, clock, policy, portfolio, proposal, evidence)
         v1, n1, cash1 = _ledger_state(db)
         declined_ok = (
             verdict.status in (VerdictStatus.REJECTED, VerdictStatus.BLOCKED)
-            and v1 == v0 and n1 == n0 and cash1 == cash0
+            and v1 == v0
+            and n1 == n0
+            and cash1 == cash0
         )
         ok &= declined_ok
-        print(f"declined    | verdict={verdict.status.name} | version {v0}->{v1} | "
-              f"entries +{n1 - n0} | cash {cash0}->{cash1} | {'OK' if declined_ok else 'FAIL'}")
+        print(
+            f"declined    | verdict={verdict.status.name} | version {v0}->{v1} | "
+            f"entries +{n1 - n0} | cash {cash0}->{cash1} | {'OK' if declined_ok else 'FAIL'}"
+        )
 
     # ---- declined-2: stale portfolio_version -> STALE_PORTFOLIO ----
     with tempfile.TemporaryDirectory() as tmp:
@@ -131,13 +157,17 @@ def main() -> int:
         v0, n0, cash0 = _ledger_state_init(db, portfolio)
         stale = replace(portfolio, version=portfolio.version + 99)
         verdict = run_gate(db, clock, policy, portfolio, proposal, evidence, stale=stale)
-        print(f"declined-2  | verdict={verdict.status.name} | "
-              f"{'OK' if verdict.status in (VerdictStatus.STALE_PORTFOLIO, VerdictStatus.REJECTED, VerdictStatus.BLOCKED) else 'INFO'}")
+        print(
+            f"declined-2  | verdict={verdict.status.name} | "
+            f"{'OK' if verdict.status in (VerdictStatus.STALE_PORTFOLIO, VerdictStatus.REJECTED, VerdictStatus.BLOCKED) else 'INFO'}"
+        )
 
     # ---- over-budget: documented gap (no budget module) ----
-    print("over-budget | N/A — budget module not implemented (FR-02 spec-only, #22); "
-          "contract expects BudgetDenied / MISSING_USAGE; documented gap, owner B, "
-          "pending FR-02 implementation")
+    print(
+        "over-budget | N/A — budget module not implemented (FR-02 spec-only, #22); "
+        "contract expects BudgetDenied / MISSING_USAGE; documented gap, owner B, "
+        "pending FR-02 implementation"
+    )
 
     return 0 if ok else 1
 
