@@ -21,7 +21,7 @@ Draft until #15 merges.
 | GATE-03 (schema gate) | This is the schema gate's executable core: `--registry`/`--schema` plus `--json` for CI; E wires it into the gate after merge. |
 | FR-01 / INV-02 (A's entries) | Validates A's own registry entries (fit criterion present, references resolve, invariants zero-tolerance). |
 
-## Test function → rule mapping (20 functions, 24 cases)
+## Test function → rule mapping (24 functions / 24 cases)
 
 | Test function | Rule |
 |---|---|
@@ -39,15 +39,22 @@ Draft until #15 merges.
 | `test_must_without_verification_fails` | Must bound to a verification |
 | `test_invariant_not_zero_tolerance_fails` | invariant zero tolerance |
 | `test_invariant_zero_tolerance_passes` | zero-tolerance invariant accepted |
+| `test_cli_exit_zero_on_pass` | CLI exit 0 when the registry passes |
+| `test_cli_exit_one_on_failure` | CLI exit 1 when the registry fails |
+| `test_cli_json_report` | `--json` emits an ok/errors report with a `registry` field |
+| `test_missing_registry_is_an_error` | a missing registry file is a structured error |
 | `test_id_prefix_type_mismatch_fails` | FR-01 + governance rejected by the checker (D #15 item 2) |
 | `test_id_prefix_type_match_passes` | matching id+type accepted |
 | `test_real_schema_rejects_bad_ids` | real schema rejects `XFR-01` / `FR-011` / `" FR-01"` (D #15 items 1,6) |
-| `test_real_schema_rejects_bad_owner_and_metric` | real schema rejects `Alice` / `A+Z` / `x y` (D #15 items 1,6) |
+| `test_real_schema_rejects_bad_owner_and_metric` | real schema rejects `Alice` / `A+Z` (owner) and `x y` (metric), each asserted as a `[schema]` error (D #15 items 1,6) |
 | `test_real_schema_rejects_id_type_mismatch` | real schema rejects FR-01 + governance (D #15 items 2,6) |
 | `test_real_schema_accepts_valid_entry` | real schema accepts a valid FR-01 entry |
 
 The 4 `test_real_schema_*` cases load `docs/req/req-schema.json` (from #15), not
 `MINIMAL_SCHEMA`, so the anchored patterns and id-type conditionals are covered.
+The newer `operator=exists` + boolean-threshold rule (added to #15) is covered by
+the #31 end-to-end run against the real schema (no case in this spec uses
+`exists`), recorded as follow-up coverage rather than a spec case here.
 
 ## Expected state per branch
 

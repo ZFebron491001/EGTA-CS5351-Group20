@@ -46,7 +46,7 @@ MINIMAL_SCHEMA = {
                 "properties": {
                     "id": {
                         "type": "string",
-                        "pattern": "(FR|NFR|INV|GOV|GATE|SUB)-[0-9]{2}",
+                        "pattern": "^(FR|NFR|INV|GOV|GATE|SUB)-[0-9]{2}$",
                     },
                     "priority": {"enum": ["Must", "Should", "Could", "Won't"]},
                     "fit_criterion": {
@@ -329,15 +329,18 @@ def test_real_schema_rejects_bad_ids(tmp_path):
 
 
 def test_real_schema_rejects_bad_owner_and_metric(tmp_path):
-    rc, report = _real_schema_report(tmp_path, [_req("FR-01", owner="Alice")])
-    assert rc == 1
-    assert any("[schema]" in e for e in report["errors"])
-    rc, report = _real_schema_report(tmp_path, [_req("FR-01", owner="A+Z")])
-    assert rc == 1
+    # Each bad value must be rejected by the SCHEMA layer specifically (a
+    # `[schema]` error), not merely by some other checker failure.
+    for bad_owner in ("Alice", "A+Z"):
+        rc, report = _real_schema_report(tmp_path, [_req("FR-01", owner=bad_owner)])
+        assert rc == 1, bad_owner
+        assert any("[schema]" in e for e in report["errors"]), bad_owner
+
     bad_metric = _req("FR-01")
     bad_metric["fit_criterion"]["metric"] = "x y"
     rc, report = _real_schema_report(tmp_path, [bad_metric])
-    assert rc == 1
+    assert rc == 1, "x y"
+    assert any("[schema]" in e for e in report["errors"]), "x y"
 
 
 def test_real_schema_rejects_id_type_mismatch(tmp_path):
