@@ -18,7 +18,7 @@ reason · affecting REQ/ADR/INV).
 - File: `transcripts/61069361-ZHOU-Jianmin.md`
 - OpenCode session: `ses_e095275cbffeefLAOdxMbkW2QF` — “Group assignment review for role E”
 - Exported via `opencode export <sessionID>` (real), rendered to Markdown; **1198 messages**.
-- sha256: `bdea9d4aa6ff4cef9abc920a07ccda22428e5c1d3c6a86b07b941eb29f737cdc`
+- sha256: `a38b9e72e54067f7450123f16271808e9a77f133859499fc4f23c79c7357ef87`
 
 ## E — phase index (which log session covers which work)
 | Log session_id | Phase | PR / requirement |
