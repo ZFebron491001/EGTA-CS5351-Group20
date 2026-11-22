@@ -6,10 +6,17 @@
 # criteria. Confirmed: FR-01, INV-02, NFR-10 (owner A); FR-02, NFR-01, INV-03 and
 # GOV-02 (owner B, 2026-11-22); FR-04, NFR-05, INV-01, INV-04, INV-06, INV-07 and
 # NFR-04 (owner D, 2026-11-22, PR #9 comment); GOV-03, GOV-09 (owner D, existence
-# criteria). NFR-07/NFR-09/GATE-01..04/GATE-06 are D-confirmed but stay draft until
-# the E co-owner confirms. NFR-02 (B+E) is B-confirmed but stays draft (E pending).
-# Remaining entries stay drafts until their owner replies.
-# This file is validated by docs/req/req-schema.json (on the schema PR, not on main yet).
+# criteria); NFR-07/NFR-09/GATE-01..04/GATE-06 (E+D, both sides confirmed 2026-11-22,
+# E via PR #9 comment 7079513759); GOV-01/SUB-01/GOV-05/GOV-08 (owner A / A+E, A
+# confirmed criteria 2026-11-22). NFR-02 (B+E) is B-confirmed but stays draft (E
+# pending). Remaining entries stay drafts until their owner replies.
+#
+# confirmed_by_owner means the ACCEPTANCE CRITERION is agreed by its owner(s); it is
+# NOT a claim that the deliverable currently meets it. Known gaps (tracked, not blocking
+# criterion confirmation): GOV-05 complete_transcripts is 5 required but only 1 member
+# transcript (E) exists on main (A/B/C/D pending); GOV-08 d8_artefact_present requires
+# src/ + test/offline/ + test/live/ but test/live/ does not exist yet.
+# This file is validated by docs/req/req-schema.json.
 
 schema_version: "1.0"
 requirements:
@@ -226,7 +233,7 @@ requirements:
       unit: percent
       verification: "CI and PR verification; the approver cannot be the implementer's agent"
     evidence: ["gate_status", "approval_missing", "ai_log_missing"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: NFR-08
@@ -262,7 +269,7 @@ requirements:
       unit: count
       verification: "event schema, completeness checks and failure tests"
     evidence: ["run_id", "risk_verdict", "proposal_hash", "event_gap"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: NFR-10
@@ -422,9 +429,9 @@ requirements:
       operator: "eq"
       threshold: 38
       unit: count
-      verification: "python tools/check_requirements.py"
+      verification: "docs/req/requirements.yaml validates against docs/req/req-schema.json (jsonschema, 0 errors, 38 entries). tools/check_requirements.py is still pending (#30/#31) and is not yet required for this criterion."
     evidence: ["docs/req/requirements.yaml"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "A"
 
   - id: GOV-02
@@ -496,7 +503,7 @@ requirements:
       unit: count
       verification: "confirm five transcripts named <student-id>-<student-name>.md exist with intervention annotations (plan does not name a concrete command)"
     evidence: ["session transcripts"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "A+E"
 
   - id: GOV-06
@@ -545,12 +552,12 @@ requirements:
     component: repo
     fit_criterion:
       metric: d8_artefact_present
-      operator: "gte"
-      threshold: null
+      operator: "exists"
+      threshold: true
       unit: null
       verification: "confirm src/ and test/offline, test/live exist with upstream provenance retained (plan does not name a concrete command)"
     evidence: ["src/", "test/offline/", "test/live/"]
-    status: pending_owner_supply
+    status: confirmed_by_owner
     supplied_by: "A+E"
 
   - id: GOV-09
@@ -586,7 +593,7 @@ requirements:
       unit: count
       verification: "six-intentional-failure-PR CI artifacts show the gate blocks; approval_missing and ai_log_missing are recorded"
     evidence: ["CI artifact", "gate_status", "approval_missing"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-02
@@ -604,7 +611,7 @@ requirements:
       unit: count
       verification: "intentional bad imports / unauthorized import PRs are rejected by CI; static checks run per commit"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-03
@@ -622,7 +629,7 @@ requirements:
       unit: count
       verification: "intentional bad-schema PR is blocked by CI; id uniqueness, resolvable references, every Must has test/component/monitor, all invariant thresholds zero-tolerance"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-04
@@ -640,7 +647,7 @@ requirements:
       unit: count
       verification: "intentional wrong-prompt PR fails the semantic gate; results bound to commit SHA"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-05
@@ -676,7 +683,7 @@ requirements:
       unit: count
       verification: "intentional missing-AI-log PR is blocked by CI; the log links changed files, session, tool/model and test evidence"
     evidence: ["CI artifact", "ai_log_missing"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: SUB-01
@@ -694,5 +701,5 @@ requirements:
       unit: count
       verification: "secret scan and ZIP inspection confirm no video, API key, environment secret or private credential; the video is delivered separately"
     evidence: ["cs5351-submission-v1.zip", "secret scan report", "10-minute video"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "A"
