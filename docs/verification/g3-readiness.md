@@ -1,6 +1,6 @@
 # G3 readiness — E side (gap sheet)
 
-Snapshot: `main` `dc59be1`, 2026-11-22T11:40Z.
+Snapshot: `main` `4d4b98d` (2026-11-22; re-synced).
 Status reflects live `gh api` + `git ls-tree` at this time. Owners use the A–E map.
 
 ## Gap table
@@ -11,7 +11,7 @@ Status reflects live `gh api` + `git ls-tree` at this time. Owners use the A–E
 | **D2** architecture blueprint (`docs/architecture/architecture-blueprint.md`) | B | **MISSING** | not delivered (no PR yet) |
 | **D3** AGENTS/permissions/human-only/.opencode/.agent | D (+E wire) | **PARTIAL** | #29 **merged** (AGENTS.md + `tools/check_permissions.py`/`check_approval.py` + permission-model present); `.opencode/`, `.agent/`, `.opencode/rules.md`, `.opencode/permissions.jsonc` still absent |
 | **D4** review-memo / debt-register / bug-diary / verification-constraints | E (+all) | **PARTIAL** | `debt-register.md` present; `docs/review-memo.md`, `docs/bug-diary.md`, `docs/code-governance/verification-constraints.md` missing |
-| **D5** five main sessions + annotations | A/B/C/D/E | **PARTIAL** | E via #28 (**accepted by A/D**): raw+full md+annotations; A/B/C/D sessions still PENDING; `transcripts/` not yet on main |
+| **D5** five main sessions + annotations | A/B/C/D/E | **PARTIAL** | **#28 merged (`b0333cb`) → `transcripts/` on main**; E raw+full md+annotations present (accepted by A/D); A/B/C/D sessions still PENDING |
 | **D6** `Report.md` | E assembly | **MISSING** | reserved for the separate report day |
 | **D7** CI / 门禁 / branch protection / CODEOWNERS | E | **DONE** | 7 required checks active (#11); reverse-proof #32/#33 evidence |
 | **D8** `src/` + `test/` per module | A–E | **PARTIAL** | contracts/E2/risk_gate/evidence present; **budget** missing (#22 spec-only); deliberation C not present |
