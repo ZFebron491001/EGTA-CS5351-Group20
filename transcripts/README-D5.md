@@ -32,5 +32,5 @@ Do not invent events; unknown time/subject → mark `unknown`.
 - **C: no AI-use log entry exists on `main` yet — C must create one.**
 
 ## Status
-- **E: READY** — `transcripts/61069361-ZHOU-Jianmin.md` (session `ses_e095275cbffeefLAOdxMbkW2QF`).
+- **E: PARTIAL** — complete raw (`61069361-ZHOU-Jianmin.raw.json`) + complete markdown (`61069361-ZHOU-Jianmin.md`) + annotations (`61069361-ZHOU-Jianmin-annotations.md`) present; marked PARTIAL pending D’s acceptance / final freeze. Session `ses_e095275cbffeefLAOdxMbkW2QF`.
 - **A / B / C / D: PENDING.**

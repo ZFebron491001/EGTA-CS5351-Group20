@@ -12,13 +12,16 @@ reason · affecting REQ/ADR/INV).
 | B (cosine-Y) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-B-fragment.yaml` (`ses_e0451298…`) | FR-02 budget, PR #22 | **PENDING (B to submit)** |
 | C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
 | D (ZFebron491001) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, PR #20 | **PENDING (D to submit)** |
-| **E (61069361 ZHOU Jianmin)** | **`transcripts/61069361-ZHOU-Jianmin.md`** | `ses_e095275cbffeefLAOdxMbkW2QF` (main); 6 log sessions (below) | FR-05 contracts + E2 + CI/gov: PR #3, #8, #11, #12, #18, #23 | **READY** |
+| **E (61069361 ZHOU Jianmin)** | `transcripts/61069361-ZHOU-Jianmin.md` (complete) + `…raw.json` (authoritative) + `…-annotations.md` | `ses_e095275cbffeefLAOdxMbkW2QF` (main); 6 log sessions (below) | FR-05 contracts + E2 + CI/gov: PR #3, #8, #11, #12, #18, #23 | **PARTIAL** (raw+annotations done; pending D acceptance/freeze) |
 
 ## E — main session
-- File: `transcripts/61069361-ZHOU-Jianmin.md`
+- File (complete Markdown): `transcripts/61069361-ZHOU-Jianmin.md`
+- File (authoritative raw JSON): `transcripts/61069361-ZHOU-Jianmin.raw.json`
+- Annotations: `transcripts/61069361-ZHOU-Jianmin-annotations.md`
 - OpenCode session: `ses_e095275cbffeefLAOdxMbkW2QF` — “Group assignment review for role E”
-- Exported via `opencode export <sessionID>` (real), rendered to Markdown; **1198 messages**.
-- sha256: `a38b9e72e54067f7450123f16271808e9a77f133859499fc4f23c79c7357ef87`
+- Exported via `opencode export <sessionID>` (real); complete (non-truncated) render, **1260 messages**.
+- sha256 (md): `533e63760cd17c74f6fa26a9c9ad0c6d9c77ddea1fe83453a109a0a6db66112a`
+- sha256 (raw.json, redacted): `007caf575072bf32736a0aed67e8c8222ba69e70b0706994a55a2f22793c980e`
 
 ## E — phase index (which log session covers which work)
 | Log session_id | Phase | PR / requirement |
@@ -31,6 +34,7 @@ reason · affecting REQ/ADR/INV).
 | `E-impl-FR05-contracts-v3` | FR-05 contracts v3 + E2 impl | #18 · GATE-01 |
 
 ## Notes
+- **This PR covers only the E part.** D5 requires all of A/B/C/D as well (they submit their own raw+annotations).
 - **PR #23** (DEBT-FR05-D4 close + budget CI suite + #10 supersede record) is still **open** (not yet merged); the budget suite there is N/A until FR-02 impl + record.
 - `transcripts/**` is **not** part of any `spec_bundle` (FR-05/E2) → no hash/bundle recompute.
 - Others' rows are **not** filled on their behalf; they submit their own file + log entry.
