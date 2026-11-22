@@ -7,7 +7,7 @@ base:     main
 # ONLY test_content_commit + aggregate + bundle. Do not push after approval.
 
 test_content_commit: a05e24611093449b7973e3ddbb9e69e511ec069e
-actual_cases: 223            # pytest -m spec test/offline/contracts --collect-only
+actual_cases: 222            # pytest -m spec test/offline/contracts --collect-only
 
 files (per-file SHA-256):
   e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/contracts/__init__.py

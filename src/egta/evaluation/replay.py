@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from egta.contracts.evaluation import ReplayState, replay_events
 from egta.contracts.events import RunEvent
+import json  # REVERSE-PROOF: unused import -> ruff F401
 
 
 def replay_run(
