@@ -519,3 +519,34 @@ sessions:
     cost: "unknown"
     session_path: "unknown"
     session_path_note: "To be exported before G3; recorded 'unknown' (not fabricated)."
+
+  - session_id: "E-e4-e2e-g1"
+    student: "E / 61069361 ZHOU Jianmin / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351/DeepSeek-V4-Flash"
+    pr: 34
+    branch: docs/E4-final-verification
+    time:
+      - "2026-11-22T11:39:21Z"   # E4 run (date in final-verification.md §0)
+      - "2026-11-22T19:39+08:00" # commit f9f3d21 (e2e_g1 driver + doc)
+    task_requirement_ids: [FR-05, NFR-08, NFR-09, GATE-06]
+    writable_path: ["docs/verification/", "tools/"]
+    generated_files:
+      - file: "docs/verification/final-verification.md"
+        change: "E4 final verification (§1-§6: 223/28/139/NA, CI 7 checks, e2e tables, reverse-proof refs)"
+      - file: "tools/e2e_g1.py"
+        change: "module-level G1 three-way driver (normal/declined/over-budget; temp SQLite, fixed clock, no network)"
+    commits: ["58ac2a6", "f9f3d21"]
+    human_intervention:
+      - "E4/e2e required and checked by D (final evidence freeze)."
+      - "Re-run/confirmation performed by A on review; GATE-06 gap flagged by A → this entry added."
+    verification_output:
+      - "contracts 223 passed (7-file isolated)"
+      - "E2 28 passed; risk_gate 139 passed"
+      - "upstream 1412 passed, 1 skipped, 1 deselected"
+      - "ruff clean; mypy src/egta 0 errors (20 files)"
+      - "e2e normal: COMPLETE/APPROVED, version 1->2, +1 entry, cash 10000.00->9899.90"
+      - "e2e declined(oversized): REJECTED, version unchanged, 0 entries, cash unchanged"
+      - "e2e over-budget: N/A (budget not implemented, FR-02 #22; expects BudgetDenied/MISSING_USAGE; owner B)"
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "E4 work ran AFTER the D5 main-session export (transcripts/61069361-ZHOU-Jianmin.md is the frozen D5 main session and does not include E4). A fresh export of this E4 session was not produced; recorded 'unknown' (not fabricated)."
