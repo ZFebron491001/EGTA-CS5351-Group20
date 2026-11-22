@@ -323,7 +323,15 @@ jobs:
           if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/deliberation/\|^test/offline/deliberation/\|^prompts/'; then role=build-c; fi
           if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/risk_gate/\|^test/offline/risk_gate/'; then role=build-d; fi
           if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/evaluation/\|^test/offline/evaluation/'; then role=build-e; fi
-          if [ -z "$role" ]; then role=verify; fi
+          # B.2 fail-closed: if the diff touches src/test but NO role label and NO
+          # module matched, do NOT default to verify -- mark unknown (fail later).
+          if [ -z "$role" ]; then
+            if echo "$changed" | grep -qE '^(src|test)/'; then
+              role="__UNKNOWN__"
+            else
+              role=verify   # non-src/test (docs/etc.) -> Option 2 N/A path below
+            fi
+          fi
           echo "role=$role" >> "$GITHUB_OUTPUT"
           echo "inferred role: $role"
           # Option 2: scope decision. GATE-02 only polices SRC/TEST module paths.
@@ -332,7 +340,11 @@ jobs:
           # code-owner review. B.1: an approval-record update (docs/approvals/) with
           # no module change is also N/A (AUTHORIZED human exception) -> D review.
           nonsrc=$(echo "$changed" | grep -vE '^(src|test)/' || true)
-          if [ -z "$changed" ]; then
+          if [ "$role" = "__UNKNOWN__" ]; then
+            echo "::error::could not infer a permission role for a src/test change (no role: label, no module match) -- fail closed"
+            echo "applicable=false" >> "$GITHUB_OUTPUT"
+            echo "unknown_role=true" >> "$GITHUB_OUTPUT"
+          elif [ -z "$changed" ]; then
             echo "applicable=true" >> "$GITHUB_OUTPUT"
           elif ! echo "$changed" | grep -qE '^(src|test)/'; then
             echo "::notice::diff touches no src/ or test/ (CI/docs/transcripts/approvals) -- GATE-02 N/A; reviewed by code-owner"
@@ -345,6 +357,10 @@ jobs:
           else
             echo "applicable=true" >> "$GITHUB_OUTPUT"
           fi
+      - name: Fail closed on unknown role
+        if: steps.role.outputs.unknown_role == 'true'
+        run: |
+          echo "::error::unknown permission role (src/test changed, unmapped) -- GATE-02 fails closed"; exit 1
       - name: Run permission checker (APPROVAL_PROTECTED is an authorized exception)
         if: steps.role.outputs.applicable == 'true'
         run: |
