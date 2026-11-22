@@ -1,15 +1,27 @@
 # Requirement registry (D1) — single source of truth for requirement facts.
 # prd.yaml references these ids rather than restating them.
-# Entries with status: draft_from_plan are faithful transcriptions of
-# /home/lenovo/refs/execution_plan_261111.md and are NOT yet confirmed by their
-# owners. A assembles the registry but does not define other members' acceptance
-# criteria. Confirmed: FR-01, INV-02, NFR-10 (owner A); FR-02, NFR-01, INV-03 and
-# GOV-02 (owner B, 2026-11-22); FR-04, NFR-05, INV-01, INV-04, INV-06, INV-07 and
-# NFR-04 (owner D, 2026-11-22, PR #9 comment); GOV-03, GOV-09 (owner D, existence
-# criteria). NFR-07/NFR-09/GATE-01..04/GATE-06 are D-confirmed but stay draft until
-# the E co-owner confirms. NFR-02 (B+E) is B-confirmed but stays draft (E pending).
-# Remaining entries stay drafts until their owner replies.
-# This file is validated by docs/req/req-schema.json (on the schema PR, not on main yet).
+# Entries transcribed as status: draft_from_plan are faithful transcriptions of
+# /home/lenovo/refs/execution_plan_261111.md that are NOT yet confirmed by their
+# owners (none remain as of the 2026-11-22 update below).
+# A assembles the registry but does not define other members' acceptance
+# criteria. ALL 38 entries are now confirmed_by_owner (last update: C's FR-03/INV-05/
+# NFR-03 and E's FR-05/NFR-06/NFR-08/GATE-05/GOV-06/NFR-02 + GOV-04/GOV-07 criteria,
+# 2026-11-22). Earlier confirmations: A (FR-01/INV-02/NFR-10/GOV-01/SUB-01/GOV-05/
+# GOV-08); B (FR-02/NFR-01/INV-03/GOV-02); D (FR-04/NFR-05/INV-01/INV-04/INV-06/
+# INV-07/NFR-04/GOV-03/GOV-09); E+D shared (NFR-07/NFR-09/GATE-01..04/GATE-06).
+# NFR-03 (C+E): criterion has three mandatory co-criteria (entailment >= 90%,
+# valid_evidence_reference_rate = 100%, support-rate drop <= 5pp); the single-metric
+# fit_criterion encodes (1) and the verification lists all three.
+# Unit normalisation: E supplied GOV-04 unit "files" and GOV-07 unit "gates"; both are
+# counts, stored as unit: count (the schema's unit enum has no free-text value) with
+# the item spelled out in verification.
+#
+# confirmed_by_owner means the ACCEPTANCE CRITERION is agreed by its owner(s); it is
+# NOT a claim that the deliverable currently meets it. Known gaps (tracked, not blocking
+# criterion confirmation): GOV-05 complete_transcripts is 5 required but only 1 member
+# transcript (E) exists on main (A/B/C/D pending); GOV-08 d8_artefact_present requires
+# src/ + test/offline/ + test/live/ but test/live/ does not exist yet.
+# This file is validated by docs/req/req-schema.json.
 
 schema_version: "1.0"
 requirements:
@@ -64,7 +76,7 @@ requirements:
       unit: count
       verification: "30 discussion fixtures all obey phase transitions; each round's proposal holds claim/evidence/counterargument fields; at most 2 challenge rounds, and a repeat round with no new evidence stops early; negative cases cover skipped phases, unsupported proposals and injected instructions"
     evidence: ["T-DEL-01", "EVAL-QUALITY-01", "phase_transition", "unsupported_claim_rate"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "C"
 
   - id: FR-04
@@ -100,7 +112,7 @@ requirements:
       unit: count
       verification: "30 fixed scenarios can generate paired reports; a missing comparison result is explicitly shown as incomplete and not counted as a win; replay verifies hash and schema and retains the same terminal state; negative cases cover tampered logs, mixed comparison across data snapshots and missing usage"
     evidence: ["T-EVAL-01", "T-EVAL-02", "incomplete_pairs", "event_gap", "manifest_mismatch"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: NFR-01
@@ -136,7 +148,7 @@ requirements:
       unit: percent
       verification: "paired experiment of 30 scenarios x 3 runs per config, reporting p50/p95 and distributions (latency median reduction >=20%)"
     evidence: ["p50/p95", "token", "latency"]
-    status: draft_from_plan  # B side confirmed 2026-11-22 (PR #9 comment); E (co-owner) has not confirmed this entry yet
+    status: confirmed_by_owner
     supplied_by: "B+E"
 
   - id: NFR-03
@@ -152,9 +164,9 @@ requirements:
       operator: "gte"
       threshold: 90
       unit: percent
-      verification: "pre-annotated set, two-person independent blind scoring plus dispute adjudication (valid citation id ratio 100%; support rate drop <=5 percentage points)"
+      verification: "Three acceptance criteria, all required: (1) evidence_entailment_rate >= 90% (core claims, human-scored on the pre-annotated set by two independent blind scorers with third-party adjudication); (2) valid_evidence_reference_rate = 100% (every claim references an existing evidence id); (3) support-rate drop vs baseline <= 5 percentage points. The single-metric fit_criterion encodes criterion (1); (2) and (3) are mandatory co-criteria and must not be dropped."
     evidence: ["EVAL-QUALITY-01", "unsupported_claim_rate"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "C+E"
 
   - id: NFR-04
@@ -208,7 +220,7 @@ requirements:
       unit: percent
       verification: "static architecture checks, contract tests, coverage (safety-rule branch coverage 100%; cross-module import violations 0; public contract pass rate 100%), per module owner"
     evidence: ["check_architecture", "contract tests", "coverage"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: NFR-07
@@ -226,7 +238,7 @@ requirements:
       unit: percent
       verification: "CI and PR verification; the approver cannot be the implementer's agent"
     evidence: ["gate_status", "approval_missing", "ai_log_missing"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: NFR-08
@@ -244,7 +256,7 @@ requirements:
       unit: count
       verification: "network blocking and manifest verification"
     evidence: ["manifest_mismatch", "event_gap"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: NFR-09
@@ -262,7 +274,7 @@ requirements:
       unit: count
       verification: "event schema, completeness checks and failure tests"
     evidence: ["run_id", "risk_verdict", "proposal_hash", "event_gap"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: NFR-10
@@ -370,7 +382,7 @@ requirements:
       unit: count
       verification: "injection and tool-privilege tests"
     evidence: ["malicious evidence set", "permission-denial"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "C"
 
   - id: INV-06
@@ -422,9 +434,9 @@ requirements:
       operator: "eq"
       threshold: 38
       unit: count
-      verification: "python tools/check_requirements.py"
+      verification: "docs/req/requirements.yaml validates against docs/req/req-schema.json (jsonschema, 0 errors, 38 entries). tools/check_requirements.py is still pending (#30/#31) and is not yet required for this criterion."
     evidence: ["docs/req/requirements.yaml"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "A"
 
   - id: GOV-02
@@ -472,13 +484,13 @@ requirements:
     owner: E
     component: governance
     fit_criterion:
-      metric: d4_artefact_present
-      operator: "gte"
-      threshold: null
-      unit: null
-      verification: "confirm review memos, debt register and bug diary exist (plan does not name a concrete command)"
+      metric: d4_artefact_count
+      operator: "eq"
+      threshold: 4
+      unit: count
+      verification: "all four D4 items present: review-memo, debt register, bug diary, verification-constraints (E-supplied criterion 2026-11-22)"
     evidence: ["docs/review-memo.md"]
-    status: pending_owner_supply
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: GOV-05
@@ -496,7 +508,7 @@ requirements:
       unit: count
       verification: "confirm five transcripts named <student-id>-<student-name>.md exist with intervention annotations (plan does not name a concrete command)"
     evidence: ["session transcripts"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "A+E"
 
   - id: GOV-06
@@ -514,7 +526,7 @@ requirements:
       unit: count
       verification: "confirm Report.md contains five 300-500 word reflections and contribution weights (plan does not name a concrete command)"
     evidence: ["Report.md"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: GOV-07
@@ -526,13 +538,13 @@ requirements:
     owner: E
     component: repo
     fit_criterion:
-      metric: d7_artefact_present
-      operator: "gte"
-      threshold: null
-      unit: null
-      verification: "confirm branch protection, CI blocking and README on GitHub (plan does not name a concrete command)"
+      metric: gates_blocking_verified
+      operator: "eq"
+      threshold: 6
+      unit: count
+      verification: "six gates of reverse-blocking verification (E-supplied criterion 2026-11-22)"
     evidence: ["GitHub repository", "CI workflow"]
-    status: pending_owner_supply
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: GOV-08
@@ -545,12 +557,12 @@ requirements:
     component: repo
     fit_criterion:
       metric: d8_artefact_present
-      operator: "gte"
-      threshold: null
+      operator: "exists"
+      threshold: true
       unit: null
       verification: "confirm src/ and test/offline, test/live exist with upstream provenance retained (plan does not name a concrete command)"
     evidence: ["src/", "test/offline/", "test/live/"]
-    status: pending_owner_supply
+    status: confirmed_by_owner
     supplied_by: "A+E"
 
   - id: GOV-09
@@ -586,7 +598,7 @@ requirements:
       unit: count
       verification: "six-intentional-failure-PR CI artifacts show the gate blocks; approval_missing and ai_log_missing are recorded"
     evidence: ["CI artifact", "gate_status", "approval_missing"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-02
@@ -604,7 +616,7 @@ requirements:
       unit: count
       verification: "intentional bad imports / unauthorized import PRs are rejected by CI; static checks run per commit"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-03
@@ -622,7 +634,7 @@ requirements:
       unit: count
       verification: "intentional bad-schema PR is blocked by CI; id uniqueness, resolvable references, every Must has test/component/monitor, all invariant thresholds zero-tolerance"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-04
@@ -640,7 +652,7 @@ requirements:
       unit: count
       verification: "intentional wrong-prompt PR fails the semantic gate; results bound to commit SHA"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: GATE-05
@@ -658,7 +670,7 @@ requirements:
       unit: count
       verification: "intentional regression-bug PR is blocked by CI; full offline suite must pass"
     evidence: ["CI artifact", "gate_status"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "E"
 
   - id: GATE-06
@@ -676,7 +688,7 @@ requirements:
       unit: count
       verification: "intentional missing-AI-log PR is blocked by CI; the log links changed files, session, tool/model and test evidence"
     evidence: ["CI artifact", "ai_log_missing"]
-    status: draft_from_plan  # D side confirmed 2026-11-22 (PR #9); E side still needed
+    status: confirmed_by_owner
     supplied_by: "E+D"
 
   - id: SUB-01
@@ -694,5 +706,5 @@ requirements:
       unit: count
       verification: "secret scan and ZIP inspection confirm no video, API key, environment secret or private credential; the video is delivered separately"
     evidence: ["cs5351-submission-v1.zip", "secret scan report", "10-minute video"]
-    status: draft_from_plan
+    status: confirmed_by_owner
     supplied_by: "A"

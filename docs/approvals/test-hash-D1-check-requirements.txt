@@ -1,0 +1,27 @@
+PR/task: D1 requirement-registry checker (test-first spec, test/spec ONLY — no tool)
+branch:   spec/D1-check-requirements
+base:     main
+
+# Approval binding: authoritative reviewed head = GitHub review commit_id (not
+# stored). Merge commit in external registry/CI/PR comment. This file records
+# ONLY test_content_commit + aggregate + bundle. Do not push after approval.
+
+test_content_commit: cd9c25867e4238eeacaa26b880c427c15dba9abe
+actual_cases: 24             # pytest test/offline/requirements --collect-only (tool absent => RED)
+expected_branch_state: RED   # tool absent: 24 failed, collection OK (per-test fail, not error)
+
+files (per-file SHA-256):
+  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/requirements/__init__.py
+  843c8203609bb9f049caa3dcac563406aac604ab1385e98d8a58efeb41b9279e  test/offline/requirements/test_check_requirements.py
+
+aggregate_sha256 (tests, sorted by path):
+  843c8203609bb9f049caa3dcac563406aac604ab1385e98d8a58efeb41b9279e
+
+spec_bundle_sha256 (tests + trace-D1-check-requirements.md, sorted):
+  674d40326eae3d1091a7fd0793a7e9bfe038a49ca0f99c55ad6ec2343fd7d64c
+
+# Deferred dependencies: #9 (registry) and #15 (schema) not yet on main.
+# Spec branch RED because the tool is absent. Implementation branch (#31) adds
+# the tool + CI + CODEOWNERS; its real-schema tests require #15's schema on the
+# base, so #31 rebases onto main after #15. GATE-03 is NOT claimed enabled here.
+approved_by: PENDING (GitHub review commit_id authoritative; independent reviewer required)
