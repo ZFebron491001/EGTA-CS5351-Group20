@@ -20,8 +20,8 @@ reason · affecting REQ/ADR/INV).
 - Annotations: `transcripts/61069361-ZHOU-Jianmin-annotations.md`
 - OpenCode session: `ses_e095275cbffeefLAOdxMbkW2QF` — “Group assignment review for role E”
 - Exported via `opencode export <sessionID>` (real); complete (non-truncated) render, **1260 messages**.
-- sha256 (md): `533e63760cd17c74f6fa26a9c9ad0c6d9c77ddea1fe83453a109a0a6db66112a`
-- sha256 (raw.json, redacted): `007caf575072bf32736a0aed67e8c8222ba69e70b0706994a55a2f22793c980e`
+- `export_sha256` (= **Markdown** transcript sha): `533e63760cd17c74f6fa26a9c9ad0c6d9c77ddea1fe83453a109a0a6db66112a`
+- `raw_export_sha256` (= **raw JSON** export sha, redacted): `007caf575072bf32736a0aed67e8c8222ba69e70b0706994a55a2f22793c980e`
 
 ## E — phase index (which log session covers which work)
 | Log session_id | Phase | PR / requirement |
@@ -34,7 +34,7 @@ reason · affecting REQ/ADR/INV).
 | `E-impl-FR05-contracts-v3` | FR-05 contracts v3 + E2 impl | #18 · GATE-01 |
 
 ## Notes
-- **This PR covers only the E part.** D5 requires all of A/B/C/D as well (they submit their own raw+annotations).
+- **This PR covers only the E part; D5 is NOT complete until A/B/C/D submit.**
 - **PR #23** (DEBT-FR05-D4 close + budget CI suite + #10 supersede record) is still **open** (not yet merged); the budget suite there is N/A until FR-02 impl + record.
 - `transcripts/**` is **not** part of any `spec_bundle` (FR-05/E2) → no hash/bundle recompute.
 - Others' rows are **not** filled on their behalf; they submit their own file + log entry.

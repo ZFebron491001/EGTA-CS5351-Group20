@@ -1,7 +1,7 @@
 # D5 transcript submission — instructions for each member
 
 Each member submits **their own** one main OpenCode session + their AI-use log
-entry. E is ready; **A / B / C / D are PENDING** (see `INDEX.md`).
+entry. **E: PARTIAL** (raw + annotations done; pending D acceptance); **A / B / C / D are PENDING** (see `INDEX.md`). **This covers only the E part — D5 is NOT complete until A/B/C/D submit.**
 
 ## What each member must provide
 1. **`transcripts/<student-id>-<name>.md`** — your **main** OpenCode session,

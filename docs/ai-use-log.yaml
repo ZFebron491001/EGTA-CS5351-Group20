@@ -202,7 +202,7 @@ sessions:
 # --- E's PR #3 sessions, merged verbatim from main (2fb2813) ---
   - session_id: "E-2026-11-20-spec-FR05-batchA"
     student: "E / jianmin2004"
-    agent_tool_model: "OpenCode / opencode CLI 1.18.34 / CS5351-DeepSeek-V4-Flash"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351-DeepSeek-V4-Flash"
     test_approval: "docs/approvals/test-hash-FR-05-contracts.txt (@ZFebron491001 GATE-01, PR #3)"
     time:
       - "2026-11-20T18:29:03+08:00"   # commit 92a17e2 (actual)
@@ -259,7 +259,7 @@ sessions:
     final_binding: "PR #3 @ 2fb2813"
   - session_id: "E-2026-11-20-spec-FR05-batchB"
     student: "E / jianmin2004"
-    agent_tool_model: "OpenCode / opencode CLI 1.18.34 / CS5351-DeepSeek-V4-Flash"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351-DeepSeek-V4-Flash"
     test_approval: "docs/approvals/test-hash-FR-05-contracts.txt (@ZFebron491001 GATE-01, PR #3)"
     time:
       - "2026-11-20T23:22:54+08:00"   # commit 602f6a3 (Batch B content commit, actual commit time)
@@ -319,7 +319,7 @@ sessions:
     final_binding: "PR #3 @ 2fb2813"
   - session_id: "E-2026-11-21-spec-FR05-final"
     student: "E / jianmin2004"
-    agent_tool_model: "OpenCode / opencode CLI 1.18.34 / CS5351-DeepSeek-V4-Flash"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351-DeepSeek-V4-Flash"
     test_approval: "docs/approvals/test-hash-FR-05-contracts.txt (@ZFebron491001 GATE-01, PR #3)"
     time:
       - "2026-11-21T11:43:29+08:00"   # commit 0c6b60a (final-round content commit, actual)
@@ -363,7 +363,7 @@ sessions:
     final_binding: "PR #3 @ 2fb2813"
   - session_id: "E-2026-11-21-spec-FR05-converge"
     student: "E / jianmin2004"
-    agent_tool_model: "OpenCode / opencode CLI 1.18.34 / CS5351-DeepSeek-V4-Flash"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351-DeepSeek-V4-Flash"
     test_approval: "docs/approvals/test-hash-FR-05-contracts.txt (@ZFebron491001 GATE-01, PR #12)"
     time:
       - "2026-11-21T12:55:00+08:00"   # convergence round (this session)
@@ -403,7 +403,7 @@ sessions:
     final_binding: "PR #12 @ 66f17b9"
   - session_id: "E-2026-11-21-spec-E2-evaluation"
     student: "E / jianmin2004"
-    agent_tool_model: "OpenCode / opencode CLI 1.18.34 / CS5351-DeepSeek-V4-Flash"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351-DeepSeek-V4-Flash"
     test_approval: "docs/approvals/test-hash-E2-evaluation.txt (@ZFebron491001 GATE-01, PR #8)"
     time:
       - "2026-11-21T17:55:00+08:00"
@@ -492,7 +492,7 @@ sessions:
 
   - session_id: "E-impl-FR05-contracts-v3"
     student: "E / jianmin2004"
-    agent_tool_model: "OpenCode / opencode CLI 1.18.34 / CS5351-DeepSeek-V4-Flash"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351-DeepSeek-V4-Flash"
     test_approval: "docs/approvals/test-hash-FR-05-contracts.txt + test-hash-E2-evaluation.txt (@ZFebron491001 GATE-01, PR #18)"
     pr: 18
     branch: impl/FR-05-contracts-v3
