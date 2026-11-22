@@ -6,20 +6,23 @@ base:     main
 # stored). Merge commit in external registry/CI/PR comment. This file records
 # ONLY test_content_commit + aggregate + bundle. Do not push after approval.
 
-test_content_commit: e79bf4c57cad4d3b29135c95bb15ba86bbefa1c3
-actual_cases: 18             # pytest test/offline/requirements --collect-only (tool absent => RED)
-expected_branch_state: RED   # tool absent: 18 failed, collection OK (per-test fail, not error)
+test_content_commit: 71735063f2f2cbf7aab258e5e62000913cb559dd
+actual_cases: 24             # pytest test/offline/requirements --collect-only (tool absent => RED)
+expected_branch_state: RED   # tool absent: 24 failed, collection OK (per-test fail, not error)
 
 files (per-file SHA-256):
   e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/requirements/__init__.py
-  28751d3571421af1e1b7f28bc3693812dd194f78efbda777fe83015415ba928a  test/offline/requirements/test_check_requirements.py
+  9e05922f5086097821e524c7d5bc1c5eadf5df9cd2239f642936cfd3db3d9726  test/offline/requirements/test_check_requirements.py
 
 aggregate_sha256 (tests, sorted by path):
-  28751d3571421af1e1b7f28bc3693812dd194f78efbda777fe83015415ba928a
+  9e05922f5086097821e524c7d5bc1c5eadf5df9cd2239f642936cfd3db3d9726
 
 spec_bundle_sha256 (tests + trace-D1-check-requirements.md, sorted):
-  819076ddb6b8809faaf58e88eb7864c7e56578b3d3b98277a13575affcf02644
+  5622aeca443a86e949c816f30cf5b9e2e2f35228336da2f8e7e8f7edd4e6ee17
 
-# Deferred dependencies: #9 (registry) and #15 (schema) not yet on main; impl PR
-# wires CI + CODEOWNERS. GATE-03 is NOT claimed enabled by this spec.
+# Deferred dependencies: #9 (registry) and #15 (schema) not yet on main.
+# Spec branch RED because the tool is absent. Implementation branch (#31) adds
+# the tool + CI + CODEOWNERS; its real-schema tests require #15's schema on the
+# base, so #31 rebases onto main after #15 merges. GATE-03 is NOT claimed enabled
+# by this spec.
 approved_by: PENDING (GitHub review commit_id authoritative; independent reviewer required)
