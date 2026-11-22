@@ -35,6 +35,8 @@ dev = [
     "ruff>=0.16",
     "pytest>=8.0",
     "pytest-subtests>=0.13",
+    # D1 registry checker (tools/check_requirements.py) and GATE-03 schema check.
+    "jsonschema>=4.20",
 ]
 # Amazon Bedrock support (AWS SigV4 auth + boto3). Optional so the core install
 # stays lean: pip install "tradingagents[bedrock]".
