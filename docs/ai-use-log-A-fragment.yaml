@@ -182,3 +182,32 @@ sessions:
     cost: "unknown"
     notes:
       - "Completes the back-fill of all transcribable owner confirmations on #9."
+
+  - session_id: "A-2026-11-22-D1-registry-CE-finalconfirm"
+    student: "A / Du Yuxiang / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    pr: 39
+    branch: docs/req-registry-update-2
+    time:
+      - "2026-11-22T23:00+08:00"   # transcribe C + E final confirmations
+    task_requirement_ids: [D1, FR-03, INV-05, NFR-03, FR-05, NFR-06, NFR-08, GATE-05, GOV-06, NFR-02, GOV-04, GOV-07]
+    writable_path: ["docs/req/requirements.yaml", "docs/ai-use-log-A-fragment.yaml"]
+    generated_files:
+      - file: "docs/req/requirements.yaml"
+        change: "C confirmed FR-03/INV-05/NFR-03; E confirmed FR-05/NFR-06/NFR-08/GATE-05/GOV-06/NFR-02; GOV-04/GOV-07 criteria applied from E. NFR-03 criterion made explicit as three mandatory co-criteria. Registry now 38/38 confirmed_by_owner."
+    human_intervention:
+      - type: redirect
+        who: "C (wawfggqq)"
+        what: "FR-03/INV-05/NFR-03 confirmed; noted NFR-03 full criterion must include valid_evidence_reference_rate = 100% and support-rate drop <= 5pp to avoid a missing acceptance item."
+      - type: redirect
+        who: "E (jianmin2004)"
+        what: "Confirmed FR-05/NFR-06/NFR-08/GATE-05/GOV-06/NFR-02 and supplied GOV-04/GOV-07 criteria (units files/gates)."
+    verification_output:
+      - command: "python -c 'import yaml,json,jsonschema; jsonschema.validate(yaml.safe_load(open(\"docs/req/requirements.yaml\")), json.load(open(\"docs/req/req-schema.json\")))'"
+        result: "0 schema errors; 38 entries; 38 confirmed_by_owner"
+    transcription_notes:
+      - "A transcribed only owners' confirmed criteria; no acceptance criterion invented. Single-metric fit_criterion cannot hold NFR-03's three sub-metrics, so (1) is the metric and (2)/(3) are listed as mandatory co-criteria in verification."
+      - "E's units files/gates normalised to unit: count (schema enum has no free-text unit); the item count is stated in verification."
+    cost: "unknown"
+    notes:
+      - "Docs-only: requirements.yaml + this fragment."
