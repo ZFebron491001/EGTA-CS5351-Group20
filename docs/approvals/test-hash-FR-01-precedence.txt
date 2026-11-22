@@ -7,25 +7,30 @@ base:     main
 # approved_by is filled by D (approver) after review; the author must not fill it.
 
 # Scope: the 4 additive FR-01 precedence cases that the frozen pack spec
-# test-hash-FR-01-pack.txt (actual_cases: 33) does NOT cover. Together they pin
-# the classification order integrity -> staleness -> time -> dedupe so that:
+# test-hash-FR-01-pack.txt (actual_cases: 33) does NOT cover. They pin the
+# classification order integrity -> staleness -> time -> dedupe so that:
 #   - a tampered cache item is INTEGRITY_VIOLATION (not STALE),
-#   - a well-formed cache item is STALE_DATA (E-26 unchanged),
-#   - a future-dated cache item is STALE_DATA (cache staged before time filter),
-#   - a future-dated non-cache item is FUTURE_DATA.
+#   - a well-formed cache item is STALE_DATA (E-26 rule, unchanged),
+#   - a future-dated cache item is STALE_DATA (cache staged before the time filter),
+#   - a future-dated non-cache item is FUTURE_DATA (INV-02 time filter).
 # The STALE-vs-FUTURE_DATA choice for cache is a contract-level decision recorded
-# in docs/req/trace-FR-01-evidence-impl.md (classification precedence), not merely
-# whatever the implementation happens to do.
+# in this PR's trace (docs/req/trace-FR-01-pack-precedence.md, "Precedence and
+# INV-02 reconciliation"); it rests on the E-26 cache rule already frozen in
+# docs/req/trace-FR-01-pack.md, and is asserted explicitly by these tests — not
+# whatever the implementation happens to do. No implementation-only document is
+# referenced here.
 
+test_content_commit: 777f43e1d499d2863afa38b1c90cef406ca0cfe5   # rebased onto main 0431ac7; test content unchanged (hash 68be998b)
 actual_cases: 4
 # 4 functions / 4 cases in test/offline/evidence/test_pack_precedence.py, selected by -m spec.
-
-test_content_commit:     777f43e   # rebased onto main 0431ac7; test content unchanged (hash 68be998b)
 
 files (per-file SHA-256):
   68be998b0c289463575631d234d472a96e093e55784fbe36ebe46d1268c15a2e  test/offline/evidence/test_pack_precedence.py
 
-aggregate_sha256 (sha256sum of per-file "hash  path" lines, sorted by path):
+# aggregate_sha256 = SHA-256 of the sorted per-file "hash  path" lines below
+# (single line here), matching the FR-01-pack/FR-04 record convention; it is not
+# the file hash.
+aggregate_sha256 (sha256sum of per-file lines, sorted by path):
   04fdffcbff274d06abbb7289ff006ffe3c817a7bf828871ef9bd8762e66bc9a1
 
 reviewed_pr_head:        PENDING   # filled by D at review on this head
