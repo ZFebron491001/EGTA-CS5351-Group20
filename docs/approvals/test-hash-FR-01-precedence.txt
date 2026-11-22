@@ -20,6 +20,8 @@ base:     main
 actual_cases: 4
 # 4 functions / 4 cases in test/offline/evidence/test_pack_precedence.py, selected by -m spec.
 
+test_content_commit:     777f43e   # rebased onto main 0431ac7; test content unchanged (hash 68be998b)
+
 files (per-file SHA-256):
   68be998b0c289463575631d234d472a96e093e55784fbe36ebe46d1268c15a2e  test/offline/evidence/test_pack_precedence.py
 

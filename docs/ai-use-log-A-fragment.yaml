@@ -224,7 +224,16 @@ sessions:
       - "docs/req/"
       - "docs/ai-use-log-A-fragment.yaml"
     branch: "test/FR-01-pack-precedence"
-    base: "main"
+    base: "main (0431ac7 after rebase)"
+    pr: 44
+    commits: ["777f43e"]   # rebased head; original 4e75ceb superseded by rebase onto main 0431ac7
+    test_approval:
+      record_path: "docs/approvals/test-hash-FR-01-precedence.txt"
+      test_content_commit: "777f43e"
+      actual_cases: 4
+      reviewed_pr_head: "PENDING (D fills at review)"
+      approved_by: "PENDING (D fills at review)"
+    session_path: "unknown (raw opencode session not exported yet; recorded 'unknown', not fabricated)"
     generated_files:
       - file: "test/offline/evidence/test_pack_precedence.py"
         note: "4 additive FR-01 classification-precedence cases (integrity->stale->time->dedupe). RED by design (egta.evidence.pack absent)."
