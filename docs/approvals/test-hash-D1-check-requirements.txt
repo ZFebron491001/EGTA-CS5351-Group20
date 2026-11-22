@@ -6,23 +6,22 @@ base:     main
 # stored). Merge commit in external registry/CI/PR comment. This file records
 # ONLY test_content_commit + aggregate + bundle. Do not push after approval.
 
-test_content_commit: 71735063f2f2cbf7aab258e5e62000913cb559dd
+test_content_commit: cd9c25867e4238eeacaa26b880c427c15dba9abe
 actual_cases: 24             # pytest test/offline/requirements --collect-only (tool absent => RED)
 expected_branch_state: RED   # tool absent: 24 failed, collection OK (per-test fail, not error)
 
 files (per-file SHA-256):
   e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/offline/requirements/__init__.py
-  9e05922f5086097821e524c7d5bc1c5eadf5df9cd2239f642936cfd3db3d9726  test/offline/requirements/test_check_requirements.py
+  843c8203609bb9f049caa3dcac563406aac604ab1385e98d8a58efeb41b9279e  test/offline/requirements/test_check_requirements.py
 
 aggregate_sha256 (tests, sorted by path):
-  9e05922f5086097821e524c7d5bc1c5eadf5df9cd2239f642936cfd3db3d9726
+  843c8203609bb9f049caa3dcac563406aac604ab1385e98d8a58efeb41b9279e
 
 spec_bundle_sha256 (tests + trace-D1-check-requirements.md, sorted):
-  91e3239c195fa471ea0fc4976f58af9f06284b5f3f3d41fed5807beb948b90da
+  674d40326eae3d1091a7fd0793a7e9bfe038a49ca0f99c55ad6ec2343fd7d64c
 
 # Deferred dependencies: #9 (registry) and #15 (schema) not yet on main.
 # Spec branch RED because the tool is absent. Implementation branch (#31) adds
 # the tool + CI + CODEOWNERS; its real-schema tests require #15's schema on the
-# base, so #31 rebases onto main after #15 merges. GATE-03 is NOT claimed enabled
-# by this spec.
+# base, so #31 rebases onto main after #15. GATE-03 is NOT claimed enabled here.
 approved_by: PENDING (GitHub review commit_id authoritative; independent reviewer required)

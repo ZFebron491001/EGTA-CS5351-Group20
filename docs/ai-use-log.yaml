@@ -532,7 +532,7 @@ sessions:
     task_requirement_ids: [NFR-10, GATE-03, GATE-06]
     writable_path: ["tools/check_requirements.py", "test/offline/requirements/", "pyproject.toml", ".github/workflows/ci.yml", ".github/CODEOWNERS", "docs/req/", "docs/approvals/", "docs/ai-use-log.yaml"]
     generated_files:
-      - "test/offline/requirements/test_check_requirements.py (20 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression; spec branch RED because tool + schema absent)"
+      - "test/offline/requirements/test_check_requirements.py (24 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression; spec branch RED because tool + schema absent)"
       - "tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage) — impl PR #31"
       - "docs/req/trace-D1-check-requirements.md"
       - "docs/approvals/test-hash-D1-check-requirements.txt (actual_cases 24)"
@@ -550,3 +550,19 @@ sessions:
       - "CI offline gate: requirements: collect-only=24 expected=24 -> OK"
       - "ruff clean; upstream pytest -> 1412 passed, 1 skipped"
     cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "Raw opencode session not yet exported; recorded as unknown (not fabricated) before G3."
+    test_approval:
+      spec_pr: 30
+      record: "docs/approvals/test-hash-D1-check-requirements.txt"
+      test_content_commit: "cd9c25867e4238eeacaa26b880c427c15dba9abe"
+      actual_cases: 24
+    commits:
+      - "spec #30 test commit cd9c258 (24 cases; id-type + real-schema)"
+      - "impl #31 tool/CI/CODEOWNERS commit on feat/D1-check-requirements"
+    placement_note: >-
+      Recorded in the shared main log (not the A fragment) because D's reviews of
+      #27 and #25 explicitly required a docs/ai-use-log.yaml session entry for
+      GATE-06. #9 also carries an A fragment for registry/PRD sessions; this
+      checker session lives here to satisfy that review requirement. E owns the
+      final assembly and may fold fragments into this file at submission time.
