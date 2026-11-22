@@ -7,7 +7,7 @@ Status reflects live `gh api` + `git ls-tree` at this time. Owners use the A–E
 
 | Artifact | Owner | Status | Blocker |
 |---|---|---|---|
-| **D1** requirement registry (`docs/req/prd.yaml`, `requirements.yaml`, `req-schema.json`) + `tools/check_requirements.py` | A | **PARTIAL** | `requirements.yaml` **merged** (#9); `prd.yaml`/`req-schema.json` (#15) and `check_requirements.py` (#30 spec/#31 impl) still **open** |
+| **D1** requirement registry (`docs/req/prd.yaml`, `requirements.yaml`, `req-schema.json`) + `tools/check_requirements.py` | A | **PARTIAL** | `requirements.yaml` **merged** (#9); `prd.yaml`/`req-schema.json` **merged** (#15, already in `main`); `check_requirements.py` (#30 spec/#31 impl) still **open** |
 | **D2** architecture blueprint (`docs/architecture/architecture-blueprint.md`) | B | **MISSING** | not delivered (no PR yet) |
 | **D3** AGENTS/permissions/human-only/.opencode/.agent | D (+E wire) | **PARTIAL** | #29 **merged** (AGENTS.md + `tools/check_permissions.py`/`check_approval.py` + permission-model present); `.opencode/`, `.agent/`, `.opencode/rules.md`, `.opencode/permissions.jsonc` still absent |
 | **D4** review-memo / debt-register / bug-diary / verification-constraints | E (+all) | **PARTIAL** | `debt-register.md` present; `docs/review-memo.md`, `docs/bug-diary.md`, `docs/code-governance/verification-constraints.md` missing |
@@ -24,7 +24,7 @@ Status reflects live `gh api` + `git ls-tree` at this time. Owners use the A–E
 ## E can close now vs blocked on others
 - **E can close now:** E4 verification evidence (#34), offline gate + reverse-proof
   (#32/#33), E's D5 part (#28), debt-register + E AI-use entries, `tools/e2e_g1.py`.
-- **Blocked on A:** D1 `prd.yaml`/`req-schema.json` (#15) + `check_requirements.py` (#30/#31) → unblocks the **schema gate**. (`requirements.yaml` is now merged via #9, so `check_approval --registry` has its file.)
+- **Blocked on A:** `check_requirements.py` (#30 spec/#31 impl) → unblocks the **schema gate**. (`requirements.yaml` merged via #9; `prd.yaml`/`req-schema.json` merged via #15 — both already in `main`, so `check_approval --registry` has its file and the schema files exist.)
 - **Blocked on B:** D2 blueprint; FR-02 budget implementation (#22 spec) → budget
   suite goes live; FR-01 pack (#25).
 - **Blocked on C:** D9 `Prompt.md`; D5 C session; semantic runner for GATE-04.
