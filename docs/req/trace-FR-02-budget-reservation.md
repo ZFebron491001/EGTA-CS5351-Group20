@@ -108,7 +108,15 @@ currently assume; each is a single choice rather than a guess-with-fallbacks.
 - **Unknown usage:** `settle(rid, actual_usage_or_unknown=None)` — `None` = unknown.
   Candidate; alternatives are a dedicated enum member or a separate
   `settle_unknown(rid)`.
-- **Known usage:** `settle(rid, actual_usage_or_unknown={"tokens": N})`. Candidate.
+- **Known usage:** `settle(rid, actual_usage_or_unknown={...})`. Candidate. NFR-01 is
+  a TRIPLE constraint (tokens / cost / calls), so when all three actual amounts are
+  known, pass the full triplet:
+  `settle(rid, {"tokens": N, "cost_usd": D, "calls": C})`. A PARTIAL dict settles only
+  the axes it names; every unnamed axis stays on its original reservation (treated as
+  not yet known, so retained — never silently reset). Example:
+  `settle(rid, {"tokens": 100})` settles only the token axis (releasing 900 of the
+  1000 held there), while the cost and calls reservations remain held. Money keeps the
+  current string decimal form (e.g. `"0.01"`, consistent with `max_cost_usd`).
 - **Reservation id:** `Reservation.reservation_id`. Candidate.
 
 ## Not covered here (future)
