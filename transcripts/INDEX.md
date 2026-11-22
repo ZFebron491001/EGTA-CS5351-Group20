@@ -1,0 +1,36 @@
+# D5 — Session transcript index
+
+One **main** OpenCode session per member (raw export), plus an index. Secondary
+sessions go under `transcripts/appendix/` (not a substitute for the main session).
+Annotation format for human interventions: **execution_plan §10.1**
+(`HUMAN-INTERVENTION` · time · type ∈ {interrupt, redirect, approve, reject} ·
+reason · affecting REQ/ADR/INV).
+
+| Member | Main transcript file | AI-use log session_id | Covers PR / REQ | Status |
+|---|---|---|---|---|
+| A (yuxiangdu39) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log.yaml` (A entries) | FR-01 / INV-02, PR #5 | **PENDING (A to submit)** |
+| B (cosine-Y) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-B-fragment.yaml` (`ses_e0451298…`) | FR-02 budget, PR #22 | **PENDING (B to submit)** |
+| C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
+| D (ZFebron491001) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, PR #20 | **PENDING (D to submit)** |
+| **E (61069361 ZHOU Jianmin)** | **`transcripts/61069361-ZHOU-Jianmin.md`** | `ses_e095275cbffeefLAOdxMbkW2QF` (main); 6 log sessions (below) | FR-05 contracts + E2 + CI/gov: PR #3, #8, #11, #12, #18, #23 | **READY** |
+
+## E — main session
+- File: `transcripts/61069361-ZHOU-Jianmin.md`
+- OpenCode session: `ses_e095275cbffeefLAOdxMbkW2QF` — “Group assignment review for role E”
+- Exported via `opencode export <sessionID>` (real), rendered to Markdown; **1198 messages**.
+- sha256: `bdea9d4aa6ff4cef9abc920a07ccda22428e5c1d3c6a86b07b941eb29f737cdc`
+
+## E — phase index (which log session covers which work)
+| Log session_id | Phase | PR / requirement |
+|---|---|---|
+| `E-2026-11-20-spec-FR05-batchA` | FR-05 spec (Batch A) | #3 · FR-05, NFR-08, NFR-09 |
+| `E-2026-11-20-spec-FR05-batchB` | FR-05 spec (Batch B) | #3 |
+| `E-2026-11-21-spec-FR05-final` | FR-05 convergence | #3 |
+| `E-2026-11-21-spec-FR05-converge` | FR-05 threshold contract | #12 |
+| `E-2026-11-21-spec-E2-evaluation` | E2 spec | #8 · NFR-08 |
+| `E-impl-FR05-contracts-v3` | FR-05 contracts v3 + E2 impl | #18 · GATE-01 |
+
+## Notes
+- `transcripts/**` is **not** part of any `spec_bundle` (FR-05/E2) → no hash/bundle recompute.
+- Others' rows are **not** filled on their behalf; they submit their own file + log entry.
+- C currently has **no** AI-use log entry on `main` — C must create one.
