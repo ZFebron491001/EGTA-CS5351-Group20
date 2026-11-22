@@ -9,7 +9,7 @@ reason · affecting REQ/ADR/INV).
 | Member | Main transcript file | AI-use log session_id | Covers PR / REQ | Status |
 |---|---|---|---|---|
 | A (yuxiangdu39) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log.yaml` (A entries) | FR-01 pack #25 / INV-02 spec #4 | **PENDING (A to submit)** |
-| B (cosine-Y) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-B-fragment.yaml` (`ses_e0451298…`) | FR-02 budget, PR #22 | **PENDING (B to submit)** |
+| B (cosine-Y) | `transcripts/61076721-YuXiyan.md` (+ `…raw.json` authoritative, `…-annotations.md`) | `ses_e0451298bffeYlnqHo00GSewD2` in `docs/ai-use-log.yaml` | FR-01/FR-02: #5 (merged), #21 (merged), #22 (open) | **READY** (snapshot 2026-11-22 21:04 +08) |
 | C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
 | D (ZFebron491001) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, PR #20 | **PENDING (D to submit)** |
 | **E (61069361 ZHOU Jianmin)** | `transcripts/61069361-ZHOU-Jianmin.md` (complete) + `…raw.json` (authoritative) + `…-annotations.md` | `ses_e095275cbffeefLAOdxMbkW2QF` (main); 6 log sessions (below) | FR-05 contracts + E2 + CI/gov: PR #3, #8, #11, #12, #18, #23 | **PARTIAL** (raw+annotations done; pending D acceptance/freeze) |
