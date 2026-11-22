@@ -326,7 +326,18 @@ jobs:
           if [ -z "$role" ]; then role=verify; fi
           echo "role=$role" >> "$GITHUB_OUTPUT"
           echo "inferred role: $role"
+          # Option 2: scope decision. GATE-02 only polices SRC/TEST module paths.
+          # A diff touching NO src/ and NO test/ (CI-only .github/, docs-only,
+          # transcripts/, docs/report/) is N/A here and is reviewed out by D's
+          # code-owner review instead.
+          if [ -n "$changed" ] && ! echo "$changed" | grep -qE '^(src|test)/'; then
+            echo "::notice::diff touches no src/ or test/ (CI/docs/transcripts-only) -- GATE-02 N/A; reviewed by code-owner"
+            echo "applicable=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "applicable=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Run permission checker
+        if: steps.role.outputs.applicable == 'true'
         run: |
           python tools/check_permissions.py --repo . \
             --base "${{ github.event.pull_request.base.sha }}" \
