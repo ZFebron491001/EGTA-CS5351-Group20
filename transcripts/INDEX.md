@@ -8,7 +8,7 @@ reason · affecting REQ/ADR/INV).
 
 | Member | Main transcript file | AI-use log session_id | Covers PR / REQ | Status |
 |---|---|---|---|---|
-| A (yuxiangdu39) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log.yaml` (A entries) | FR-01 / INV-02, PR #5 | **PENDING (A to submit)** |
+| A (yuxiangdu39) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log.yaml` (A entries) | FR-01 pack #25 / INV-02 spec #4 | **PENDING (A to submit)** |
 | B (cosine-Y) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-B-fragment.yaml` (`ses_e0451298…`) | FR-02 budget, PR #22 | **PENDING (B to submit)** |
 | C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
 | D (ZFebron491001) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, PR #20 | **PENDING (D to submit)** |
@@ -31,6 +31,7 @@ reason · affecting REQ/ADR/INV).
 | `E-impl-FR05-contracts-v3` | FR-05 contracts v3 + E2 impl | #18 · GATE-01 |
 
 ## Notes
+- **PR #23** (DEBT-FR05-D4 close + budget CI suite + #10 supersede record) is still **open** (not yet merged); the budget suite there is N/A until FR-02 impl + record.
 - `transcripts/**` is **not** part of any `spec_bundle` (FR-05/E2) → no hash/bundle recompute.
 - Others' rows are **not** filled on their behalf; they submit their own file + log entry.
 - C currently has **no** AI-use log entry on `main` — C must create one.
