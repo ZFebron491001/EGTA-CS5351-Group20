@@ -283,3 +283,69 @@ def test_missing_registry_is_an_error(tmp_path):
     rc, report = _run(tmp_path / "nope.yaml", sch)
     assert rc == 1
     assert any("registry not found" in e for e in report["errors"])
+
+
+# --------------------------------------------------------------------------- #
+# id-prefix / type linkage (D #15 item 2)
+# --------------------------------------------------------------------------- #
+
+def test_id_prefix_type_mismatch_fails(tmp_path):
+    # FR-01 declared as governance must be rejected (the schema also enforces
+    # this; the checker must too, so a relaxed schema cannot let it through).
+    rc, report = _report(tmp_path, [_req("FR-01", type="governance")])
+    assert rc == 1
+    assert any("does not match its id prefix" in e for e in report["errors"])
+
+
+def test_id_prefix_type_match_passes(tmp_path):
+    rc, report = _report(tmp_path, [_req("GOV-01", type="governance")])
+    assert rc == 0, report
+
+
+# --------------------------------------------------------------------------- #
+# Regression against the REAL schema (D #15 item 6)
+#
+# These load docs/req/req-schema.json (the real schema from #15), not the local
+# MINIMAL_SCHEMA, so the anchored patterns and id-type conditionals are covered.
+# On the spec branch the real schema is not present yet (it lands with #15), so
+# these fail like the rest of the suite (expected RED); once #15 and the tool are
+# on the branch they pass.
+# --------------------------------------------------------------------------- #
+
+REAL_SCHEMA = REPO_ROOT / "docs" / "req" / "req-schema.json"
+
+
+def _real_schema_report(tmp_path, requirements):
+    real = json.loads(REAL_SCHEMA.read_text(encoding="utf-8"))
+    reg, sch = _write(tmp_path, requirements, schema=real)
+    return _run(reg, sch)
+
+
+def test_real_schema_rejects_bad_ids(tmp_path):
+    for bad in ("XFR-01", "FR-011", " FR-01"):
+        rc, report = _real_schema_report(tmp_path, [_req(bad)])
+        assert rc == 1, f"{bad!r} should be rejected by the real schema"
+        assert any("[schema]" in e for e in report["errors"]), bad
+
+
+def test_real_schema_rejects_bad_owner_and_metric(tmp_path):
+    rc, report = _real_schema_report(tmp_path, [_req("FR-01", owner="Alice")])
+    assert rc == 1
+    assert any("[schema]" in e for e in report["errors"])
+    rc, report = _real_schema_report(tmp_path, [_req("FR-01", owner="A+Z")])
+    assert rc == 1
+    bad_metric = _req("FR-01")
+    bad_metric["fit_criterion"]["metric"] = "x y"
+    rc, report = _real_schema_report(tmp_path, [bad_metric])
+    assert rc == 1
+
+
+def test_real_schema_rejects_id_type_mismatch(tmp_path):
+    rc, report = _real_schema_report(tmp_path, [_req("FR-01", type="governance")])
+    assert rc == 1
+    assert any("[schema]" in e for e in report["errors"])
+
+
+def test_real_schema_accepts_valid_entry(tmp_path):
+    rc, report = _real_schema_report(tmp_path, [_req("FR-01")])
+    assert rc == 0, report
