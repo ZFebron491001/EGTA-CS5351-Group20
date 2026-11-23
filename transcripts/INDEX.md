@@ -9,7 +9,7 @@ reason · affecting REQ/ADR/INV).
 | Member | Main transcript file | AI-use log session_id | Covers PR / REQ | Status |
 |---|---|---|---|---|
 | A (61016736 Du Yuxiang) | `transcripts/61016736-DuYuxiang.md` (raw) + `…-annotations.md` + `…en.md` (English narrative); raw JSON `…raw.json` | `ses_dfc7091b2ffeKoDECWYCHHLaNB` (in `docs/ai-use-log-A-fragment.yaml`) | FR-01 pack #25/#43, INV-02 #4/#13, precedence #44→#51, D1, live test #57, reviews #42/#54/#56 | **READY** |
-| B (cosine-Y) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-B-fragment.yaml` (`ses_e0451298…`) | FR-02 budget, PR #22 | **PENDING (B to submit)** |
+| B (cosine-Y) | `transcripts/61076721-YuXiyan.md` (+ `…raw.json` authoritative, `…-annotations.md`) | `ses_e0451298bffeYlnqHo00GSewD2` in `docs/ai-use-log.yaml` | FR-01/FR-02: #5, #21, #22 | **READY** (snapshot 2026-11-22 21:04 +08) |
 | C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
 | D (61017180 Zhang Fan / ZFebron491001) | `transcripts/61017180-Zhang-Fan.md` (main) + `…raw.json`; `transcripts/appendix/61017180-Zhang-Fan-session2.md` + `…raw.json`; `…-annotations.md` | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, D3, GATE-01/02 verification, reverse proof | **COMPLETE** (main + appendix + annotations) |
 | **E (61069361 ZHOU Jianmin)** | `transcripts/61069361-ZHOU-Jianmin.md` (complete) + `…raw.json` (authoritative) + `…-annotations.md` | `ses_e095275cbffeefLAOdxMbkW2QF` (main); 6 log sessions (below) | FR-05 contracts + E2 + CI/gov: PR #3, #8, #11, #12, #18, #23 | **PARTIAL** (raw+annotations done; pending D acceptance/freeze) |
@@ -51,7 +51,7 @@ reason · affecting REQ/ADR/INV).
 | `E-impl-FR05-contracts-v3` | FR-05 contracts v3 + E2 impl | #18 · GATE-01 |
 
 ## Notes
-- **D5 status:** A and D are complete; B and C are still pending. E remains `PARTIAL` pending final acceptance/freeze. This file records the current state; members submit their own files.
+- **D5 status:** A, B and D are complete (B is a snapshot READY, 2026-11-22 21:04 +08); C is still pending. E remains `PARTIAL` pending final acceptance/freeze. This file records the current state; members submit their own files.
 - **PR #23** has since been merged; the budget suite activates when FR-02 implementation and the budget record co-sign are present.
 - `transcripts/**` is **not** part of any `spec_bundle` (FR-05/E2) → no hash/bundle recompute.
 - Others' rows are **not** filled on their behalf; they submit their own file + log entry.
