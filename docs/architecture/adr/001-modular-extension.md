@@ -1,10 +1,12 @@
 # ADR-001 — Modular extension over the upstream baseline
 
-- **Status:** DRAFT (proposed for D2; PENDING HUMAN APPROVAL)
+- **Status:** PROPOSED — PENDING HUMAN APPROVAL (draft for D2)
 - **Date:** 2026-11-22
 - **Owner:** B (blueprint / ADR-001 per `execution_plan_261111.md` §7.3)
 - **Related:** FR-02, INV-03, NFR-01/02/04; ADR-003 (risk authority); invariants;
-  `docs/architecture/architecture-blueprint.md`
+  `docs/architecture/architecture-blueprint.md`, `docs/architecture/option-ledger.md`,
+  `docs/architecture/evaluation-table.md`, `docs/architecture/trace-matrix.md`.
+- **Decision record:** `docs/architecture/option-ledger.md` (OL-01).
 
 > Scope of this ADR (per `execution_plan` §4.2/§4.3): the *architecture decision* —
 > how EGTA extends `TauricResearch/TradingAgents` (baseline SHA `9fa1196`,
@@ -79,8 +81,12 @@ rather than escalating to microservices (`execution_plan` §4.2).
 
 ## Status of the supporting work (traceable)
 
-- Evidence contracts (types) — merged, PR #21.
-- Budget spec — merged, PR #22.
-- Budget governor implementation — in review, PR #45.
+- Evidence contracts (types) — **merged**, PR #21.
+- Evidence pack build — **merged**, PR #43 (`7c3fbd4`).
+- Budget spec — **merged**, PR #22 (`a47c29c`).
+- Budget governor implementation — **merged**, PR #45 (`eafaff4`); four frozen cases
+  pass and the CI per-suite gate reports `budget: passed=4 expected=4 -> OK`.
+- Deliberation module (C) — **pending** (`src/egta/deliberation/` not built).
 - Unified model gateway, tool binding, structured fallback, zero-budget transport,
-  sent-then-interrupt — **pending** (no implementation yet).
+  sent-then-interrupt — **pending** (no implementation yet; `src/egta/app/` and
+  `src/egta/adapters/` do not exist). See `risk-list.md` R1/R3.
