@@ -32,3 +32,5 @@ def test_evidence_time_and_policy(case, gate_factory):
     assert_case(case, harness, case_input)
     if case.test_id == "T-RISK-EVD-05":
         _assert_date_only_canonical(case_input.evidence)
+
+# reverse-proof test drift
