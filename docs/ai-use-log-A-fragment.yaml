@@ -324,3 +324,59 @@ sessions:
     cost: "unknown"
     notes:
       - "A-scoped: test/live/test_data_provider.py only."
+
+  - session_id: "ses_dfc7091b2ffeKoDECWYCHHLaNB"
+    student: "A / Du Yuxiang / 61016736 / yuxiangdu39"
+    agent_tool_model: "opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-22T14:01:01Z"   # session start
+      - "2026-11-23T08:31:21Z"   # last user turn (requested D5 export)
+    task_requirement_ids: [FR-01, INV-02, NFR-06, NFR-08, NFR-10, D1, D5, GATE-01, GATE-02, GATE-05, GATE-06]
+    writable_path:
+      - "src/egta/evidence/"
+      - "test/offline/evidence/"
+      - "test/live/test_data_provider.py"
+      - "docs/req/"
+      - "docs/evidence/FR-01/"
+      - "docs/ai-use-log-A-fragment.yaml"
+      - "transcripts/"
+    branch: "multiple (feat/FR-01-evidence-pack, test/FR-01-pack-precedence, feat/FR-01-impl-rebuild, test/FR-01-live-data-provider, docs/D5-A-transcript)"
+    generated_files:
+      - file: "transcripts/61016736-DuYuxiang.md"
+        note: "D5 main-session transcript (raw render; tool outputs verbatim)"
+      - file: "transcripts/61016736-DuYuxiang.en.md"
+        note: "English narrative translation (user/assistant prose in English; tool I/O raw)"
+      - file: "transcripts/61016736-DuYuxiang.raw.json"
+        note: "authoritative `opencode export` JSON"
+      - file: "transcripts/61016736-DuYuxiang-annotations.md"
+        note: "human-intervention annotation index (English, §10.1 format)"
+      - file: "src/egta/evidence/pack.py, hashing.py, __init__.py"
+        note: "FR-01 build_pack/validate_claims + A-scoped local canonical hasher port (PR #43)"
+      - file: "test/live/test_data_provider.py"
+        note: "live FR-01 data-provider test, skipped unless EGTA_LIVE_DATA=1 (PR #57)"
+      - file: "docs/req/trace-FR-01-evidence-impl.md"
+        note: "FR-01 impl trace"
+    human_intervention:
+      - category: "supervision / redirects / approvals"
+        action: "Multiple human directives, corrections and gate approvals across the session; see transcripts/61016736-DuYuxiang-annotations.md for the indexed list (28 user turns). Key: instructed rigorous self-audit after rework; chose option A (per-file routing); authorized merging non-authored PRs #42/#51 after independent approval; identified the A permission-boundary violation, leading to the A-scoped hasher-port redesign."
+        requirement_ids: ["GATE-01","NFR-06","D5"]
+    verification_output:
+      - command: "pytest -m spec test/offline/evidence -q (on main)"
+        result: "37 passed, 13 deselected"
+      - command: "pytest test/live/test_data_provider.py -q"
+        result: "4 skipped offline; 4 passed with EGTA_LIVE_DATA=1"
+      - command: "tools/check_permissions.py --role build-a (each PR)"
+        result: "OK: no permission violations"
+    cost: "unknown"
+    transcript:
+      raw_json: "transcripts/61016736-DuYuxiang.raw.json"
+      markdown_raw: "transcripts/61016736-DuYuxiang.md"
+      markdown_en: "transcripts/61016736-DuYuxiang.en.md"
+      annotations: "transcripts/61016736-DuYuxiang-annotations.md"
+      export_sha256: "6f120ce7d8e15ac64316acb529c378b9838dc687d4635bef30496a06c8b4837b"   # English narrative md
+      raw_md_sha256: "f55b11e02f82a573fb135aee6a6ccbba6f5e17cb929b9695a1b64f05300a81c6"
+      raw_export_sha256: "fc0d1bd5d0977433a9027954338278e9a4c6cf429458af991107a5d2eebe1c04"
+      messages: 612
+    notes:
+      - "Raw session only; tool outputs kept verbatim (like E). English narrative provided in .en.md; raw .md authoritative."
+      - "Credentials redacted (****REDACTED****); scanned clean (no github_pat_/ghp_/sk- tokens in export)."
