@@ -737,7 +737,7 @@ sessions:
       - "#47 merged precise FR-01 evidence routing and the FR-02 budget approval record."
       - "Added governance (exact 38), check-permissions (GATE-02) and check-approval (GATE-01) to protect-main required checks."
       - "Reverse-proof failure control #48 proved all three gates fail and the PR is BLOCKED; normal control #49 proved all 10 required checks pass on main; the GATE-01 base bug was fixed by #50."
-      - "Closed throwaway #48/#49 and #32 without merge; requested changes on stale reverse-proof doc #33."
+      - "Closed throwaway #48/#49 and #32 without merge; #33 was updated and merged, and #43 was merged after the E routing/producer fixes."
     verification_output:
       - command: "#48 failure control run 45105760411"
         exit_code: 1
@@ -751,25 +751,24 @@ sessions:
       - command: "git show origin/main:.opencode/rules.md; ADR/debt inspection"
         exit_code: 0
         result: ".opencode/rules.md present; ADR-003/risk-policy still PROPOSED; DEBT-FR04-POLICY-APPROVAL Open"
-      - command: "#43 check-approval inspection"
-        exit_code: 1
-        result: "src/egta/evidence/ still routes to the old FR-01-evidence record; E/A must split pack/hashing to FR-01-pack and repair the old record"
+      - command: "post-closeout merge check"
+        exit_code: 0
+        result: "#33 merged 93da0ff; #43 merged dfb7a3f; #57 merged aa9ce5a; #43 check-approval is now green after routing/record fixes"
     git_output:
       - action: "GitHub merges"
-        result: "#47 320bf4d; #50 0fef55b; #51 5f21991; #53 29a8556; #52 809ec6f"
+        result: "#47 320bf4d; #50 0fef55b; #51 5f21991; #53 29a8556; #52 809ec6f; #33 93da0ff; #43 dfb7a3f; #57 aa9ce5a"
       - action: "main head"
-        result: "809ec6f801d40f10d63437ea282eaf5123524aca"
+        result: "aa9ce5a8cc330b4254c6cf1220a2d8caed38d68d"
     implementation_status: "D3 rules and ADR/policy deferral complete; required/reverse verification complete; D5 transcript and final log/evidence freeze remain"
     approval_links:
       - "ADR/policy deferral: #52; debt DEBT-FR04-POLICY-APPROVAL"
       - "Human rules: #53"
       - "Reverse proof: #48 failure, #49 normal pass, #50 fix"
     repository_blockers:
-      - "#43 GATE-01 is blocked by E source routing to the old FR-01-evidence record; pack/hashing need FR-01-pack mapping and the old record needs repair."
       - "#46 Prompt.md remains CHANGES_REQUESTED (invalid YAML, read/write conflict, behind main)."
-      - "#45 budget implementation and the FR-02 budget record co-sign remain pending."
-      - "#33 reverse-proof doc is stale and changes were requested."
+      - "#45 budget implementation still needs E review; #56 budget co-sign is open/behind main."
       - "D5 main transcript and E's merge of A/B/C/D fragments into docs/ai-use-log.yaml remain pending."
+      - "C FR-03 deliberation implementation is still absent."
     cost: "unknown"
     session_path: "unknown (raw session not exported yet)"
     notes:

@@ -61,11 +61,16 @@ D3 / ADR-policy closeout
   DEBT-FR04-POLICY-APPROVAL (#52), not inferred. The gate remains fail-closed.
 - DEBT-FR04-POLICY-APPROVAL is Open and must be carried into submission evidence.
 
+Post-closeout updates
+---------------------
+- #33 was updated and merged (93da0ff) with the new evidence.
+- #43 was merged (dfb7a3f) after the evidence routing/record fixes; GATE-01 is green.
+- #57 (live data-provider test) merged at aa9ce5a.
+- Current main: aa9ce5a8cc330b4254c6cf1220a2d8caed38d68d.
+
 Residual issues (not D gate defects)
 ------------------------------------
-- #43 check-approval still fails because src/egta/evidence/ routes to the old
-  FR-01-evidence record. Pack/hashing need FR-01-pack routing and the old record
-  needs A/E repair.
 - #46 Prompt.md remains CHANGES_REQUESTED.
-- #45 budget implementation and FR-02 budget record co-sign remain pending.
-- #33 reverse-proof doc is stale; D requested changes.
+- #45 budget implementation still needs E review; #56 budget co-sign is open/behind main.
+- D5 main transcript and the total AI-use log merge remain pending.
+- C FR-03 deliberation implementation is still absent.
