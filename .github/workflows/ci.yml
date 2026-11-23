@@ -438,19 +438,46 @@ jobs:
             mod="$1"; hit="$2"
             if [ -n "$hit" ]; then
               rec="docs/approvals/test-hash-${mod}.txt"
-              if [ ! -f "$rec" ]; then echo "::notice::no record $rec -- N/A for $mod"; return; fi
-              apbase=$(grep -E '^test_content_commit:' "$rec" | awk '{print $2}')
-              echo "--- check-approval $mod (base=$apbase) ---"
+              if [ ! -f "$rec" ]; then
+                echo "::error::no approval record $rec for $mod -- fail closed"
+                fail=1
+                return
+              fi
+              tcommit=$(grep -E '^test_content_commit:' "$rec" | awk '{print $2}')
+              if [ -z "$tcommit" ]; then
+                echo "::error::$mod record has no test_content_commit -- fail closed"
+                fail=1
+                return
+              fi
+              if git merge-base --is-ancestor "$tcommit" "$base"; then
+                # Implementation PR: compare the PR base to the head. Using the
+                # (possibly old) record test commit as base would falsely flag
+                # other test suites merged since then as TEST_DRIFT.
+                impl_base="$base"
+              else
+                # Test/spec PR: its approved test commit is in the PR, not in base.
+                # If the PR changes one of the record's approved test files, its
+                # GATE-01 approval is the PR review, not check_approval.
+                approved_paths=$(grep -E '^[[:space:]]+[0-9a-f]{64}[[:space:]]{2}' "$rec" | awk '{print $2}')
+                if [ -n "$approved_paths" ] && echo "$hit" | grep -Fxf <(echo "$approved_paths") >/dev/null; then
+                  echo "::notice::$mod is a test/spec PR (record test commit is not in base); GATE-01 approval is the PR review -- N/A"
+                  return
+                fi
+                echo "::error::$mod base does not contain test_content_commit $tcommit -- fail closed"
+                fail=1
+                return
+              fi
+              echo "--- check-approval $mod (base=$impl_base) ---"
               ran=$((ran+1))
               python tools/check_approval.py --repo . --record "$rec" \
-                --implementation-base "$apbase" --implementation-head "$head" \
+                --implementation-base "$impl_base" --implementation-head "$head" \
                 --registry docs/req/requirements.yaml \
                 --author "${{ github.event.pull_request.user.login }}" || fail=1
             fi
           }
           # FR-01 evidence is split per-file (see detectors above); each matched
-          # record is checked independently. N/A for a record that does not yet
-          # exist (forward-compatible: activates when its file + record land).
+          # record is checked independently. Missing records fail closed; test/spec
+          # PRs are N/A because their approval is the PR review.
           check FR-01-evidence-contracts "$hit_ev_contracts"
           check FR-01-precedence         "$hit_precedence"
           check FR-01-pack               "$hit_pack$hit_evidence_src"
