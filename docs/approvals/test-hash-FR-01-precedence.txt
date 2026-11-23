@@ -20,7 +20,10 @@ base:     main
 # whatever the implementation happens to do. No implementation-only document is
 # referenced here.
 
-test_content_commit: 777f43e1d499d2863afa38b1c90cef406ca0cfe5   # rebased onto main 0431ac7; test content unchanged (hash 68be998b)
+# test_content_commit = rebased commit that last touched the test file; test
+# content unchanged after rebase (hash 68be998b). SHA must be alone on this line
+# (no inline comment) so check_approval.py parses the field cleanly.
+test_content_commit: cf9a7a424603efcca75c1db2ea458f1025a63e50
 actual_cases: 4
 # 4 functions / 4 cases in test/offline/evidence/test_pack_precedence.py, selected by -m spec.
 
@@ -33,6 +36,10 @@ files (per-file SHA-256):
 aggregate_sha256 (sha256sum of per-file lines, sorted by path):
   04fdffcbff274d06abbb7289ff006ffe3c817a7bf828871ef9bd8762e66bc9a1
 
-reviewed_pr_head:        PENDING   # filled by D at review on this head
-merge_commit:            PENDING   # filled after merge
-approved_by:             PENDING   # filled by D after review
+# Binding fields below: put the value ALONE on each line (no inline comment) so
+# check_approval.py parses them. D fills reviewed_pr_head (the approved PR head
+# commit) and approved_by/approved_at at review; merge_commit after merge.
+reviewed_pr_head:        PENDING
+merge_commit:            PENDING
+approved_by:             PENDING
+approved_at:             PENDING
