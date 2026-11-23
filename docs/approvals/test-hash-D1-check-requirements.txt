@@ -7,7 +7,7 @@ base:     main
 # ONLY test_content_commit + aggregate + bundle. Do not push after approval.
 
 test_content_commit: cd9c25867e4238eeacaa26b880c427c15dba9abe
-actual_cases: 24             # pytest test/offline/requirements --collect-only (tool absent => RED)
+actual_cases: 24             # pytest test/offline/requirements --collect-only
 expected_branch_state: RED   # tool absent: 24 failed, collection OK (per-test fail, not error)
 
 files (per-file SHA-256):
@@ -20,8 +20,14 @@ aggregate_sha256 (tests, sorted by path):
 spec_bundle_sha256 (tests + trace-D1-check-requirements.md, sorted):
   674d40326eae3d1091a7fd0793a7e9bfe038a49ca0f99c55ad6ec2343fd7d64c
 
-# Deferred dependencies: #9 (registry) and #15 (schema) not yet on main.
-# Spec branch RED because the tool is absent. Implementation branch (#31) adds
-# the tool + CI + CODEOWNERS; its real-schema tests require #15's schema on the
-# base, so #31 rebases onto main after #15. GATE-03 is NOT claimed enabled here.
-approved_by: PENDING (GitHub review commit_id authoritative; independent reviewer required)
+# --- Approval closure (GATE-01) ------------------------------------------------
+# The spec (PR #30) is approved by D and merged. The implementation PR #31
+# descends from the #30 merge commit, so its test ancestry is the approved tests.
+reviewed_pr_head:        e1ea3212d0341b3673559a93719e0a05812133b6   # PR #30 head D approved
+merge_commit:            0431ac76a9d1d85de4c296a1a99ebc3dd44269a0   # PR #30 merge (2026-11-22T15:18:42Z)
+approved_by:             D (ZFebron491001), @ZFebron491001
+approved_at:             2026-11-22T15:18:42Z
+
+# Note: #9 (registry) and #15 (schema) are now on main; the implementation
+# (#31) carries the tool + CI + CODEOWNERS on top of the merged spec. GATE-03
+# becomes runnable once this record + the checker are on main + E's CI wiring.

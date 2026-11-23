@@ -519,6 +519,94 @@ sessions:
     export_sha256: "533e63760cd17c74f6fa26a9c9ad0c6d9c77ddea1fe83453a109a0a6db66112a"
     final_binding: "PR #18 @ 10ee52d"
 
+  # --- B (cosine-Y) main session — D5 submission ----------------------------
+  # Snapshot cutoff: 2026-11-22T21:04:17+08:00. B's main work up to that time:
+  # FR-02 baseline (B1) -> shared evidence contracts spec (#5) -> implementation
+  # (#21) -> FR-02 budget spec (#22). Later records appended per team freeze.
+  - session_id: "ses_e0451298bffeYlnqHo00GSewD2"
+    student: "B / YuXiyan / cosine-Y"
+    agent_tool_model: "OpenCode / opencode CLI 1.18.35 / cityu/CS5351/DeepSeek-V4-Flash (provider cityu)"
+    snapshot_cutoff: "2026-11-22T21:04:17+08:00"
+    time:
+      - "2026-11-21T09:18:21+08:00"   # first user turn (B1 baseline request)
+      - "2026-11-22T21:04:17+08:00"   # last message at export (session still active at export; snapshot)
+    task_requirement_ids:
+      - FR-02
+      - INV-03
+      - NFR-01
+      - NFR-02
+      - NFR-04
+      - FR-01
+      - INV-02
+      - GATE-01
+      - GATE-06
+    writable_path:
+      - "docs/evidence/FR-02/"
+      - "docs/req/"
+      - "docs/approvals/"
+      - "test/offline/contracts/"
+      - "test/offline/budget/"
+      - "src/egta/contracts/"
+      - "pyproject.toml"
+      - "docs/ai-use-log-B-fragment.yaml"
+    generated_files:
+      - file: "docs/evidence/FR-02/upstream-offline-baseline.md"
+        commit: "57cd5f2 (docs/B-baseline)"
+        change: "upstream offline baseline at SHA 9fa1196: 1412 passed / 1 skipped / 1 deselected; Python 3.12.16 env"
+      - file: "docs/evidence/FR-02/structured-fallback-probe.md"
+        commit: "57cd5f2 (docs/B-baseline)"
+        change: "local gateway probe, NormalizedChatOpenAI + httpx.MockTransport; allowance 2/1/0 -> transport 2/1/0"
+      - file: "test/offline/contracts/test_evidence_contracts.py"
+        commit: "e1cb6ad -> a433d5a (merged via #5 69da0e4)"
+        change: "shared evidence contract spec; pytestmark=spec; E-31 same-date excluded/FUTURE_DATA; tampered-item constructible; non-empty excluded_items"
+      - file: "docs/req/evidence-contracts.md, docs/req/trace-FR-01-evidence-contracts.md, docs/approvals/test-hash-FR-01-contracts.txt"
+        change: "evidence contract doc + trace + approval hash (test_content_commit a433d5a)"
+      - file: "src/egta/contracts/evidence.py, src/egta/contracts/__init__.py"
+        commit: "f5edf54 (merged via #21 141547a)"
+        change: "RunSpec/EvidenceItem/EvidencePack/Availability/ExcludedItem (type layer); ReasonCode imported from egta.contracts.events"
+      - file: "pyproject.toml"
+        commit: "f5edf54 (merged via #21)"
+        change: "packages.find where=[\".\",\"src\"], include tradingagents*/cli*/egta* (hybrid layout)"
+      - file: "test/offline/budget/conftest.py, fakes.py, test_reservation_holds.py"
+        commit: "efa4bbe (PR #22)"
+        change: "governor_factory lazy import; token-only-bottleneck fixtures; 3 tests (unknown/unsettled -> BudgetDenied; known 100 -> Reservation)"
+      - file: "test/offline/budget/test_admission.py"
+        commit: "b73fda3 (PR #22)"
+        change: "1 concurrency test: two threads race one call slot -> exactly one Reservation + one BudgetDenied"
+      - file: "docs/req/trace-FR-02-budget-reservation.md, docs/req/trace-FR-02-admission.md"
+        commit: "efa4bbe / b73fda3 / 79b99f3"
+        change: "budget spec traces; settle partial-known-usage clarification (79b99f3)"
+      - file: "docs/ai-use-log-B-fragment.yaml"
+        change: "B AI-use fragment assembled across #5/#21/#22"
+    human_intervention:
+      - category: "human instruction / supervision (quality control)"
+        action: "Directed B1 baseline read-only; approved isolated Python 3.12 venv (scheme B, aligned to E); required truthful not-run/pass reporting."
+        requirement_ids: ["FR-02", "NFR-08"]
+      - category: "human instruction / supervision (test-first)"
+        action: "Required test-first shared evidence contract spec; adopted D's second INV-02 ruling (same-date date-only excluded, FUTURE_DATA), superseding earlier 'same-day admitted' wording."
+        requirement_ids: ["FR-01", "INV-02", "GATE-01"]
+      - category: "human correction (real defect caught by human source review)"
+        action: "Found three FR-02 budget tests that could pass despite a real bypass (self-reserve instead of the real helper; hasattr fallback; test-built entry); removed them, keeping only the genuine governor concurrency test. Corrected 'fixture setup failure' -> 'failure at the test's call to the factory'."
+        requirement_ids: ["FR-02", "INV-03"]
+      - category: "human approval gate (every commit/push/PR)"
+        action: "Explicitly authorized each local commit, push, and PR creation; required normal fast-forward only (no force)."
+        requirement_ids: ["GATE-01"]
+    verification_output:
+      - "python -m pytest tests -m 'not integration' -> 1412 passed, 1 skipped, 1 deselected (baseline at 9fa1196)"
+      - "python -m pytest -m spec test/offline/contracts/test_evidence_contracts.py -> 65 passed (with #18 events.py)"
+      - "python -m pytest -m spec test/offline/budget/ -> 4 collected, 4 failed (ModuleNotFoundError: egta.budget; business assertions 0; expected RED)"
+      - "ruff check . -> All checks passed"
+      - "wheel install (clean venv, PYTHONPATH cleared): RunSpec/EvidenceItem/EvidencePack import OK; ReasonCode 13 codes; tradingagents 0.7.1 + cli OK"
+    cost: "unknown"
+    cost_source: "OpenCode does not record billing; session cost field is not a real invoice. Marked unknown."
+    session_path: "transcripts/61076721-YuXiyan.md"
+    raw_session_path: "transcripts/61076721-YuXiyan.raw.json"
+    export_sha256: "23117924de85d3edb1ec5e4ed91156b2c570883fdf8bfbe43d7086cdf04c02cb"
+    raw_export_sha256: "2748505a43df77cb0e221c2c26e0695242f111840dc6d65567cb6e8e4ed3f185"
+    annotations_path: "transcripts/61076721-YuXiyan-annotations.md"
+    redaction: "Personal email from a captured 'git config' output replaced with ****REDACTED-EMAIL**** (2 occurrences); unredacted original retained outside the repository."
+    related_commits: ["57cd5f2", "e1cb6ad", "2982562", "1e07105", "a433d5a", "f52868d", "3d529ed", "291db39", "f5edf54", "efa4bbe", "b73fda3", "a61d3b1", "79b99f3"]
+    related_prs: ["#5 (merged 69da0e4)", "#21 (merged 141547a)", "#22 (open, awaiting E formal approval)"]
   - session_id: "E-e4-e2e-g1"
     student: "E / 61069361 ZHOU Jianmin / jianmin2004"
     agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351/DeepSeek-V4-Flash"
@@ -593,31 +681,31 @@ sessions:
   - session_id: "A-2026-11-22-d1-check-requirements"
     student: "A / yuxiangdu39"
     agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
-    pr: 30
-    branch: spec/D1-check-requirements (spec) -> feat/D1-check-requirements (impl)
+    pr: "30 (spec) + 31 (impl)"
+    branch: "spec/D1-check-requirements (spec #30) -> feat/D1-check-requirements (impl #31)"
     time:
-      - "2026-11-22T16:20:00+08:00"   # checker implementation + first tests
-      - "2026-11-22T17:10:00+08:00"   # rework after D request-changes on PR #27
-      - "2026-11-22T18:40:00+08:00"   # split into spec #30 + impl #31; id-type + real-schema tests
+      - "2026-11-22T16:20:00+08:00"   # spec: checker tests + first implementation attempt
+      - "2026-11-22T17:10:00+08:00"   # spec: rework after D request-changes on PR #27
+      - "2026-11-22T18:40:00+08:00"   # spec: split into #30 (RED) + #31; id-type + real-schema tests
+      - "2026-11-22T23:20:00+08:00"   # impl #31: rebuild on main after #30 merged; tool + CI + CODEOWNERS
     task_requirement_ids: [NFR-10, GATE-03, GATE-06]
     writable_path: ["tools/check_requirements.py", "test/offline/requirements/", "pyproject.toml", ".github/workflows/ci.yml", ".github/CODEOWNERS", "docs/req/", "docs/approvals/", "docs/ai-use-log.yaml"]
     generated_files:
-      - "test/offline/requirements/test_check_requirements.py (24 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression; spec branch RED because tool + schema absent)"
-      - "tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage) — impl PR #31"
-      - "docs/req/trace-D1-check-requirements.md"
-      - "docs/approvals/test-hash-D1-check-requirements.txt (actual_cases 24)"
-      - "pyproject.toml (dev extras: jsonschema, PyYAML) — impl PR #31"
-      - ".github/workflows/ci.yml (requirements suite wired, EXPECT_REQUIREMENTS 24) — impl PR #31"
-      - ".github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements/) — impl PR #31"
+      - "spec #30: test/offline/requirements/test_check_requirements.py (24 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression)"
+      - "spec #30: docs/req/trace-D1-check-requirements.md, docs/approvals/test-hash-D1-check-requirements.txt"
+      - "impl #31: tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage)"
+      - "impl #31: .github/workflows/ci.yml (requirements suite wired into offline-tests, EXPECT_REQUIREMENTS 24, presence via tool file Path.exists)"
+      - "impl #31: .github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements/)"
+      - "impl #31: pyproject.toml (dev extras: jsonschema, PyYAML)"
     human_intervention:
-      - "D request-changes on PR #27 with 7 items and on PR #15 item 2; A drove all fixes and split the mixed PR into test-first spec #30 (RED) + impl #31 (tool + CI + CODEOWNERS), matching the FR-04 governance spec model."
-      - "A placed the 4 real-schema regression tests in the checker spec per D #15 item 6; merge order #15 -> #30 -> #31 so the real-schema cases resolve against #15."
+      - "D request-changes on PR #27 (7 items) and PR #15 (item 2); A split the mixed PR into test-first spec #30 (RED) + impl #31, matching the FR-04 governance model."
+      - "D request-changes on #30 (trace counts, schema assertions, AI-use, anchor) and on #31 (approval-record closure + impl AI-use + PR description); A closed both. A placed the 4 real-schema tests in the spec per D #15 item 6."
     verification_output:
-      - "spec #30: pytest test/offline/requirements -q -> 24 failed (tool + schema absent, collection OK) — expected RED"
-      - "impl #31: pytest test/offline/requirements -q -> 24 passed (against #15 schema)"
-      - "impl e2e: python tools/check_requirements.py --registry <#9> --schema <#15> -> OK, exit 0"
-      - "impl negative: FR-01 + type governance -> exit 1 'does not match its id prefix'"
-      - "CI offline gate: requirements: collect-only=24 expected=24 -> OK"
+      - "spec #30 (before merge): pytest test/offline/requirements -> 24 failed (tool absent, collection OK) — expected RED"
+      - "impl #31 (on main 0431ac7, tool + schema present): pytest test/offline/requirements -> 24 passed"
+      - "impl #31 e2e: python tools/check_requirements.py --registry docs/req/requirements.yaml --schema docs/req/req-schema.json -> OK, exit 0 (38 entries, 38 confirmed)"
+      - "impl #31 negative: FR-01 + type governance -> exit 1 'does not match its id prefix'"
+      - "impl #31 CI offline gate: requirements: collect-only=24 expected=24; passed=24 expected=24 -> OK (Actions run 45037827018)"
       - "ruff clean; upstream pytest -> 1412 passed, 1 skipped"
     cost: "unknown"
     session_path: "unknown"
@@ -627,9 +715,11 @@ sessions:
       record: "docs/approvals/test-hash-D1-check-requirements.txt"
       test_content_commit: "cd9c25867e4238eeacaa26b880c427c15dba9abe"
       actual_cases: 24
+      spec_reviewed_head: "e1ea3212d0341b3673559a93719e0a05812133b6"
+      spec_merge_commit: "0431ac76a9d1d85de4c296a1a99ebc3dd44269a0"
     commits:
-      - "spec #30 test commit cd9c258 (24 cases; id-type + real-schema)"
-      - "impl #31 tool/CI/CODEOWNERS commit on feat/D1-check-requirements"
+      - "spec #30 test content: cd9c258 (24 cases; id-type + real-schema)"
+      - "impl #31 implementation commit: bdad677 (tool + CI + CODEOWNERS + pyproject; descends from #30 merge 0431ac7)"
     placement_note: >-
       Recorded in the shared main log (not the A fragment) because D's reviews of
       #27 and #25 explicitly required a docs/ai-use-log.yaml session entry for

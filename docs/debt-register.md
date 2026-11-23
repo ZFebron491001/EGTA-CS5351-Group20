@@ -31,5 +31,15 @@ Owner: E · Verifier: A
 
 All: **Owner: E · Verifier: D.**
 
+## DEBT-FR04-POLICY-APPROVAL
+
+| ID | Category | Description | Impact | Opened | Expiry condition | Status |
+|---|---|---|---|---|---|---|
+| DEBT-FR04-POLICY-APPROVAL | Governance / risk policy | Human approval of ADR-003 and the versioned paper-only demo policy is deferred. Freshness, fee model, slippage model, base currency, quantization and rounding, version/hash, and effective window are not frozen. The plan-specified 20% BUY concentration cap and 10% BUY/SELL notional cap are not approved defaults. | Keep the gate fail-closed for absent or incompatible policy. Do not promote fixture values to defaults or infer policy or integration approval from passing module tests. | 2026-11-23 | Confirm the policy values and effective window, bind the version/hash, obtain independent human review on the exact candidate, and record offline threshold and safe-reject evidence. Link the review from ADR-003. | Open |
+
+Owner: D · Verifier: independent reviewer to be assigned · Review checkpoint:
+next submission freeze. If still open, carry the limitation into submission
+evidence; the freeze does not close this debt.
+
 ## Superseded PRs
 - **#10** (v2, impl/FR-05-contracts-v2 @ `399dfc4`) — **Closed by E via `gh pr close` on 2026-11-22T11:01:12Z**; superseded by **#18** (main `10ee52d`); history retained.
