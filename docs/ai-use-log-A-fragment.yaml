@@ -254,3 +254,42 @@ sessions:
     notes:
       - "Test-only: no src/, contracts, CI or other module change."
       - "Frozen test_pack.py (hash 75fc9d) untouched; this adds a separate file."
+
+  - session_id: "ses_feat_FR01_impl_ascoped"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-23T15:00+08:00"
+    task_requirement_ids: [FR-01, INV-02, NFR-06]
+    writable_path:
+      - "src/egta/evidence/"
+      - "docs/evidence/FR-01/"
+      - "docs/req/"
+      - "docs/ai-use-log-A-fragment.yaml"
+    pr: 43
+    branch: "feat/FR-01-evidence-pack"
+    base: "5f21991 (#51 merge); descends from approved precedence spec"
+    generated_files:
+      - file: "src/egta/evidence/pack.py"
+        note: "build_pack/validate_claims/InvalidCitation; injectable hasher port (default local canonical_pack_hash); precedence integrity->stale->time->dedupe; no cross-module import."
+      - file: "src/egta/evidence/hashing.py"
+        note: "local canonical evidence hash, byte-identical to egta.risk_gate.canonical.recompute_evidence_hash; equality proven by test_pack_hash_matches_risk_gate_canonical."
+      - file: "docs/req/trace-FR-01-evidence-impl.md"
+        note: "implementation trace; hasher-port rationale; no contracts/risk_gate/CI change."
+    human_intervention:
+      - category: "review response"
+        action: "D blocker 1 (no cross-module import) satisfied without touching contracts/risk_gate: local byte-identical hasher + injected port, keeping all changes within module A (check_permissions --role build-a OK). Earlier attempt (moving canonical to contracts + editing risk_gate+CI) was reverted because it violated A's write scope (GATE-02)."
+        requirement_ids: ["FR-01","NFR-06","GATE-02"]
+    verification_output:
+      - command: "pytest -m spec test/offline/evidence -q"
+        result: "37 passed, 13 deselected"
+      - command: "pytest -m 'not spec' test/offline/evidence -q"
+        result: "13 passed, 37 deselected"
+      - command: "ruff check src/egta/evidence test/offline/evidence; mypy src/egta/evidence"
+        result: "ruff clean; mypy no issues"
+      - command: "tools/check_permissions.py --role build-a"
+        result: "OK: no permission violations"
+    cost: "unknown"
+    notes:
+      - "A-scoped: only src/egta/evidence/, docs/evidence/FR-01/, docs/req/, this fragment."
+      - "CI gating of evidence suite is E/D-owned; A does not edit CI."
