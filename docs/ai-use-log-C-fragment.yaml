@@ -17,7 +17,7 @@ fragment_for: docs/ai-use-log.yaml
 
 sessions:
   - session_id: "unknown (not exposed by this environment)"
-   student: "C / Yuan Weizhi"
+    student: "C / Yuan Weizhi"
     agent_tool_model: "OpenCode / deepseek/deepseek-flash(reasoning effort: Max)"
     time:
       - "2026-11-23T00:36:20+08:00"
@@ -82,3 +82,78 @@ sessions:
       - "No secrets, approvals, hashes, CI runs or runtime enforcement are claimed."
       - "Identity fields are unknown; C or the human owner must supply them without inference."
       - "Prompt.md is untracked at the time of this record; no commit, push, PR or merge was performed."
+
+  - session_id: "ses_df844053affeWE4YX8rHOOQfcM"
+    student: "C / Yuan Weizhi"
+    agent_tool_model: "OpenCode / deepseek/deepseek-flash(reasoning effort: Max)"
+    time:
+      - "PLACEHOLDER — human to provide session start timestamp"
+      - "PLACEHOLDER — human to provide session end timestamp"
+    task_requirement_ids:
+      - GOV-09
+    writable_path:
+      - "Prompt.md"
+      - "docs/ai-use-log-C-fragment.yaml"
+    generated_files:
+      - file: "Prompt.md"
+        change: >-
+          §2.3 implements D ruling Option A as a three-layer read/write rule;
+          the header clarifies Owner: C as Author: C (content author) and
+          Requirement owner: D (requirements.yaml).
+      - file: "docs/ai-use-log-C-fragment.yaml"
+        change: >-
+          This session fixed the review-found indentation bug at line 20:
+          student: was 3 spaces and is now 4 spaces, aligned with sibling keys.
+        note: "除第 20 行缩进修复外未改写既有行 (no other existing line was rewritten)."
+    human_intervention:
+      - category: "human decision / D ruling"
+        action: >-
+          D ruled Option A for the Prompt.md/AGENTS read-access conflict and
+          superseded the parenthetical note in D's earlier review; AGENTS.md and
+          docs/architecture/permission-model.md stay unchanged. The PR remains
+          CHANGES_REQUESTED; this ruling is not D9 acceptance.
+        evidence: "https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/46#pullrequestreview-6019470020"
+        limit: >-
+          Scoped to Prompt.md §2.3 and the header owner clarification; no
+          AGENTS.md, permission-model.md, CI, contracts or approval-record edits.
+    verification_output:
+      - command: >-
+          python3 -c "import yaml; from pathlib import Path; d=yaml.safe_load(Path('docs/ai-use-log-C-fragment.yaml').read_text(encoding='utf-8')); assert d['role']=='C' and d['sessions'][0]['task_requirement_ids']==['GOV-09']; print('YAML_OK: role=C, requirement=GOV-09, generated files declared')"
+        exit_code: 0
+        result: "YAML_OK: role=C, requirement=GOV-09, generated files declared"
+        evidence: "agent session output"
+      - command: >-
+          python -c "import yaml; yaml.safe_load(open('docs/ai-use-log-C-fragment.yaml')); print('YAML_OK')"
+        exit_code: 127
+        result: "/bin/bash: line 1: python: command not found"
+        evidence: "agent container has no python executable"
+      - command: >-
+          python3 -c "import yaml; yaml.safe_load(open('docs/ai-use-log-C-fragment.yaml')); print('YAML_OK')"
+        exit_code: 0
+        result: "YAML_OK"
+        evidence: "agent session output"
+      - command: "python -m pytest test/offline/governance -q"
+        exit_code: 127
+        result: "/bin/bash: line 1: python: command not found"
+        evidence: "agent container has no python executable"
+      - command: "python3 -m pytest test/offline/governance -q"
+        exit_code: 1
+        result: "/usr/bin/python3: No module named pytest"
+        evidence: "agent container has no pytest; authoritative gate is the post-push CI rerun (human to add link)"
+      - command: "python -m pytest test/offline/governance -q"
+        exit_code: 0
+        result: "38 passed (reviewer evidence; not run in C's container)"
+        evidence: "D on 31b0dff in WSL2 venv /home/zf/venvs/cs5351 (pytest 9.1.1); reviewer evidence only"
+      - command: >-
+          git status --porcelain=v1 && git ls-files -z | xargs -0 sha256sum
+        exit_code: 0
+        result: "only Prompt.md and docs/ai-use-log-C-fragment.yaml differ from the pre-edit baseline; no other tracked file changed"
+        evidence: "agent session output; compare /tmp/opencode/pre-edit-tracked.sha256"
+    cost: "unknown"
+    session_path: 'D:\G20\sessions\46-fix-session.md'
+    notes:
+      - "D ruling: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/46#pullrequestreview-6019470020; PR remains CHANGES_REQUESTED; this is not D9 acceptance."
+      - "除第 20 行缩进修复外未改写既有行 (no existing line was rewritten other than the line-20 indentation fix)."
+      - "Agent container: python absent (127); python3 has no pytest. Reviewer's 38/38 is recorded as reviewer evidence, not an agent-container run."
+      - "Branch head 31b0dff is behind main; rebase/merge and post-push CI rerun are human-executed. No CI changes were made."
+      - "No secrets, approvals, hashes, CI runs or runtime enforcement are claimed beyond the recorded facts."

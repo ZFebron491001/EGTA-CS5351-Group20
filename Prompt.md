@@ -1,6 +1,6 @@
 # Prompt.md — 编码代理静态启动指令
 
-> 治理工件：GOV-09（D9）｜Owner: C｜D9 验收: D｜状态: PENDING HUMAN REVIEW
+> 治理工件：GOV-09（D9）｜Author: C（内容作者）｜Requirement owner: D（requirements.yaml）｜D9 验收: D｜状态: PENDING HUMAN REVIEW
 >
 > 本文件是静态、任务无关的启动 prompt，不嵌入具体任务细节。
 > 本文件本身不构成运行时强制；实际强制由人类闸口、权限检查器、CI 门禁、
@@ -56,9 +56,12 @@
 ### 2.3 范围边界
 
 - 列出本任务允许读取和写入的精确模块/文件/测试路径，以及明确不做的内容。
-- 列出 protected / human-only / 凭据路径；不得读写其他模块、`src/egta/contracts/`、
-  CI、CODEOWNERS、rulesets、`docs/approvals/`、`.opencode/rules.md`、其他成员日志
-  或任何凭据。
+- 列出 protected / human-only / 凭据路径。凭据路径（如 `.env`、API key、`~/.ssh`、
+  broker 凭据）禁止读取与写入；human-only 路径（如 `.opencode/rules.md`）只读、
+  禁止写入或编辑；对其他模块、`src/egta/contracts/`、CI、CODEOWNERS、rulesets、
+  `docs/approvals/` 与其他成员日志，禁止写入或编辑，读取仅限 `AGENTS.md` 与
+  `docs/architecture/permission-model.md` 允许的范围（如已批准契约与评审证据），
+  不得跨模块访问私有实现。
 - 不得移动上游 `tradingagents/` 代码或改写基线行为，除非已有 ADR 与回归证据。
 
 ### 2.4 测试策略
