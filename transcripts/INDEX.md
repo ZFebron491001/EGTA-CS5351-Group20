@@ -8,7 +8,7 @@ reason · affecting REQ/ADR/INV).
 
 | Member | Main transcript file | AI-use log session_id | Covers PR / REQ | Status |
 |---|---|---|---|---|
-| A (yuxiangdu39) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log.yaml` (A entries) | FR-01 pack #25 / INV-02 spec #4 | **PENDING (A to submit)** |
+| A (61016736 Du Yuxiang) | `transcripts/61016736-DuYuxiang.md` (raw) + `…-annotations.md` + `…en.md` (English narrative); raw JSON `…raw.json` | `ses_dfc7091b2ffeKoDECWYCHHLaNB` (in `docs/ai-use-log-A-fragment.yaml`) | FR-01 pack #25/#43, INV-02 #4/#13, precedence #44→#51, D1, live test #57, reviews #42/#54/#56 | **READY** |
 | B (cosine-Y) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-B-fragment.yaml` (`ses_e0451298…`) | FR-02 budget, PR #22 | **PENDING (B to submit)** |
 | C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
 | D (ZFebron491001) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, PR #20 | **PENDING (D to submit)** |
