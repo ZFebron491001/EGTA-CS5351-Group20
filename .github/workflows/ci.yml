@@ -393,7 +393,7 @@ jobs:
   # Module -> record MAP uses PRECISE paths so FR-01 evidence tests (which live
   # under test/offline/contracts/) route to FR-01-evidence, NOT FR-05-contracts.
   #   src/egta/contracts/ | src/egta/evaluation/ | test/offline/contracts/  (minus evidence) -> FR-05-contracts
-  #   src/egta/evidence/  | test/offline/evidence/  | test/offline/contracts/test_evidence_contracts.py -> FR-01-evidence
+  #   src/egta/evidence/ -> FR-01-pack;  test/offline/evidence/ (per-file, below) + test/offline/contracts/test_evidence_contracts.py -> their own FR-01-* records
   #   src/egta/risk_gate/ | test/offline/risk_gate/ -> FR-04-risk-gate
   #   src/egta/budget/ ... -> FR-02-budget
   # A single change may match several modules -> the loop checks EACH record.
@@ -416,8 +416,19 @@ jobs:
           if [ ! -f docs/req/requirements.yaml ]; then echo "::notice::requirements.yaml absent -- N/A"; exit 0; fi
           if ! echo "$changed" | grep -qE '^(src|test)/'; then echo "::notice::no src/test change -- N/A"; exit 0; fi
 
-          # Precise module detectors (evidence first, then contract/eval).
-          hit_evidence=$(echo "$changed" | grep -E '^src/egta/evidence/|^test/offline/evidence/|^test/offline/contracts/test_evidence_contracts\.py' || true)
+          # Precise module detectors. FR-01 evidence is split per-file so each
+          # evidence spec routes to its OWN approval record (fixes A #44):
+          #   test/offline/contracts/test_evidence_contracts.py -> FR-01-evidence-contracts
+          #   test/offline/evidence/test_pack_precedence.py      -> FR-01-precedence (N/A until it + record exist)
+          #   test/offline/evidence/test_pack.py                 -> FR-01-pack
+          #   test/offline/evidence/* (rest) -> FR-01-evidence; src/egta/evidence/ -> FR-01-pack
+          # Multiple records may match one change; check() runs EACH matched record.
+          ev_all=$(echo "$changed" | grep -E '^test/offline/evidence/' || true)
+          hit_ev_contracts=$(echo "$changed" | grep -E '^test/offline/contracts/test_evidence_contracts\.py' || true)
+          hit_precedence=$(echo "$changed" | grep -E '^test/offline/evidence/test_pack_precedence\.py' || true)
+          hit_pack=$(echo "$changed" | grep -E '^test/offline/evidence/test_pack\.py' || true)
+          hit_evidence_rest=$(echo "$ev_all" | grep -vE 'test_pack_precedence\.py$|test_pack\.py$' || true)
+          hit_evidence_src=$(echo "$changed" | grep -E '^src/egta/evidence/' || true)
           hit_fr05=$(echo "$changed" | grep -E '^src/egta/contracts/|^src/egta/evaluation/|^test/offline/contracts/' | grep -v '^test/offline/contracts/test_evidence_contracts\.py' || true)
           hit_risk=$(echo "$changed" | grep -E '^src/egta/risk_gate/|^test/offline/risk_gate/' || true)
           hit_budget=$(echo "$changed" | grep -E '^src/egta/budget/' || true)
@@ -427,19 +438,52 @@ jobs:
             mod="$1"; hit="$2"
             if [ -n "$hit" ]; then
               rec="docs/approvals/test-hash-${mod}.txt"
-              if [ ! -f "$rec" ]; then echo "::notice::no record $rec -- N/A for $mod"; return; fi
-              apbase=$(grep -E '^test_content_commit:' "$rec" | awk '{print $2}')
-              echo "--- check-approval $mod (base=$apbase) ---"
+              if [ ! -f "$rec" ]; then
+                echo "::error::no approval record $rec for $mod -- fail closed"
+                fail=1
+                return
+              fi
+              tcommit=$(grep -E '^test_content_commit:' "$rec" | awk '{print $2}')
+              if [ -z "$tcommit" ]; then
+                echo "::error::$mod record has no test_content_commit -- fail closed"
+                fail=1
+                return
+              fi
+              if git merge-base --is-ancestor "$tcommit" "$base"; then
+                # Implementation PR: compare the PR base to the head. Using the
+                # (possibly old) record test commit as base would falsely flag
+                # other test suites merged since then as TEST_DRIFT.
+                impl_base="$base"
+              else
+                # Test/spec PR: its approved test commit is in the PR, not in base.
+                # If the PR changes one of the record's approved test files, its
+                # GATE-01 approval is the PR review, not check_approval.
+                approved_paths=$(grep -E '^[[:space:]]+[0-9a-f]{64}[[:space:]]{2}' "$rec" | awk '{print $2}')
+                if [ -n "$approved_paths" ] && echo "$hit" | grep -Fxf <(echo "$approved_paths") >/dev/null; then
+                  echo "::notice::$mod is a test/spec PR (record test commit is not in base); GATE-01 approval is the PR review -- N/A"
+                  return
+                fi
+                echo "::error::$mod base does not contain test_content_commit $tcommit -- fail closed"
+                fail=1
+                return
+              fi
+              echo "--- check-approval $mod (base=$impl_base) ---"
               ran=$((ran+1))
               python tools/check_approval.py --repo . --record "$rec" \
-                --implementation-base "$apbase" --implementation-head "$head" \
+                --implementation-base "$impl_base" --implementation-head "$head" \
                 --registry docs/req/requirements.yaml \
                 --author "${{ github.event.pull_request.user.login }}" || fail=1
             fi
           }
-          check FR-01-evidence   "$hit_evidence"
-          check FR-05-contracts  "$hit_fr05"
-          check FR-04-risk-gate  "$hit_risk"
-          check FR-02-budget     "$hit_budget"
+          # FR-01 evidence is split per-file (see detectors above); each matched
+          # record is checked independently. Missing records fail closed; test/spec
+          # PRs are N/A because their approval is the PR review.
+          check FR-01-evidence-contracts "$hit_ev_contracts"
+          check FR-01-precedence         "$hit_precedence"
+          check FR-01-pack               "$hit_pack$hit_evidence_src"
+          check FR-01-evidence           "$hit_evidence_rest"
+          check FR-05-contracts          "$hit_fr05"
+          check FR-04-risk-gate          "$hit_risk"
+          check FR-02-budget             "$hit_budget"
           if [ "$ran" -eq 0 ]; then echo "::notice::no module record matched -- N/A"; fi
           exit $fail

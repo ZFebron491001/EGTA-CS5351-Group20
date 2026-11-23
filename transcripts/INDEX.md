@@ -8,11 +8,28 @@ reason · affecting REQ/ADR/INV).
 
 | Member | Main transcript file | AI-use log session_id | Covers PR / REQ | Status |
 |---|---|---|---|---|
-| A (yuxiangdu39) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log.yaml` (A entries) | FR-01 pack #25 / INV-02 spec #4 | **PENDING (A to submit)** |
+| A (61016736 Du Yuxiang) | `transcripts/61016736-DuYuxiang.md` (raw) + `…-annotations.md` + `…en.md` (English narrative); raw JSON `…raw.json` | `ses_dfc7091b2ffeKoDECWYCHHLaNB` (in `docs/ai-use-log-A-fragment.yaml`) | FR-01 pack #25/#43, INV-02 #4/#13, precedence #44→#51, D1, live test #57, reviews #42/#54/#56 | **READY** |
 | B (cosine-Y) | `transcripts/61076721-YuXiyan.md` (+ `…raw.json` authoritative, `…-annotations.md`) | `ses_e0451298bffeYlnqHo00GSewD2` in `docs/ai-use-log.yaml` | FR-01/FR-02: #5 (merged), #21 (merged), #22 (open) | **READY** (snapshot 2026-11-22 21:04 +08) |
 | C (wawfggqq) | `transcripts/<student-id>-<name>.md` — *to be provided* | *(none on main — needs an AI-use entry)* | C modules (deliberation/prompts) | **PENDING — no AI-use log yet** |
-| D (ZFebron491001) | `transcripts/<student-id>-<name>.md` — *to be provided* | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, PR #20 | **PENDING (D to submit)** |
+| D (61017180 Zhang Fan / ZFebron491001) | `transcripts/61017180-Zhang-Fan.md` (main) + `…raw.json`; `transcripts/appendix/61017180-Zhang-Fan-session2.md` + `…raw.json`; `…-annotations.md` | in `docs/ai-use-log-D-fragment.yaml` (D-* entries) | FR-04 risk_gate, D3, GATE-01/02 verification, reverse proof | **COMPLETE** (main + appendix + annotations) |
 | **E (61069361 ZHOU Jianmin)** | `transcripts/61069361-ZHOU-Jianmin.md` (complete) + `…raw.json` (authoritative) + `…-annotations.md` | `ses_e095275cbffeefLAOdxMbkW2QF` (main); 6 log sessions (below) | FR-05 contracts + E2 + CI/gov: PR #3, #8, #11, #12, #18, #23 | **PARTIAL** (raw+annotations done; pending D acceptance/freeze) |
+
+
+## D — main and continuation sessions
+
+- Main Markdown: `transcripts/61017180-Zhang-Fan.md`
+- Main raw JSON: `transcripts/61017180-Zhang-Fan.raw.json`
+- Appendix Markdown: `transcripts/appendix/61017180-Zhang-Fan-session2.md`
+- Appendix raw JSON: `transcripts/appendix/61017180-Zhang-Fan-session2.raw.json`
+- Annotations: `transcripts/61017180-Zhang-Fan-annotations.md`
+- Main session: `ses_e079e10bcffenzVS8BxvxK6Dl8` — “(me) EGTA Member D — FR-04 risk-gate test-first design”
+- Continuation session: `ses_dfd91c6a0ffeGCYpCzxK7KuCWM` — “Role D — inventory, implementation, governance and closeout”
+- Export: `opencode export <sessionID>` (OpenCode 1.18.34; DeepSeek V4.1 Flash)
+- Main raw SHA-256: `e6ab20a2851011254673caf589d14cbfa05ac7ada3908866a940451f7952d865`
+- Main Markdown SHA-256: `649ed97c097724c5fba1703e13c09e96c4f7a5b495abe44dfdac002566bb96a3`
+- Appendix raw SHA-256: `ebfcbb189893d6dce86696440c6b5895ed8c836847ae26bc3bef0d5fdb69c003`
+- Appendix Markdown SHA-256: `b7321abebd729fad317009d911082b8a83dae4e142f41049ec347d8240fffe9a`
+- Secret scan: 0 hits (GitHub/PAT/OpenAI/AWS/private-key/bearer patterns); reasoning retained in raw only.
 
 ## E — main session
 - File (complete Markdown): `transcripts/61069361-ZHOU-Jianmin.md`
@@ -34,8 +51,8 @@ reason · affecting REQ/ADR/INV).
 | `E-impl-FR05-contracts-v3` | FR-05 contracts v3 + E2 impl | #18 · GATE-01 |
 
 ## Notes
-- **This PR covers only the E part; D5 is NOT complete until A/B/C/D submit.**
-- **PR #23** (DEBT-FR05-D4 close + budget CI suite + #10 supersede record) is still **open** (not yet merged); the budget suite there is N/A until FR-02 impl + record.
+- **D5 status:** A, B and D are complete; C is still pending. E remains `PARTIAL` pending final acceptance/freeze. This file records the current state; members submit their own files.
+- **PR #23** has since been merged; the budget suite activates when FR-02 implementation and the budget record co-sign are present.
 - `transcripts/**` is **not** part of any `spec_bundle` (FR-05/E2) → no hash/bundle recompute.
 - Others' rows are **not** filled on their behalf; they submit their own file + log entry.
 - C currently has **no** AI-use log entry on `main` — C must create one.
