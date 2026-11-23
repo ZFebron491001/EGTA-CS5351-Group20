@@ -393,7 +393,7 @@ jobs:
   # Module -> record MAP uses PRECISE paths so FR-01 evidence tests (which live
   # under test/offline/contracts/) route to FR-01-evidence, NOT FR-05-contracts.
   #   src/egta/contracts/ | src/egta/evaluation/ | test/offline/contracts/  (minus evidence) -> FR-05-contracts
-  #   src/egta/evidence/  | test/offline/evidence/  | test/offline/contracts/test_evidence_contracts.py -> FR-01-evidence
+  #   src/egta/evidence/ -> FR-01-pack;  test/offline/evidence/ (per-file, below) + test/offline/contracts/test_evidence_contracts.py -> their own FR-01-* records
   #   src/egta/risk_gate/ | test/offline/risk_gate/ -> FR-04-risk-gate
   #   src/egta/budget/ ... -> FR-02-budget
   # A single change may match several modules -> the loop checks EACH record.
@@ -421,7 +421,7 @@ jobs:
           #   test/offline/contracts/test_evidence_contracts.py -> FR-01-evidence-contracts
           #   test/offline/evidence/test_pack_precedence.py      -> FR-01-precedence (N/A until it + record exist)
           #   test/offline/evidence/test_pack.py                 -> FR-01-pack
-          #   test/offline/evidence/* (rest) + src/egta/evidence/ -> FR-01-evidence
+          #   test/offline/evidence/* (rest) -> FR-01-evidence; src/egta/evidence/ -> FR-01-pack
           # Multiple records may match one change; check() runs EACH matched record.
           ev_all=$(echo "$changed" | grep -E '^test/offline/evidence/' || true)
           hit_ev_contracts=$(echo "$changed" | grep -E '^test/offline/contracts/test_evidence_contracts\.py' || true)
@@ -480,8 +480,8 @@ jobs:
           # PRs are N/A because their approval is the PR review.
           check FR-01-evidence-contracts "$hit_ev_contracts"
           check FR-01-precedence         "$hit_precedence"
-          check FR-01-pack               "$hit_pack"
-          check FR-01-evidence           "$hit_evidence_rest$hit_evidence_src"
+          check FR-01-pack               "$hit_pack$hit_evidence_src"
+          check FR-01-evidence           "$hit_evidence_rest"
           check FR-05-contracts          "$hit_fr05"
           check FR-04-risk-gate          "$hit_risk"
           check FR-02-budget             "$hit_budget"
