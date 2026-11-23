@@ -1,13 +1,11 @@
 # FR-01 evidence pack implementation — green
-# branch feat/FR-01-evidence-pack (A-scoped: src/egta/evidence only)
-# base: descends from main 5f21991 (#51 merged); A hasher-port design, no cross-module import
-# date: 2026-11-23T07:02:46Z
+# head 8d53fe4; branch feat/FR-01-evidence-pack (A-scoped, rebased onto main with #55)
+# date: 2026-11-23T08:07:37Z
 ## pytest -m spec test/offline/evidence -q
-37 passed, 13 deselected in 0.08s
+37 passed, 13 deselected in 0.09s
 ## pytest -m 'not spec' test/offline/evidence -q
-13 passed, 37 deselected in 0.04s
-## ruff + mypy
-All checks passed!
-Success: no issues found in 4 source files
-## check_permissions (build-a)
+13 passed, 37 deselected in 0.05s
+## check_permissions --role build-a
 OK: no permission violations
+## GATE-01: src/egta/evidence -> FR-01-pack
+OK: approval record verified
