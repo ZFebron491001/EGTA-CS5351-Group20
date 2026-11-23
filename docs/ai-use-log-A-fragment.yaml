@@ -293,3 +293,34 @@ sessions:
     notes:
       - "A-scoped: only src/egta/evidence/, docs/evidence/FR-01/, docs/req/, this fragment."
       - "CI gating of evidence suite is E/D-owned; A does not edit CI."
+
+  - session_id: "ses_test_FR01_live_provider"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-23T16:00+08:00"
+    task_requirement_ids: [FR-01, INV-02, NFR-08]
+    writable_path:
+      - "test/live/test_data_provider.py"
+      - "docs/ai-use-log-A-fragment.yaml"
+    branch: "test/FR-01-live-data-provider"
+    base: "main (post-#43)"
+    generated_files:
+      - file: "test/live/test_data_provider.py"
+        note: "Live Yahoo Finance test of FR-01 invariants (bar date not future, sha256(excerpt)==content_hash, INV-02 admissible, build_pack well-formed). Skipped unless EGTA_LIVE_DATA=1 (built-in skipif; pyproject not module A's scope)."
+    human_intervention:
+      - category: "scope decision"
+        action: "Chose env-gated skipif instead of adding a 'live' marker to pyproject.toml, because pyproject is outside module A's allowed paths and offline CI must stay network-free (NFR-08)."
+        requirement_ids: ["NFR-08","FR-01"]
+    verification_output:
+      - command: "pytest test/live/test_data_provider.py -q (offline)"
+        result: "4 skipped (no error)"
+      - command: "EGTA_LIVE_DATA=1 pytest test/live/test_data_provider.py -q"
+        result: "4 passed (real provider)"
+      - command: "ruff check test/live/test_data_provider.py"
+        result: "All checks passed!"
+      - command: "tools/check_permissions.py --role build-a"
+        result: "OK: no permission violations"
+    cost: "unknown"
+    notes:
+      - "A-scoped: test/live/test_data_provider.py only."
