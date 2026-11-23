@@ -707,3 +707,172 @@ sessions:
       - "No frozen test was deleted or skipped; the existing EVD-05 case gained the date-only canonical assertion."
       - "The approval record was updated at A's explicit direction with A's independently recomputed values; A's GitHub review remains authoritative."
       - "The date-only branch is based on main before the open #37 D-log closeout PR; the final D-log merge order must keep both entries."
+
+  - session_id: "D-2026-11-23-E3-required-reverse-D3-closeout"
+    student: "D / ZFebron491001"
+    agent_tool_model: "OpenCode / DeepSeek V4.1 Flash"
+    opencode_session_id: "ses_dfd91c6a0ffeGCYpCzxK7KuCWM"
+    time:
+      - "2026-11-23T15:28:31+08:00"   # verification and D evidence closeout
+    task_requirement_ids:
+      - FR-04
+      - D3
+      - GATE-01
+      - GATE-02
+      - GATE-06
+      - NFR-07
+      - GOV-03
+      - GOV-09
+    writable_path:
+      - "docs/ai-use-log-D-fragment.yaml"
+      - "docs/evidence/FR-04/gate-reverse-proof.txt"
+    human_intervention:
+      - type: approve
+        what: "Human completed the ADR-003/risk-policy deferral and human-only .opencode/rules.md; authorized D to verify and record the next-stage evidence"
+        evidence: "interactive: 这两项任务已经完成，检查之后推进下一阶段任务"
+        limit: "The agent did not edit .opencode/rules.md or sign ADR-003; the ADR remains PROPOSED by design and the policy approval is recorded as debt."
+    changes:
+      - "#52 merged ADR-003/risk-policy deferral text and DEBT-FR04-POLICY-APPROVAL; the ADR remains PROPOSED and the gate remains fail-closed."
+      - "#53 merged the human-maintained .opencode/rules.md; runtime enforcement is not claimed."
+      - "#47 merged precise FR-01 evidence routing and the FR-02 budget approval record."
+      - "Added governance (exact 38), check-permissions (GATE-02) and check-approval (GATE-01) to protect-main required checks."
+      - "Reverse-proof failure control #48 proved all three gates fail and the PR is BLOCKED; normal control #49 proved all 10 required checks pass on main; the GATE-01 base bug was fixed by #50."
+      - "Closed throwaway #48/#49 and #32 without merge; #33 was updated and merged, and #43 was merged after the E routing/producer fixes."
+    verification_output:
+      - command: "#48 failure control run 45105760411"
+        exit_code: 1
+        result: "governance, check-permissions and check-approval failed; mergeStateStatus=BLOCKED"
+      - command: "#49 normal control run 45131000924 on main 809ec6f"
+        exit_code: 0
+        result: "all 10 required checks passed; only review requirement blocked; closed without merge"
+      - command: "#50 merged; GATE-01 uses PR base for implementation PRs"
+        exit_code: 0
+        result: "0fef55b; false TEST_DRIFT removed; test/spec PRs N/A; missing records fail closed"
+      - command: "git show origin/main:.opencode/rules.md; ADR/debt inspection"
+        exit_code: 0
+        result: ".opencode/rules.md present; ADR-003/risk-policy still PROPOSED; DEBT-FR04-POLICY-APPROVAL Open"
+      - command: "post-closeout merge check"
+        exit_code: 0
+        result: "#33 merged 93da0ff; #43 merged dfb7a3f; #57 merged aa9ce5a; #43 check-approval is now green after routing/record fixes"
+    git_output:
+      - action: "GitHub merges"
+        result: "#47 320bf4d; #50 0fef55b; #51 5f21991; #53 29a8556; #52 809ec6f; #33 93da0ff; #43 dfb7a3f; #57 aa9ce5a"
+      - action: "main head"
+        result: "aa9ce5a8cc330b4254c6cf1220a2d8caed38d68d"
+    implementation_status: "D3 rules and ADR/policy deferral complete; required/reverse verification complete; D5 transcript and final log/evidence freeze remain"
+    approval_links:
+      - "ADR/policy deferral: #52; debt DEBT-FR04-POLICY-APPROVAL"
+      - "Human rules: #53"
+      - "Reverse proof: #48 failure, #49 normal pass, #50 fix"
+    repository_blockers:
+      - "#46 Prompt.md remains CHANGES_REQUESTED (invalid YAML, read/write conflict, behind main)."
+      - "#45 budget implementation still needs E review; #56 budget co-sign is open/behind main."
+      - "D5 main transcript and E's merge of A/B/C/D fragments into docs/ai-use-log.yaml remain pending."
+      - "C FR-03 deliberation implementation is still absent."
+    cost: "unknown"
+    session_path: "unknown (raw session not exported yet)"
+    notes:
+      - "No frozen test, approval record, contract or CI file was edited by this closeout entry."
+      - "Human-only .opencode/rules.md was authored by the human; the agent only verified it."
+      - "The ADR-003 status remains PROPOSED; deferral is explicit, not an inferred approval."
+  - session_id: "D-2026-11-23-D5-transcript"
+    student: "D / Zhang Fan / 61017180 / ZFebron491001"
+    agent_tool_model: "OpenCode / DeepSeek V4.1 Flash / 1.18.34"
+    time:
+      - "2026-11-23T17:01:40+08:00"   # D5 export, redaction scan, render and index
+    task_requirement_ids:
+      - D5
+      - GATE-06
+      - NFR-07
+    writable_path:
+      - "transcripts/61017180-Zhang-Fan.md"
+      - "transcripts/61017180-Zhang-Fan.raw.json"
+      - "transcripts/61017180-Zhang-Fan-annotations.md"
+      - "transcripts/appendix/61017180-Zhang-Fan-session2.md"
+      - "transcripts/appendix/61017180-Zhang-Fan-session2.raw.json"
+      - "transcripts/INDEX.md"
+      - "docs/ai-use-log-D-fragment.yaml"
+    human_intervention:
+      - type: approve
+        what: "Human supplied student ID 61017180 and authorized D5 transcript preparation and commit"
+        evidence: "interactive: student ID 61017180"
+        limit: "The readable transcript is a render; reasoning is retained in raw JSON; no secret values are included."
+    changes:
+      - "Exported main D session ses_e079e10bcffenzVS8BxvxK6Dl8 and continuation ses_dfd91c6a0ffeGCYpCzxK7KuCWM."
+      - "Rendered main and appendix Markdown; retained compact raw JSON; added curated human-intervention annotations."
+      - "Updated transcripts/INDEX.md D row, session IDs and raw/Markdown hashes."
+    verification_output:
+      - command: "opencode export ses_e079e10bcffenzVS8BxvxK6Dl8; opencode export ses_dfd91c6a0ffeGCYpCzxK7KuCWM"
+        exit_code: 0
+        result: "483 main messages / 361 continuation messages; main raw 9,763,161 bytes; appendix raw 4,253,980 bytes"
+      - command: "secret-pattern scan and Markdown render"
+        exit_code: 0
+        result: "0 secret hits; main Markdown 1,713,061 bytes; appendix Markdown 1,636,709 bytes"
+      - command: "sha256sum transcripts/61017180-Zhang-Fan* transcripts/appendix/61017180-Zhang-Fan-session2*"
+        exit_code: 0
+        result: "main raw e6ab20a2851011254673caf589d14cbfa05ac7ada3908866a940451f7952d865; main md 649ed97c097724c5fba1703e13c09e96c4f7a5b495abe44dfdac002566bb96a3; appendix raw ebfcbb189893d6dce86696440c6b5895ed8c836847ae26bc3bef0d5fdb69c003; appendix md b7321abebd729fad317009d911082b8a83dae4e142f41049ec347d8240fffe9a; annotations e19b6f7d0372868b962b3c58372a8b8f14bcf3f216e008a2b8ccd66b3e4abea3"
+      - command: "git diff --name-only"
+        exit_code: 0
+        result: "transcripts + INDEX + D fragment only; no source/test/contract/CI/approval change"
+    git_output:
+      - action: "branch"
+        result: "docs/D5-transcript from main"
+      - action: "commit"
+        result: "D5 transcript commit in this branch"
+    implementation_status: "D5 main + appendix + raw JSON + annotations complete; awaiting human/A/E review"
+    approval_links:
+      - "transcripts/INDEX.md D row"
+    repository_blockers:
+      - "B and C transcripts remain pending; E final acceptance/freeze remains pending."
+    cost: "unknown"
+    session_path: "transcripts/61017180-Zhang-Fan.md + transcripts/appendix/61017180-Zhang-Fan-session2.md"
+    notes:
+      - "Main session is the original FR-04 risk-gate design session; the continuation is an appendix, not a substitute."
+      - "Reasoning parts are retained in raw JSON and omitted from the readable Markdown render."
+      - "The regex scan found 0 secret patterns; masked token output remains masked."
+
+  - session_id: "D-2026-11-23-report-sections"
+    student: "D / Zhang Fan / 61017180 / ZFebron491001"
+    agent_tool_model: "OpenCode / DeepSeek V4.1 Flash / 1.18.34"
+    time:
+      - "2026-11-23T17:32:02+08:00"   # report sections + reflection
+    task_requirement_ids:
+      - D6
+      - D5
+      - GATE-06
+    writable_path:
+      - "docs/report/D-sections.md"
+      - "docs/ai-use-log-D-fragment.yaml"
+    human_intervention:
+      - type: approve
+        what: "Human authorized D to complete the remaining report sections and reflection"
+        evidence: "interactive: 好的，请你帮我完成即可"
+        limit: "Draft compilation material only; E owns the final Report.md and cannot be replaced by this fragment."
+    changes:
+      - "Created docs/report/D-sections.md with D's §4 architecture, §5 agent governance, §6 implementation, §7 verification, §8 debt/limitations, §9 reflection and evidence index."
+      - "Recorded real D-side numbers and deferred items: 139 risk_gate, 38 governance, 10 required checks, #48/#49/#50, DEBT-FR04-POLICY-APPROVAL."
+    verification_output:
+      - command: "word-count check"
+        exit_code: 0
+        result: "D sections 3068 words; reflection 475 words (within 300-500)"
+      - command: "fact check against main e797138"
+        exit_code: 0
+        result: "D5 merged 4677a11; #54 merged e797138; D fragment 11 sessions; ADR/rules statuses match main"
+      - command: "git diff --name-only"
+        exit_code: 0
+        result: "docs/report/D-sections.md + D fragment only; no source/test/CI/approval change"
+    git_output:
+      - action: "branch"
+        result: "docs/D-report-sections from main e797138"
+      - action: "commit"
+        result: "D report sections commit in this branch"
+    implementation_status: "D report draft complete for E compilation; final Report.md assembly remains E-owned"
+    approval_links:
+      - "docs/report/A-sections.md, docs/report/E-sections-draft.md for section conventions"
+    repository_blockers:
+      - "Final Report.md compilation, B/C transcript acceptance, C Prompt/FR-03, and budget implementation activation remain outside D's report draft."
+    cost: "unknown"
+    session_path: "transcripts/61017180-Zhang-Fan.md + appendix"
+    notes:
+      - "E compiles the final Report.md; this is D's compilation material."
+      - "No claim is made that ADR-003, product policy, ticker identity, budget or C modules are complete."

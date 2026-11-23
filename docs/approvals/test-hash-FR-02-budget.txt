@@ -35,10 +35,12 @@ aggregate_sha256 (sha256sum of per-file lines, sorted by path):
 
 # --- Approval ----------------------------------------------------------------
 # AUTHOR of the FR-02 spec (#22) = B (@cosine-Y). The author MUST NOT self-approve.
-# approved_by is therefore PENDING; a NON-AUTHOR (A or E) co-signs. The
-# authoritative approval is the GitHub review commit_id on the reviewed test head.
-approved_by: PENDING (author = B/@cosine-Y; approver = A/@yuxiangdu39 or E/@jianmin2004, non-author)
-approved_at: PENDING
+# Co-signed by a NON-AUTHOR: E (@jianmin2004 / 61069361 ZHOU Jianmin) — E is NOT
+# an author of #22 (spec) or #45 (implementation), so this is a valid non-author
+# co-sign. The authoritative approval is the GitHub review commit_id on the
+# reviewed test head.
+approved_by: E (61069361 ZHOU Jianmin, @jianmin2004) — non-author co-sign
+approved_at: 2026-11-23
 
 # --- What this record unlocks -------------------------------------------------
 # CI `offline-tests` budget gate (src/egta/budget ⇔ -m spec test/offline/budget)
