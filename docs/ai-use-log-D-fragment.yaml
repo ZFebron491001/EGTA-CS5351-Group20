@@ -1,5 +1,13 @@
 # AI-use log — Member D fragment
 #
+# = SUPERSEDED (2026-11-23) =================================================
+# This fragment has been MERGED into the canonical `docs/ai-use-log.yaml`
+# (12 sessions, `D-2026-11-20-FR04-spec` … `D-2026-11-23-report-sections`).
+# `docs/ai-use-log.yaml` is now the AUTHORITATIVE record for Member D; this
+# file is retained for audit history only and must NOT be treated as the
+# current source. Do not append new entries here.
+# ==========================================================================
+#
 # This is a D-owned fragment prepared for later assembly into the team's
 # docs/ai-use-log.yaml (owned by E). It records only facts observed in this session.
 # It is NOT a test approval record and does NOT claim that any test, ADR, PR or
