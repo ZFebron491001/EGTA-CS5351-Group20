@@ -35,6 +35,11 @@ dev = [
     "ruff>=0.16",
     "pytest>=8.0",
     "pytest-subtests>=0.13",
+    # D1 registry checker (tools/check_requirements.py) and GATE-03 schema check.
+    "jsonschema>=4.20",
+    # Loaded by the checker and its tests; declare directly rather than
+    # relying on a transitive dep.
+    "PyYAML>=6.0",
 ]
 # Amazon Bedrock support (AWS SigV4 auth + boto3). Optional so the core install
 # stays lean: pip install "tradingagents[bedrock]".
@@ -49,7 +54,12 @@ tradingagents = "cli.main:app"
 version = {attr = "tradingagents.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["tradingagents*", "cli*"]
+# Hybrid layout: upstream ``tradingagents`` and ``cli`` stay at the repo root;
+# the EGTA application lives under ``src/`` (``src/egta``). Discover both roots
+# rather than switching the whole project to a src layout (which would drop the
+# existing top-level packages). ``egta`` is matched as a namespace package.
+where = [".", "src"]
+include = ["tradingagents*", "cli*", "egta*"]
 
 [tool.setuptools.package-data]
 cli = ["static/*"]
@@ -68,7 +78,7 @@ markers = [
     "unit: fast isolated unit tests",
     "integration: tests requiring external services; run only when asked for, with -m integration",
     "smoke: quick sanity-check tests",
-    "spec: test-first spec for FR-05 contracts; expected RED until the implementation lands (not a gate on the spec branch)",
+    "spec: test-first spec (FR-05 contracts, FR-01 pack, ...); expected RED until the implementation lands (not a gate on the spec branch)",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",

@@ -219,3 +219,166 @@ open_items:
   - "actual_cases = 65 (23 test functions; parametrized expansions); FR-01 CI gate remains DEBT-FR01-CI."
   - "Gateway probe scripts exist only in a local /tmp directory; not reproducible from the repository."
   - "Raw session transcript path: unknown (not exported)."
+
+# -----------------------------------------------------------------------
+# FR-02 / INV-03 budget-reservation spec session (governor layer)
+# -----------------------------------------------------------------------
+budget_spec_sessions:
+  - session_id: "ses_e0451298bffeYlnqHo00GSewD2"
+    agent_tool_model: "OpenCode / opencode CLI / cityu/CS5351/DeepSeek-V4-Flash"
+    date: 2026-11-22
+    task_requirement_ids: [FR-02, INV-03]
+    scope: "Test-first spec for governor-layer budget reservation: unknown usage and outstanding reservation must not release held tokens early; governor-only (no transport/restart/gateway claims)"
+    worktree: "/tmp/opencode/b-budget-v2 (local temporary worktree)"
+    branch: "spec/B-budget-reservation-v2"
+    base: "69da0e464b562d54bcfdec5beb84bd98bbf8a943 (origin/main)"
+    generated_files:
+      - file: "test/offline/budget/conftest.py"
+        note: "lazy-import governor_factory (candidate construction BudgetGovernor(limits=..., db_path=...)); per-case RED"
+      - file: "test/offline/budget/fakes.py"
+        note: "test-only data: token is the only tight axis; first call 1000 tokens; every follow-up 1 token"
+      - file: "test/offline/budget/test_reservation_holds.py"
+        note: "3 tests, pytestmark=spec; refusal=BudgetDenied, grant=Reservation (positive isinstance)"
+      - file: "docs/req/trace-FR-02-budget-reservation.md"
+        note: "requirement basis, hand-check table, candidate interface, not-covered list"
+    verification_output:
+      - command: "python -m ruff check ."
+        exit_code: 0
+        result: "All checks passed"
+      - command: "python -m py_compile test/offline/budget/*.py"
+        exit_code: 0
+        result: "ok"
+      - command: "python -m pytest -m spec test/offline/budget/ --collect-only -q"
+        exit_code: 0
+        result: "3 collected (selected by -m spec)"
+      - command: "python -m pytest -m spec test/offline/budget/ -q --tb=line"
+        exit_code: 1
+        result: "3 collected, 3 executed, 3 failed; first error ModuleNotFoundError: No module named 'egta.budget' at conftest.py:64; business assertions executed: 0"
+      - command: "python -m pytest -q"
+        exit_code: 0
+        result: "1412 passed, 1 skipped, 1 deselected, 24 warnings, 100 subtests passed (default suite unaffected; spec excluded)"
+    re_verification:
+      baseline: "0ab1c823b62f6cc75c96463f46a72a81da56ed9b (origin/main after D-only fast-forward; branch fast-forwarded, five files kept)"
+      note: "Ruff/py_compile/collect-only/run/default all re-run on 0ab1c82 with identical results to 69da0e4 (3 collected, 3 executed, 3 failed at egta.budget import; business assertions 0)."
+    three_row_acceptance:
+      - "unknown usage (settle None) -> follow-up 1 token -> BudgetDenied"
+      - "outstanding/unsettled -> follow-up 1 token -> BudgetDenied"
+      - "known 100 used (900 free) -> follow-up 1 token -> Reservation"
+    human_intervention:
+      - category: "intervention / approval"
+        action: "Authorized reorganizing the pre-existing local draft onto current main in a new worktree; no commit/push."
+        limit: "Local spec only; no implementation; #21 untouched."
+    dependencies_for_E:
+      - "Frozen: reserve(call_spec)->Reservation|BudgetDenied; settle(id, actual_usage_or_unknown)->BudgetState."
+      - "Frozen result type: reserve(...) -> Reservation | BudgetDenied. Candidate (needs E): the public import path (from egta.budget import BudgetGovernor, Reservation, BudgetDenied); BudgetGovernor(limits=, db_path=) construction; call_spec keys; unknown = settle(...=None); Reservation.reservation_id; known usage shape {'tokens': N}."
+    status: "spec drafted, RED by design; awaiting E pre-review; not committed."
+
+# -----------------------------------------------------------------------
+# Admission increment added to the #22 budget spec (concurrency governor test)
+# -----------------------------------------------------------------------
+budget_admission_increment:
+  session_id: "ses_e0451298bffeYlnqHo00GSewD2"
+  agent_tool_model: "OpenCode / opencode CLI / cityu/CS5351/DeepSeek-V4-Flash"
+  date: 2026-11-22
+  task_requirement_ids: [FR-02, INV-03]
+  scope: "Add ONE honest governor-layer test (concurrency no-oversell) to #22; move gateway-dependent cases (tool-binding, structured fallback, one-entry zero-budget, send-then-interrupt) to a PENDING-gateway acceptance list instead of fakes that would pass despite a real bypass."
+  worktree: "/tmp/opencode/b-budget-v2 (#22 branch spec/B-budget-reservation-v2)"
+  head_at_run: "efa4bbe1d4aa5b3c0e9530e95eee58b637f92adc (+ local uncommitted increment)"
+  origin_main_queried: "141547a87f6781abf85ee51fba33898d7c0db671"
+  note_no_rerun_on_newer_main: "Increment was not separately re-run on a 141547a checkout; it ran on the efa4bbe worktree."
+  files:
+    - "test/offline/budget/test_admission.py (new, 1 test: two threads race one call slot -> exactly one Reservation + one BudgetDenied; no transport count)"
+    - "docs/req/trace-FR-02-admission.md (new)"
+    - "test/offline/budget/fakes.py (append ONE_CALL_LIMITS, ONE_CALL_ASK only)"
+  reused_unchanged:
+    - "test/offline/budget/conftest.py (byte-identical to efa4bbe)"
+    - "test/offline/budget/test_reservation_holds.py (byte-identical to efa4bbe; #22's three cases unchanged)"
+  removed_as_would_pass_despite_bypass:
+    - "tool-binding / structured-fallback / one-entry zero-budget / send-then-interrupt tests (no unified gateway entry exists; they are in the trace's PENDING-gateway acceptance list)"
+  verification_output:
+    - command: "python -m ruff check ."
+      exit_code: 0
+      result: "All checks passed"
+    - command: "python -m py_compile test/offline/budget/*.py"
+      exit_code: 0
+      result: "ok"
+    - command: "python -m pytest -m spec test/offline/budget/ --collect-only -q"
+      exit_code: 0
+      result: "4 collected (3 reservation + 1 admission)"
+    - command: "python -m pytest -m spec test/offline/budget/ -q --tb=line"
+      exit_code: 1
+      result: "4 collected, 4 executed, 4 failed at conftest.py:64 (No module named egta.budget); business assertions executed: 0"
+  observed_client_timeout_type: "OpenAITimeoutError (subclass of openai.APITimeoutError) surfaced to caller; httpx.MockTransport records in-process receipt only"
+  human_intervention:
+    - category: "intervention / correction"
+      action: "Human source review found the earlier draft could pass despite a real budget bypass; removed those tests and kept one genuine governor test."
+      limit: "Local increment only; no implementation; #21 untouched; #22 head unchanged until confirmed."
+  status: "increment ready for local diff review; not committed; #22 unchanged."
+
+# --- From origin/main (PR #21 implementation record) ---
+
+# Implementation session — shared evidence contracts (FR-01 types)
+# -----------------------------------------------------------------------
+implementation_sessions:
+  - session_id: "ses_e0451298bffeYlnqHo00GSewD2"
+    agent_tool_model: "OpenCode / opencode CLI / cityu/CS5351/DeepSeek-V4-Flash"
+    date: 2026-11-22
+    task_requirement_ids: [FR-01, INV-02]
+    scope: "Implement public evidence contracts RunSpec/EvidenceItem/EvidencePack (type layer only); no filtering, id generation, dedupe, or digest comparison"
+    worktree: "/tmp/opencode/b-impl (local temporary worktree)"
+    branch: "impl/B-evidence-contracts"
+    base: "69da0e464b562d54bcfdec5beb84bd98bbf8a943 (origin/main; PR #5 merge)"
+    approved_spec_head: "88dbd7c"
+    generated_files:
+      - file: "src/egta/contracts/evidence.py"
+        note: "RunSpec, EvidenceItem, EvidencePack, Availability (StrEnum), ExcludedItem; imports ReasonCode from egta.contracts.events (owned by E #18/#10), no duplicate enum"
+      - file: "src/egta/contracts/__init__.py"
+        note: "re-exports RunSpec, EvidenceItem, EvidencePack (and Availability, ExcludedItem); ReasonCode stays in egta.contracts.events"
+    verification_output:
+      - command: "python -m pytest -m spec test/offline/contracts/test_evidence_contracts.py"
+        context: "B branch ALONE (main 69da0e4; no egta.contracts.events)"
+        exit_code: 2
+        result: "collection error: ModuleNotFoundError: No module named 'egta.contracts.events' (ReasonCode owned by unmerged #18)"
+      - command: "python -m pytest -m spec test/offline/contracts/test_evidence_contracts.py"
+        context: "combined with #18 head 4682b6b src/egta/contracts/events.py overlaid in a scratch copy"
+        exit_code: 0
+        result: "65 collected, 65 passed"
+      - command: "ruff check ."
+        exit_code: 0
+        result: "All checks passed"
+      - command: "py_compile src/egta/contracts/*.py"
+        exit_code: 0
+        result: "ok"
+      - command: "sha256sum test/offline/contracts/test_evidence_contracts.py"
+        result: "4618b25ac1d647ab2526e21251a2a1542e55ddd869967623501553801a4e8718 == approval record (test bytes unchanged)"
+    human_intervention:
+      - category: "intervention / approval"
+        action: "Authorized local implementation + verification in an isolated worktree; no copy of E's source, no duplicate ReasonCode."
+        limit: "Local implementation only; no commit/push/PR."
+    implementation_status: "DONE (type layer) — green once egta.contracts.events (E #18) is present; branch alone is RED on that import by design."
+    dependencies:
+      - "egta.contracts.events.ReasonCode — owned by E #18 (v3) / #10 (v2); both open, not merged to main. Verified against #18 head 92fc3016f605e33ba8f51f4819ad0f24323a6ce6."
+      - "Packaging fixed in this session: hybrid layout kept, src/egta now discovered."
+    packaging_change:
+      file: "pyproject.toml"
+      before: 'packages.find include = ["tradingagents*", "cli*"] (root only)'
+      after: 'where = [".", "src"]; include = ["tradingagents*", "cli*", "egta*"]'
+      rationale: "Keep the existing top-level tradingagents/ and cli/ packages; NOT switching to a src layout (would drop them). egta under src/ is added as a namespace package."
+      wheel_contents: "egta/, tradingagents/, cli/ all present; top_level.txt = cli, egta, tradingagents"
+      isolation_result:
+        - "ALONE (B branch wheel): tradingagents + cli import OK; egta.contracts fails only on missing egta.contracts.events (E #18 not merged)."
+        - "COMBINED (with #18 head 92fc301): RunSpec/EvidenceItem/EvidencePack + ReasonCode import OK in a clean venv outside the repo, PYTHONPATH cleared; tradingagents 0.7.1 + cli still import."
+    contract_time_responsibilities:
+      - "RunSpec.as_of: tz-aware UTC instant; bare date and naive rejected (frozen)."
+      - "EvidencePack.cutoff: same instant as run/fixture as_of; tz-aware (frozen)."
+      - "EvidenceItem.published_at/fetched_at: date-only kept as date with day precision; a tz-aware timestamp is normalized to UTC; a naive timestamp is left as given (NOT rejected here) — admissibility, including naive/malformed evidence time, is A's egta.evidence responsibility."
+    release_readiness_verification:
+      combined_source: "B worktree src + E #18 head 92fc3016f605e33ba8f51f4819ad0f24323a6ce6+ my pyproject, overlaid in /tmp/opencode/combined"
+      evidence_contracts: "65 collected, 65 passed"
+      fr05_contracts_9_files: "223 passed"
+      e2_evaluation_4_files: "28 passed"
+      full_repo_ruff: "All checks passed"
+      approved_hash_checks: "FR-05 (9 files) and E2 (6 files) per-file SHA-256 all OK; evidence-contract test 4618b25... unchanged"
+    notes:
+      - "Merge note: E's #18 src/egta/contracts/__init__.py is EMPTY; when #18 and B both land, B's non-empty __init__.py (re-exports) must be preserved. Verified by restoring B's __init__.py over #18's in the combined overlay."
+      - "A's src/egta/evidence on main is untouched."
