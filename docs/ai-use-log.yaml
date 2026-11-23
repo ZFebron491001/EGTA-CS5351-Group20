@@ -519,6 +519,94 @@ sessions:
     export_sha256: "533e63760cd17c74f6fa26a9c9ad0c6d9c77ddea1fe83453a109a0a6db66112a"
     final_binding: "PR #18 @ 10ee52d"
 
+  # --- B (cosine-Y) main session — D5 submission ----------------------------
+  # Snapshot cutoff: 2026-11-22T21:04:17+08:00. B's main work up to that time:
+  # FR-02 baseline (B1) -> shared evidence contracts spec (#5) -> implementation
+  # (#21) -> FR-02 budget spec (#22). Later records appended per team freeze.
+  - session_id: "ses_e0451298bffeYlnqHo00GSewD2"
+    student: "B / YuXiyan / cosine-Y"
+    agent_tool_model: "OpenCode / opencode CLI 1.18.35 / cityu/CS5351/DeepSeek-V4-Flash (provider cityu)"
+    snapshot_cutoff: "2026-11-22T21:04:17+08:00"
+    time:
+      - "2026-11-21T09:18:21+08:00"   # first user turn (B1 baseline request)
+      - "2026-11-22T21:04:17+08:00"   # last message at export (session still active at export; snapshot)
+    task_requirement_ids:
+      - FR-02
+      - INV-03
+      - NFR-01
+      - NFR-02
+      - NFR-04
+      - FR-01
+      - INV-02
+      - GATE-01
+      - GATE-06
+    writable_path:
+      - "docs/evidence/FR-02/"
+      - "docs/req/"
+      - "docs/approvals/"
+      - "test/offline/contracts/"
+      - "test/offline/budget/"
+      - "src/egta/contracts/"
+      - "pyproject.toml"
+      - "docs/ai-use-log-B-fragment.yaml"
+    generated_files:
+      - file: "docs/evidence/FR-02/upstream-offline-baseline.md"
+        commit: "57cd5f2 (docs/B-baseline)"
+        change: "upstream offline baseline at SHA 9fa1196: 1412 passed / 1 skipped / 1 deselected; Python 3.12.16 env"
+      - file: "docs/evidence/FR-02/structured-fallback-probe.md"
+        commit: "57cd5f2 (docs/B-baseline)"
+        change: "local gateway probe, NormalizedChatOpenAI + httpx.MockTransport; allowance 2/1/0 -> transport 2/1/0"
+      - file: "test/offline/contracts/test_evidence_contracts.py"
+        commit: "e1cb6ad -> a433d5a (merged via #5 69da0e4)"
+        change: "shared evidence contract spec; pytestmark=spec; E-31 same-date excluded/FUTURE_DATA; tampered-item constructible; non-empty excluded_items"
+      - file: "docs/req/evidence-contracts.md, docs/req/trace-FR-01-evidence-contracts.md, docs/approvals/test-hash-FR-01-contracts.txt"
+        change: "evidence contract doc + trace + approval hash (test_content_commit a433d5a)"
+      - file: "src/egta/contracts/evidence.py, src/egta/contracts/__init__.py"
+        commit: "f5edf54 (merged via #21 141547a)"
+        change: "RunSpec/EvidenceItem/EvidencePack/Availability/ExcludedItem (type layer); ReasonCode imported from egta.contracts.events"
+      - file: "pyproject.toml"
+        commit: "f5edf54 (merged via #21)"
+        change: "packages.find where=[\".\",\"src\"], include tradingagents*/cli*/egta* (hybrid layout)"
+      - file: "test/offline/budget/conftest.py, fakes.py, test_reservation_holds.py"
+        commit: "efa4bbe (PR #22)"
+        change: "governor_factory lazy import; token-only-bottleneck fixtures; 3 tests (unknown/unsettled -> BudgetDenied; known 100 -> Reservation)"
+      - file: "test/offline/budget/test_admission.py"
+        commit: "b73fda3 (PR #22)"
+        change: "1 concurrency test: two threads race one call slot -> exactly one Reservation + one BudgetDenied"
+      - file: "docs/req/trace-FR-02-budget-reservation.md, docs/req/trace-FR-02-admission.md"
+        commit: "efa4bbe / b73fda3 / 79b99f3"
+        change: "budget spec traces; settle partial-known-usage clarification (79b99f3)"
+      - file: "docs/ai-use-log-B-fragment.yaml"
+        change: "B AI-use fragment assembled across #5/#21/#22"
+    human_intervention:
+      - category: "human instruction / supervision (quality control)"
+        action: "Directed B1 baseline read-only; approved isolated Python 3.12 venv (scheme B, aligned to E); required truthful not-run/pass reporting."
+        requirement_ids: ["FR-02", "NFR-08"]
+      - category: "human instruction / supervision (test-first)"
+        action: "Required test-first shared evidence contract spec; adopted D's second INV-02 ruling (same-date date-only excluded, FUTURE_DATA), superseding earlier 'same-day admitted' wording."
+        requirement_ids: ["FR-01", "INV-02", "GATE-01"]
+      - category: "human correction (real defect caught by human source review)"
+        action: "Found three FR-02 budget tests that could pass despite a real bypass (self-reserve instead of the real helper; hasattr fallback; test-built entry); removed them, keeping only the genuine governor concurrency test. Corrected 'fixture setup failure' -> 'failure at the test's call to the factory'."
+        requirement_ids: ["FR-02", "INV-03"]
+      - category: "human approval gate (every commit/push/PR)"
+        action: "Explicitly authorized each local commit, push, and PR creation; required normal fast-forward only (no force)."
+        requirement_ids: ["GATE-01"]
+    verification_output:
+      - "python -m pytest tests -m 'not integration' -> 1412 passed, 1 skipped, 1 deselected (baseline at 9fa1196)"
+      - "python -m pytest -m spec test/offline/contracts/test_evidence_contracts.py -> 65 passed (with #18 events.py)"
+      - "python -m pytest -m spec test/offline/budget/ -> 4 collected, 4 failed (ModuleNotFoundError: egta.budget; business assertions 0; expected RED)"
+      - "ruff check . -> All checks passed"
+      - "wheel install (clean venv, PYTHONPATH cleared): RunSpec/EvidenceItem/EvidencePack import OK; ReasonCode 13 codes; tradingagents 0.7.1 + cli OK"
+    cost: "unknown"
+    cost_source: "OpenCode does not record billing; session cost field is not a real invoice. Marked unknown."
+    session_path: "transcripts/61076721-YuXiyan.md"
+    raw_session_path: "transcripts/61076721-YuXiyan.raw.json"
+    export_sha256: "23117924de85d3edb1ec5e4ed91156b2c570883fdf8bfbe43d7086cdf04c02cb"
+    raw_export_sha256: "2748505a43df77cb0e221c2c26e0695242f111840dc6d65567cb6e8e4ed3f185"
+    annotations_path: "transcripts/61076721-YuXiyan-annotations.md"
+    redaction: "Personal email from a captured 'git config' output replaced with ****REDACTED-EMAIL**** (2 occurrences); unredacted original retained outside the repository."
+    related_commits: ["57cd5f2", "e1cb6ad", "2982562", "1e07105", "a433d5a", "f52868d", "3d529ed", "291db39", "f5edf54", "efa4bbe", "b73fda3", "a61d3b1", "79b99f3"]
+    related_prs: ["#5 (merged 69da0e4)", "#21 (merged 141547a)", "#22 (open, awaiting E formal approval)"]
   - session_id: "E-e4-e2e-g1"
     student: "E / 61069361 ZHOU Jianmin / jianmin2004"
     agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351/DeepSeek-V4-Flash"
