@@ -416,8 +416,19 @@ jobs:
           if [ ! -f docs/req/requirements.yaml ]; then echo "::notice::requirements.yaml absent -- N/A"; exit 0; fi
           if ! echo "$changed" | grep -qE '^(src|test)/'; then echo "::notice::no src/test change -- N/A"; exit 0; fi
 
-          # Precise module detectors (evidence first, then contract/eval).
-          hit_evidence=$(echo "$changed" | grep -E '^src/egta/evidence/|^test/offline/evidence/|^test/offline/contracts/test_evidence_contracts\.py' || true)
+          # Precise module detectors. FR-01 evidence is split per-file so each
+          # evidence spec routes to its OWN approval record (fixes A #44):
+          #   test/offline/contracts/test_evidence_contracts.py -> FR-01-evidence-contracts
+          #   test/offline/evidence/test_pack_precedence.py      -> FR-01-precedence (N/A until it + record exist)
+          #   test/offline/evidence/test_pack.py                 -> FR-01-pack
+          #   test/offline/evidence/* (rest) + src/egta/evidence/ -> FR-01-evidence
+          # Multiple records may match one change; check() runs EACH matched record.
+          ev_all=$(echo "$changed" | grep -E '^test/offline/evidence/' || true)
+          hit_ev_contracts=$(echo "$changed" | grep -E '^test/offline/contracts/test_evidence_contracts\.py' || true)
+          hit_precedence=$(echo "$changed" | grep -E '^test/offline/evidence/test_pack_precedence\.py' || true)
+          hit_pack=$(echo "$changed" | grep -E '^test/offline/evidence/test_pack\.py' || true)
+          hit_evidence_rest=$(echo "$ev_all" | grep -vE 'test_pack_precedence\.py$|test_pack\.py$' || true)
+          hit_evidence_src=$(echo "$changed" | grep -E '^src/egta/evidence/' || true)
           hit_fr05=$(echo "$changed" | grep -E '^src/egta/contracts/|^src/egta/evaluation/|^test/offline/contracts/' | grep -v '^test/offline/contracts/test_evidence_contracts\.py' || true)
           hit_risk=$(echo "$changed" | grep -E '^src/egta/risk_gate/|^test/offline/risk_gate/' || true)
           hit_budget=$(echo "$changed" | grep -E '^src/egta/budget/' || true)
@@ -437,9 +448,15 @@ jobs:
                 --author "${{ github.event.pull_request.user.login }}" || fail=1
             fi
           }
-          check FR-01-evidence   "$hit_evidence"
-          check FR-05-contracts  "$hit_fr05"
-          check FR-04-risk-gate  "$hit_risk"
-          check FR-02-budget     "$hit_budget"
+          # FR-01 evidence is split per-file (see detectors above); each matched
+          # record is checked independently. N/A for a record that does not yet
+          # exist (forward-compatible: activates when its file + record land).
+          check FR-01-evidence-contracts "$hit_ev_contracts"
+          check FR-01-precedence         "$hit_precedence"
+          check FR-01-pack               "$hit_pack"
+          check FR-01-evidence           "$hit_evidence_rest$hit_evidence_src"
+          check FR-05-contracts          "$hit_fr05"
+          check FR-04-risk-gate          "$hit_risk"
+          check FR-02-budget             "$hit_budget"
           if [ "$ran" -eq 0 ]; then echo "::notice::no module record matched -- N/A"; fi
           exit $fail
