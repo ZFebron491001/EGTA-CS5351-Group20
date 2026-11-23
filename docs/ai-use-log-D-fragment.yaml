@@ -707,3 +707,59 @@ sessions:
       - "No frozen test was deleted or skipped; the existing EVD-05 case gained the date-only canonical assertion."
       - "The approval record was updated at A's explicit direction with A's independently recomputed values; A's GitHub review remains authoritative."
       - "The date-only branch is based on main before the open #37 D-log closeout PR; the final D-log merge order must keep both entries."
+
+  - session_id: "D-2026-11-23-D5-transcript"
+    student: "D / Zhang Fan / 61017180 / ZFebron491001"
+    agent_tool_model: "OpenCode / DeepSeek V4.1 Flash / 1.18.34"
+    time:
+      - "2026-11-23T17:01:40+08:00"   # D5 export, redaction scan, render and index
+    task_requirement_ids:
+      - D5
+      - GATE-06
+      - NFR-07
+    writable_path:
+      - "transcripts/61017180-Zhang-Fan.md"
+      - "transcripts/61017180-Zhang-Fan.raw.json"
+      - "transcripts/61017180-Zhang-Fan-annotations.md"
+      - "transcripts/appendix/61017180-Zhang-Fan-session2.md"
+      - "transcripts/appendix/61017180-Zhang-Fan-session2.raw.json"
+      - "transcripts/INDEX.md"
+      - "docs/ai-use-log-D-fragment.yaml"
+    human_intervention:
+      - type: approve
+        what: "Human supplied student ID 61017180 and authorized D5 transcript preparation and commit"
+        evidence: "interactive: student ID 61017180"
+        limit: "The readable transcript is a render; reasoning is retained in raw JSON; no secret values are included."
+    changes:
+      - "Exported main D session ses_e079e10bcffenzVS8BxvxK6Dl8 and continuation ses_dfd91c6a0ffeGCYpCzxK7KuCWM."
+      - "Rendered main and appendix Markdown; retained compact raw JSON; added curated human-intervention annotations."
+      - "Updated transcripts/INDEX.md D row, session IDs and raw/Markdown hashes."
+    verification_output:
+      - command: "opencode export ses_e079e10bcffenzVS8BxvxK6Dl8; opencode export ses_dfd91c6a0ffeGCYpCzxK7KuCWM"
+        exit_code: 0
+        result: "483 main messages / 361 continuation messages; main raw 9,763,161 bytes; appendix raw 4,253,980 bytes"
+      - command: "secret-pattern scan and Markdown render"
+        exit_code: 0
+        result: "0 secret hits; main Markdown 1,713,061 bytes; appendix Markdown 1,636,709 bytes"
+      - command: "sha256sum transcripts/61017180-Zhang-Fan* transcripts/appendix/61017180-Zhang-Fan-session2*"
+        exit_code: 0
+        result: "main raw e6ab20a2851011254673caf589d14cbfa05ac7ada3908866a940451f7952d865; main md 649ed97c097724c5fba1703e13c09e96c4f7a5b495abe44dfdac002566bb96a3; appendix raw ebfcbb189893d6dce86696440c6b5895ed8c836847ae26bc3bef0d5fdb69c003; appendix md b7321abebd729fad317009d911082b8a83dae4e142f41049ec347d8240fffe9a; annotations e19b6f7d0372868b962b3c58372a8b8f14bcf3f216e008a2b8ccd66b3e4abea3"
+      - command: "git diff --name-only"
+        exit_code: 0
+        result: "transcripts + INDEX + D fragment only; no source/test/contract/CI/approval change"
+    git_output:
+      - action: "branch"
+        result: "docs/D5-transcript from main"
+      - action: "commit"
+        result: "D5 transcript commit in this branch"
+    implementation_status: "D5 main + appendix + raw JSON + annotations complete; awaiting human/A/E review"
+    approval_links:
+      - "transcripts/INDEX.md D row"
+    repository_blockers:
+      - "B and C transcripts remain pending; E final acceptance/freeze remains pending."
+    cost: "unknown"
+    session_path: "transcripts/61017180-Zhang-Fan.md + transcripts/appendix/61017180-Zhang-Fan-session2.md"
+    notes:
+      - "Main session is the original FR-04 risk-gate design session; the continuation is an appendix, not a substitute."
+      - "Reasoning parts are retained in raw JSON and omitted from the readable Markdown render."
+      - "The regex scan found 0 secret patterns; masked token output remains masked."
