@@ -87,8 +87,8 @@ sessions:
     student: "C / Yuan Weizhi"
     agent_tool_model: "OpenCode / deepseek/deepseek-flash(reasoning effort: Max)"
     time:
-      - "PLACEHOLDER — human to provide session start timestamp"
-      - "PLACEHOLDER — human to provide session end timestamp"
+      - "2026-11-23T18:07+08:00"
+      - "2026-11-23T18:18+08:00"
     task_requirement_ids:
       - GOV-09
     writable_path:
