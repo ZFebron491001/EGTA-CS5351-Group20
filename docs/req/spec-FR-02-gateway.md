@@ -64,14 +64,74 @@ Cases 1–4 have a callable entry **only after** the gateway wrapper exists; unt
 they are acceptance conditions, not green tests. Case 5 needs the wrapper plus an
 explicit-retry call site (currently none in the chat path; Jev has its own).
 
-## 3. Left as acceptance-only (no callable entry yet)
+## 4. Left as acceptance-only (no callable entry yet)
 
 - **Unified gateway object**: none exists; must be created (see §4 file 1).
 - **Jev reserve**: `post_screen.py` calls `requests.post` directly; it must reserve
   around each attempt. No budget-aware Jev path exists today.
 - **Zero-budget transport=0**: needs the wrapper; without it the plain model sends.
 
-## 4. Minimal change file list (for the implementation round, not this spec)
+## 5. Runner / CLI acceptance (unified offline entry)
+
+A minimal offline runner wires the REAL modules and fakes **only the model**:
+
+```
+egta.app.runner.run_offline(*, governor, provider, limits, evidence, proposal,
+                            portfolio, clock, db_path, audit_path) -> RunResult
+python -m egta --offline --db-path <p> --audit-path <p>                 # CLI form
+```
+
+The runner owns the wiring; tests read results back INDEPENDENTLY (real ledger
+connection via `egta.risk_gate.ledger`, real `SqliteAuditReader`), and never trust
+the runner's own deltas. The audit is queried by a **known run_id taken from the
+input proposal / public run params** (`proposal.run_id`, e.g. `"run-1"`), and the
+runner must return that SAME `run_id`. Candidate `RunResult` fields used by the
+tests: `run_id`, `verdict` (real `RiskVerdict`), `evidence_pack_hash`, `reason_code`.
+The CLI exposes `egta.__main__.main(argv) -> int` and dispatches to
+`egta.app.runner.run_offline` with the parsed `db_path`/`audit_path`.
+
+| # | Path | Entry | Fake | Real modules under test | Pass condition |
+|---|---|---|---|---|---|
+| R1 | normal | `run_offline` | provider reply; ONE shared event list | real governor (admit before send), real RiskGate APPROVED, real ledger, real audit | same sequence `[("reserve","Reservation"),("send","chat")]`; verdict `APPROVED`; independent ledger read = +1 entry & version+1; `result.run_id == proposal.run_id`; audit read by that run_id is non-empty and all share it; `evidence_pack_hash == pack.pack_hash` |
+| R2 | risk-reject | `run_offline` | provider | real RiskGate, real ledger, real audit | known reject fixture (insufficient cash) → exactly `REJECTED` with `POLICY_REJECTED`; `result.run_id == proposal.run_id`; independent ledger read unchanged before/after; audit read by that run_id carries the reason |
+| R3 | budget-deny | `run_offline` | provider must receive **0** | real governor zero limits, real ledger, real audit | provider receives 0 calls; `reason_code == ReasonCode.BUDGET_DENIED`; `result.run_id == proposal.run_id`; independent ledger read unchanged; audit read by that run_id has a **BUDGET_DENIED** event. **Workflow terminal status is NOT asserted** — explicit spec item pending E (§8). |
+| R4 | CLI | `python -m egta` | test spy on `run_offline` | `egta.__main__.main` | public CLI with `--offline --db-path --audit-path` dispatches to `run_offline` with those params; exit code 0 |
+
+The three module paths use the real `BudgetGovernor` (#45), the real `RiskGate`
+(D's FR-04 module) and the real `SqliteAuditSink`/`SqliteAuditReader`; faking any of
+them would let a real bypass pass, which is exactly what this suite guards against.
+Ledger deltas and audit records are read back INDEPENDENTLY (a fresh ledger
+connection and the real audit reader), not from the runner's own return values.
+
+**C scope (pending):** the deliberation module is absent, so a FIXED proposal
+fixture (`test/offline/risk_gate/fakes.py` builders) stands in for C's output. This
+covers budget/risk/audit wiring; full deliberation integration stays pending.
+
+## 6. Production call inventory and integration status
+
+Every place a request can leave the process, and whether it is covered by a tested
+entry or still needs integration verification:
+
+| Entry | Where | Send path | Status |
+|---|---|---|---|
+| `propagate()` | `trading_graph.py:167` → `_run_graph` → `graph.invoke` | chat models from `get_llm()` | **needs integration**: gateway wrapper at `get_llm()` (candidate, §1) + runner test R1 generalised to the real graph |
+| CLI | `cli/run.py` → `TradingAgentsGraph(...)` → `stream_run` | same chat models | **needs integration**: R4 pins `python -m egta` entry; full CLI-over-graph e2e pending |
+| Tool binding | `agents/analysts/turn.py:26` `(prompt \| llm.bind_tools(tools)).invoke` | chat model (derived) | **spec, RED (adapter)**: case 2 — binding admits 0, bound send admits once |
+| Structured output | `agents/structured.py:69` `structured_llm.invoke` | chat model (derived) | **spec, RED (adapter)**: case 3 first send |
+| Structured→free-text fallback | `agents/structured.py:95` `plain_llm.invoke` | chat model | **spec, RED (adapter)**: case 3 — fallback RE-ADMITS, allowance 1 → refused |
+| Reflection | `memory/reflection.py:63` `self.quick_thinking_llm.invoke` | same quick model | **needs integration**: wrap the injected quick model |
+| Jev direct HTTP | `agents/post_screen.py:68` `requests.post` + retry loop | **`requests` directly (bypass)** | **needs integration**: must reserve per attempt; own adapter |
+| SDK implicit retry | `llm_clients/factory.py:123-125` `max_retries` | SDK inside one `.invoke` | **needs integration**: governed runs keep `max_retries=0` |
+| Explicit retry | (no chat-path call site today) | new attempt | **needs integration**: each attempt re-admits (R5 acceptance) |
+
+**Sent-then-timeout (unknown usage keeps the reservation held):** the governor
+already holds an unsettled reservation (#22 frozen case). The end-to-end proof — a
+real send that times out before usage returns, leaving the hold in place — is an
+**integration acceptance item** (not yet a green test): the adapter must call
+`settle(id, None)` on timeout, keeping the reservation held. Each **explicit retry**
+must call `reserve` again (a new reservation), never reuse the timed-out hold.
+
+## 7. Minimal change file list (for the implementation round, not this spec)
 
 1. **New** `src/egta/adapters/model_gateway.py` — a wrapper class over the chat model
    that (a) calls `governor.reserve`, (b) on `BudgetDenied` returns without sending,
@@ -83,22 +143,41 @@ explicit-retry call site (currently none in the chat path; Jev has its own).
 3. **Edit** `tradingagents/llm_clients/factory.py` — keep `max_retries=0` the default
    for governed runs (explicit `llm_max_retries` disabled) so SDK resends never bypass
    the governor.
-4. **Tests** `test/offline/budget/test_gateway.py` + `conftest`/`fakes` additions
-   (MockTransport counter, gateway wrapper factory), plus a trace.
+4. **New** `src/egta/app/runner.py` — `run_offline(...)` wiring evidence → gateway
+   (budget) → provider (fake in tests) → fixed proposal → real `RiskGate` → ledger →
+   audit; returns a `RunResult`. **New** `src/egta/__main__.py` — `python -m egta`
+   with an `--offline` flag selecting the fake-provider runner.
+5. **Tests** `test/offline/integration/test_gateway.py` (4 adapter cases) +
+   `test_runner_cli.py` (4 runner/CLI cases) + `conftest.py`/`fakes_gateway.py`;
+   trace + acceptance table. Lives in `test/offline/integration/` (NOT
+   `test/offline/budget/`) so the frozen #22 governor suite keeps collecting exactly
+   its four approved cases.
 
-The frozen `test/offline/budget/test_reservation_holds.py` and `test_admission.py`
-stay byte-identical.
+The frozen `test/offline/budget/test_reservation_holds.py`, `test_admission.py`,
+`conftest.py` and `fakes.py` stay byte-identical to #22.
 
-## 5. Questions only E/C can settle
+## 8. Questions only E/C can settle
+
+- **E (CI selector / routing):** the integration suite lives in
+  `test/offline/integration/` to protect the #22 governor count. Should CI add a
+  per-suite gate for it (a new `test-hash-FR-02-integration.txt` `actual_cases`
+  record), or fold it into check-permissions `build-b` routing only? `check-permissions`
+  already maps `src/egta/budget/`, `src/egta/adapters/`, `src/egta/app/`,
+  `test/offline/budget/` → `build-b`; `test/offline/integration/` needs the same
+  routing or a new selector. Record the implementation applicability condition
+  (RED lands on `egta.adapters` / `egta.app`, both unbuilt) and the approval-record
+  route (B's FR-02 budget record vs a new integration record) in the merged spec.
 
 - **E (interface):** is the gateway a `contracts`-level port (injected by `app`) or an
   `adapters/` concrete wrapper installed in `trading_graph`? Also confirm the candidate
   **adapter refusal exception** `BudgetDeniedError` (carries `reason_code`,
   `"BUDGET_DENIED"`), separate from #45's `BudgetDenied` return dataclass.
-- **E (status):** what final workflow status does the zero-budget path report
-  (`INCOMPLETE` vs a dedicated governor status)? This is distinct from the adapter's
-  unit-level refusal (`BudgetDeniedError`): the adapter refuses a single send; the
-  workflow status describes the whole run.
+- **E (status) — explicit spec item:** what final workflow status does the zero-budget
+  path report (`INCOMPLETE` vs a dedicated governor status)? This is an open decision:
+  the R3 test deliberately does NOT assert any `CompletionStatus` membership; the
+  assertion is deferred to a spec item that flips on E's ruling. It is distinct from
+  the adapter's unit-level refusal (`BudgetDeniedError`): the adapter refuses a single
+  send; the workflow status describes the whole run.
 - **C (context/deliberation boundary):** does the deliberation layer ever call a model
   other than through the shared `get_llm()` object (e.g. its own summarizer)? If so,
   that path must go through the same gateway.

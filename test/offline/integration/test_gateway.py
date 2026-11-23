@@ -6,6 +6,9 @@ The adapter entry and its refusal exception ``BudgetDeniedError`` are CANDIDATE
 interfaces pending E/C sign-off (see ``docs/req/spec-FR-02-gateway.md``); the tests
 call them so the future production code itself triggers admission and the send.
 
+Lives under ``test/offline/integration`` (NOT ``test/offline/budget``) so the frozen
+#22 governor suite keeps collecting exactly its four approved cases.
+
 Every test uses ONE ``events`` list. A spy around the real governor's ``reserve``
 appends ``("reserve", <outcome>)``; the MockTransport handler appends ``("send", <kind>)``.
 So admission and transport are observed in a single order — not just a send count.
