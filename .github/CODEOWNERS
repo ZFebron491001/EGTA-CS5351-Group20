@@ -17,6 +17,10 @@
 /test/offline/evaluation/    @jianmin2004 @ZFebron491001
 /test/offline/risk_gate/     @ZFebron491001 @yuxiangdu39
 /test/offline/evidence/      @ZFebron491001 @yuxiangdu39
+/test/offline/requirements/  @yuxiangdu39 @ZFebron491001
+
+# D1 requirement-registry checker (A owns D1)
+/tools/check_requirements.py @yuxiangdu39 @ZFebron491001
 
 # CI / governance (narrower, last)
 /.github/workflows/      @jianmin2004 @ZFebron491001

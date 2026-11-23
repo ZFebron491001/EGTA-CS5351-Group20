@@ -519,6 +519,37 @@ sessions:
     export_sha256: "533e63760cd17c74f6fa26a9c9ad0c6d9c77ddea1fe83453a109a0a6db66112a"
     final_binding: "PR #18 @ 10ee52d"
 
+  - session_id: "E-e4-e2e-g1"
+    student: "E / 61069361 ZHOU Jianmin / jianmin2004"
+    agent_tool_model: "OpenCode / opencode CLI 1.19.5 / CS5351/DeepSeek-V4-Flash"
+    pr: 34
+    branch: docs/E4-final-verification
+    time:
+      - "2026-11-22T11:39:21Z"   # E4 run (date in final-verification.md §0)
+      - "2026-11-22T19:39+08:00" # commit f9f3d21 (e2e_g1 driver + doc)
+    task_requirement_ids: [FR-05, NFR-08, NFR-09, GATE-06]
+    writable_path: ["docs/verification/", "tools/"]
+    generated_files:
+      - file: "docs/verification/final-verification.md"
+        change: "E4 final verification (§1-§6: 223/28/139/NA, CI 7 checks, e2e tables, reverse-proof refs)"
+      - file: "tools/e2e_g1.py"
+        change: "module-level G1 three-way driver (normal/declined/over-budget; temp SQLite, fixed clock, no network)"
+    commits: ["58ac2a6", "f9f3d21", "6947ab1"]
+    human_intervention:
+      - "E4/e2e required and checked by D (final evidence freeze)."
+      - "Re-run/confirmation performed by A on review; GATE-06 gap flagged by A → this entry added."
+    verification_output:
+      - "contracts: 7-file gate 223 passed; full directory 288 passed"
+      - "E2 28 passed; risk_gate 139 passed"
+      - "upstream 1412 passed, 1 skipped, 1 deselected"
+      - "ruff clean; mypy src/egta 0 errors (21 files)"
+      - "e2e normal: COMPLETE/APPROVED, version 1->2, +1 entry, cash 10000.00->9899.90"
+      - "e2e declined(oversized): REJECTED, version unchanged, 0 entries, cash unchanged"
+      - "e2e declined-2(stale): REJECTED, version unchanged, 0 entries, cash unchanged (asserted)"
+      - "e2e over-budget: N/A (budget not implemented, FR-02 #22; expects BudgetDenied/MISSING_USAGE; owner B)"
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "E4 work ran AFTER the D5 main-session export (transcripts/61069361-ZHOU-Jianmin.md is the frozen D5 main session and does not include E4). A fresh export of this E4 session was not produced; recorded 'unknown' (not fabricated)."
   - session_id: "A-2026-11-22-FR01-pack-spec"
     student: "A / Du Yuxiang / yuxiangdu39"
     agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
@@ -558,3 +589,52 @@ sessions:
     cost: "unknown"
     session_path: "unknown (raw session not exported yet; recorded 'unknown', not fabricated)"
 
+
+  - session_id: "A-2026-11-22-d1-check-requirements"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
+    pr: "30 (spec) + 31 (impl)"
+    branch: "spec/D1-check-requirements (spec #30) -> feat/D1-check-requirements (impl #31)"
+    time:
+      - "2026-11-22T16:20:00+08:00"   # spec: checker tests + first implementation attempt
+      - "2026-11-22T17:10:00+08:00"   # spec: rework after D request-changes on PR #27
+      - "2026-11-22T18:40:00+08:00"   # spec: split into #30 (RED) + #31; id-type + real-schema tests
+      - "2026-11-22T23:20:00+08:00"   # impl #31: rebuild on main after #30 merged; tool + CI + CODEOWNERS
+    task_requirement_ids: [NFR-10, GATE-03, GATE-06]
+    writable_path: ["tools/check_requirements.py", "test/offline/requirements/", "pyproject.toml", ".github/workflows/ci.yml", ".github/CODEOWNERS", "docs/req/", "docs/approvals/", "docs/ai-use-log.yaml"]
+    generated_files:
+      - "spec #30: test/offline/requirements/test_check_requirements.py (24 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression)"
+      - "spec #30: docs/req/trace-D1-check-requirements.md, docs/approvals/test-hash-D1-check-requirements.txt"
+      - "impl #31: tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage)"
+      - "impl #31: .github/workflows/ci.yml (requirements suite wired into offline-tests, EXPECT_REQUIREMENTS 24, presence via tool file Path.exists)"
+      - "impl #31: .github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements/)"
+      - "impl #31: pyproject.toml (dev extras: jsonschema, PyYAML)"
+    human_intervention:
+      - "D request-changes on PR #27 (7 items) and PR #15 (item 2); A split the mixed PR into test-first spec #30 (RED) + impl #31, matching the FR-04 governance model."
+      - "D request-changes on #30 (trace counts, schema assertions, AI-use, anchor) and on #31 (approval-record closure + impl AI-use + PR description); A closed both. A placed the 4 real-schema tests in the spec per D #15 item 6."
+    verification_output:
+      - "spec #30 (before merge): pytest test/offline/requirements -> 24 failed (tool absent, collection OK) — expected RED"
+      - "impl #31 (on main 0431ac7, tool + schema present): pytest test/offline/requirements -> 24 passed"
+      - "impl #31 e2e: python tools/check_requirements.py --registry docs/req/requirements.yaml --schema docs/req/req-schema.json -> OK, exit 0 (38 entries, 38 confirmed)"
+      - "impl #31 negative: FR-01 + type governance -> exit 1 'does not match its id prefix'"
+      - "impl #31 CI offline gate: requirements: collect-only=24 expected=24; passed=24 expected=24 -> OK (Actions run 45037827018)"
+      - "ruff clean; upstream pytest -> 1412 passed, 1 skipped"
+    cost: "unknown"
+    session_path: "unknown"
+    session_path_note: "Raw opencode session not yet exported; recorded as unknown (not fabricated) before G3."
+    test_approval:
+      spec_pr: 30
+      record: "docs/approvals/test-hash-D1-check-requirements.txt"
+      test_content_commit: "cd9c25867e4238eeacaa26b880c427c15dba9abe"
+      actual_cases: 24
+      spec_reviewed_head: "e1ea3212d0341b3673559a93719e0a05812133b6"
+      spec_merge_commit: "0431ac76a9d1d85de4c296a1a99ebc3dd44269a0"
+    commits:
+      - "spec #30 test content: cd9c258 (24 cases; id-type + real-schema)"
+      - "impl #31 implementation commit: bdad677 (tool + CI + CODEOWNERS + pyproject; descends from #30 merge 0431ac7)"
+    placement_note: >-
+      Recorded in the shared main log (not the A fragment) because D's reviews of
+      #27 and #25 explicitly required a docs/ai-use-log.yaml session entry for
+      GATE-06. #9 also carries an A fragment for registry/PRD sessions; this
+      checker session lives here to satisfy that review requirement. E owns the
+      final assembly and may fold fragments into this file at submission time.

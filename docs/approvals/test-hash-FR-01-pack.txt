@@ -19,16 +19,24 @@ base:     main
 # RED re-reproduces as 33 errors / 20 functions / 33 cases. Post-#38, D's
 # canonical._normalize handles date-only, so E-07's equality test is satisfiable.
 # test_content_commit is the rebased commit that last touched test_pack.py.
+# Record-only completion (2026-11-22): #25 merged f9ca5d1; D approved 575845e.
+# Test content/hash and actual_cases are unchanged (75fc9d..., 33).
+# Rebased test-content commit: same file content as 24c4906 (hash 75fc9d...);
+# pytest -m spec test/offline/evidence --collect-only: 33 pack cases / 20 functions.
 
-test_content_commit:     168ce87   # rebased commit; same test content as 24c4906 (hash 75fc9d); counts 33/20
-actual_cases: 33           # pytest -m spec test/offline/evidence --collect-only (33 pack cases, 20 functions)
+test_content_commit:     168ce8718c560b38a286f108fdb4b54f876f477a
+actual_cases: 33
 # 13 time-policy tests remain in test_time_policy.py (INV-02) and are deselected here.
 
 files (per-file SHA-256):
   75fc9dc5bbdf6a69fcc439a7f2c0a71ea2b01c7bf15e5c1567ed9fa574aaecac  test/offline/evidence/test_pack.py
 
-aggregate_sha256 (pack test file):
-  75fc9dc5bbdf6a69fcc439a7f2c0a71ea2b01c7bf15e5c1567ed9fa574aaecac
+# aggregate_sha256 = SHA-256 of the sorted per-file "hash  path" lines below
+# (single line here), matching the FR-04 record convention; it is not the file hash.
+aggregate_sha256 (sha256sum of per-file lines, sorted by path):
+  3643e01184e10de405b9d0599b298e5e0a520ec3aa2d3e2286979f7c9fc856ad
 
-reviewed_pr_head:        PENDING   # filled by D at review on this head
-merge_commit:            PENDING   # filled after merge
+reviewed_pr_head:        575845eb1a8c67a964a82a20d0e73ef34eab4d92
+merge_commit:            f9ca5d10d8dfbe85642e2e5130b048cf18f214f0
+approved_by:             D (@ZFebron491001)
+approved_at:             2026-11-22T14:38:46Z
