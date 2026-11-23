@@ -726,3 +726,857 @@ sessions:
       GATE-06. #9 also carries an A fragment for registry/PRD sessions; this
       checker session lives here to satisfy that review requirement. E owns the
       final assembly and may fold fragments into this file at submission time.
+  - session_id: D-2026-11-20-FR04-spec
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    time:
+    - '2026-11-20T18:12:10+08:00'
+    - '2026-11-20T18:12:50+08:00'
+    - '2026-11-20T18:25:38+08:00'
+    - '2026-11-20T18:26:21+08:00'
+    task_requirement_ids:
+    - FR-04
+    - NFR-04
+    - NFR-05
+    - NFR-09
+    - INV-01
+    - INV-04
+    - INV-06
+    - INV-07
+    - D3
+    - D8
+    - GATE-01
+    - GATE-02
+    - GATE-05
+    - GATE-06
+    writable_path:
+    - docs/architecture/adr/003-risk-authority.md
+    - docs/architecture/threat-model.md
+    - docs/architecture/risk-policy.md
+    - docs/architecture/invariants.md
+    - docs/architecture/permission-model.md
+    - docs/code-governance/mcp-tool-manifest.md
+    - docs/evidence/FR-04/
+    - docs/ai-use-log-D-fragment.yaml
+    - test/offline/risk_gate/
+    generated_files:
+    - file: docs/architecture/adr/003-risk-authority.md
+      commit: 2bbbdc0 (initial spec commit)
+      note: ADR-003 draft, status PROPOSED — PENDING HUMAN APPROVAL
+    - file: docs/architecture/threat-model.md
+      commit: 2bbbdc0 (initial spec commit)
+      note: T01–T16 threat register
+    - file: docs/architecture/risk-policy.md
+      commit: 2bbbdc0 (initial spec commit)
+      note: draft policy; 20%/10% plan-specified, freshness/fee/slippage pending
+    - file: docs/architecture/invariants.md
+      commit: 2bbbdc0 (initial spec commit)
+      note: D entries only; other owners must append
+    - file: docs/architecture/permission-model.md
+      commit: 2bbbdc0 (initial spec commit)
+      note: policy artifact; runtime enforcement not claimed
+    - file: docs/code-governance/mcp-tool-manifest.md
+      commit: 2bbbdc0 (initial spec commit)
+      note: D portion; no runtime MCP server claimed
+    - file: test/offline/risk_gate/
+      commit: 2bbbdc0 (initial spec commit)
+      note: 124 identified cases, fakes, fixtures, manifest meta-test
+    - file: docs/evidence/FR-04/
+      commit: 2bbbdc0 (initial spec commit)
+      note: red baseline, manifest green, ruff green, case-build dry run
+    human_intervention:
+    - type: approve
+      what: Phase 0 plan and authorization to generate Phase 1–4 docs/tests
+      evidence: interactive plan approval in this session
+      limit: Not a Test PR approval; not an ADR approval; no implementation authorization
+    - type: approve
+      what: Explicit authorization to complete the Test PR flow (commit + push + create PR)
+      evidence: 'human instruction: ''直接完成 Test PR 流程'''
+      limit: Not a test approval; not an ADR approval; no merge; no implementation authorization
+    - type: reject/none
+      what: no human rejection recorded in this session
+    verification_output:
+    - command: python -m pytest test/offline/risk_gate -q --tb=line
+      exit_code: 1
+      result: '124 failed (expected red: egta/risk_gate absent), 5 passed (manifest)'
+      evidence: docs/evidence/FR-04/phase4-red-baseline.txt
+    - command: python -m pytest test/offline/risk_gate/test_spec_manifest.py -q
+      exit_code: 0
+      result: 5 passed
+      evidence: docs/evidence/FR-04/phase4-manifest-green.txt
+    - command: python -m ruff check test/offline/risk_gate
+      exit_code: 0
+      result: All checks passed
+      evidence: docs/evidence/FR-04/phase4-ruff.txt
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+      evidence: session output
+    - command: case-construction dry run
+      exit_code: 0
+      result: 124 cases built; scenario keys wired
+      evidence: docs/evidence/FR-04/phase4-case-build.txt
+    git_output:
+    - action: git commit
+      result: 2bbbdc09f2eb9c9e6a2994b03253630205f47b12
+    - action: git push
+      result: origin/spec/FR-04-risk-gate
+    - action: gh pr create
+      result: 'PR #2 https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/2 (open, ready for review)'
+    implementation_status: NOT STARTED — GATE-01 approval not yet obtained
+    test_pr: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/2
+    test_pr_number: 2
+    test_pr_state: OPEN — A requested changes on 55df6ca; response 9de822f awaits re-review
+    approval_links: []
+    repository_blockers:
+    - 'At initial PR creation A (@yuxiangdu39) was not a collaborator; the formal request returned HTTP 422. A later reviewed PR #2 as a collaborator.'
+    - 'actions/workflows total_count = 0 for this fork; no CI checks are reported on PR #2. E/admin must enable/register Actions.'
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No implementation code was written.
+    - No contract, CI, CODEOWNERS, ruleset or human-only file was changed.
+    - 'Commit 2bbbdc0 and Test PR #2 were created under explicit human authorization; no merge, review or approval was performed.'
+    - The red baseline is expected test-first evidence, not xfail/skip.
+    - Instrument identity is a contract gap; tests use a test-only ticker field.
+    - This fragment was updated after PR creation; the PR head may contain a follow-up log commit.
+  - session_id: D-2026-11-20-FR04-review-response
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    time:
+    - '2026-11-20T23:22:05+08:00'
+    - '2026-11-20T23:43:49+08:00'
+    - '2026-11-20T23:45:15+08:00'
+    task_requirement_ids:
+    - FR-04
+    - NFR-04
+    - NFR-05
+    - NFR-09
+    - INV-01
+    - INV-04
+    - INV-06
+    - INV-07
+    - GATE-01
+    - GATE-06
+    writable_path:
+    - test/offline/risk_gate/
+    - docs/architecture/risk-policy.md
+    - docs/architecture/adr/003-risk-authority.md
+    - docs/architecture/threat-model.md
+    - docs/evidence/FR-04/
+    - docs/approvals/test-hash-FR-04-risk-gate.txt
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: redirect
+      what: 'A requested changes (B1–B6 plus five non-blocking answers); D instructed the agent to address them and commit to PR #2'
+      evidence: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/2#pullrequestreview-5995039509
+      limit: Not an approval; A must re-review and co-sign the hash record
+    review_response:
+    - 'B1: aligned INVALID_CITATION, INTEGRITY_VIOLATION, INVALID_TIME, STALE_DATA, VENDOR_UNAVAILABLE; one hash/identity rule'
+    - 'B2: added EVD-21 unreachable support and EVD-22 stale support'
+    - 'B3: parameterized freshness (240) and recorded test-only fee/slippage fixture values'
+    - 'B4: added test_harness_selfcheck.py with satisfying and violating stubs'
+    - 'B5: added docs/approvals/test-hash-FR-04-risk-gate.txt with approved_by: PENDING'
+    - 'B6: classification is positive iff APPROVED; test_kind split 119 behavioural + 7 static'
+    - HOLD requires a valid pack; HOLD is an action, not a verdict status
+    - ATM-07/ATM-09/FND-19 now assert the discriminating state
+    - Gate -> RunEvent.RunStatus mapping recorded; instrument identity is a blocking dependency in the hash record
+    verification_output:
+    - command: python -m pytest test/offline/risk_gate -q --tb=line
+      exit_code: 1
+      result: '126 failed (expected red: egta/risk_gate absent), 13 passed (11 manifest + 2 harness)'
+      evidence: docs/evidence/FR-04/phase4-red-baseline.txt
+    - command: python -m pytest test/offline/risk_gate/test_spec_manifest.py -q
+      exit_code: 0
+      result: 11 passed
+      evidence: docs/evidence/FR-04/phase4-manifest-green.txt
+    - command: python -m pytest test/offline/risk_gate/test_harness_selfcheck.py -q
+      exit_code: 0
+      result: 2 passed
+      evidence: docs/evidence/FR-04/phase4-harness-green.txt
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+      evidence: docs/evidence/FR-04/phase4-ruff.txt
+    - command: case-construction dry run
+      exit_code: 0
+      result: 126 built; 119 behavioural + 7 static
+      evidence: docs/evidence/FR-04/phase4-case-build.txt
+    git_output:
+    - action: git commit
+      result: 9de822ff664546d0d741b00636702d176855105b (review-response test content)
+    - action: git push
+      result: origin/spec/FR-04-risk-gate
+    implementation_status: NOT STARTED — A re-review pending
+    test_pr: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/2
+    test_pr_number: 2
+    test_pr_state: OPEN — A CHANGES_REQUESTED on 55df6ca; response 9de822f awaits re-review
+    approval_links:
+    - 'docs/approvals/test-hash-FR-04-risk-gate.txt (approved_by: PENDING)'
+    repository_blockers:
+    - A re-review pending on the new head.
+    - 'actions/workflows total_count = 0 for this fork; no CI checks are reported on PR #2.'
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No implementation code was written.
+    - No self-approval, merge, contract edit, CI edit or human-only file edit was performed.
+    - The 126 failures are expected red, not xfail/skip.
+    - The hash record is prepared but NOT signed by the agent.
+    - 'A re-approved head 1fd6d29; PR #17 merged b245bdb; record-only update in progress.'
+  - session_id: D-2026-11-22-FR04-cutoff-fix
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    time:
+    - '2026-11-22T00:28:04+08:00'
+    - '2026-11-22T00:28:23+08:00'
+    - '2026-11-22T12:32:15+08:00'
+    task_requirement_ids:
+    - FR-04
+    - GATE-01
+    - GATE-06
+    writable_path:
+    - test/offline/risk_gate/fakes.py
+    - docs/approvals/test-hash-FR-04-risk-gate.txt
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: approve
+      what: Authorized a one-line Test PR for the base evidence cutoff fixture fix, with A re-approval
+      evidence: 'interactive approval: 授权提交 Test PR（推荐）'
+      limit: Not an approval of the new test hash; A must independently re-approve
+    changes:
+    - base_evidence_pack cutoff -600s -> -30s to align with make_evidence default
+    - no expected outcome or test count changes; EVD-05 remains REVIEW; base valid
+    verification_output:
+    - command: python -m pytest test/offline/risk_gate -q --tb=line
+      exit_code: 1
+      result: 126 failed, 13 passed — expected red (egta absent); no xfail/skip
+      evidence: local session output
+    - command: python -m pytest test/offline/risk_gate/test_spec_manifest.py test/offline/risk_gate/test_harness_selfcheck.py -q
+      exit_code: 0
+      result: 13 passed
+      evidence: local session output
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+      evidence: local session output
+    git_output:
+    - action: git commit
+      result: d5cf2ea5a10ddc9fb7be7f91c17bfac80cd0c196 (test content)
+    - action: git push
+      result: origin/spec/FR-04-cutoff-fix
+    - action: GitHub merge
+      result: 'PR #17 merge commit b245bdb9095f018cecf8b19419479fc6c2957395'
+    implementation_status: READY TO START — test baseline merged; Phase 5 not started
+    test_pr: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/17
+    test_pr_state: MERGED — A approved 1fd6d29; merge commit b245bdb
+    approval_links:
+    - docs/approvals/test-hash-FR-04-risk-gate.txt (A approved head 1fd6d29; approved_at 2026-11-22T03:30:09Z; merge_commit b245bdb)
+    repository_blockers:
+    - 'Test baseline PR #17 merged; A approved head 1fd6d29.'
+    - Implementation integration still needs ticker/contracts/policy decisions.
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No implementation code was written.
+    - No test expectation changes; only the base pack cutoff fixture.
+    - The 126 failures are expected red, not xfail/skip.
+    - The hash record is prepared but NOT signed by the agent.
+    - 'A re-approved head 1fd6d29; PR #17 merged b245bdb; record-only PR #19 merged 0ab1c823b62f6cc75c96463f46a72a81da56ed9b.'
+  - session_id: D-2026-11-22-FR04-implementation
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    time:
+    - '2026-11-22T12:44:22+08:00'
+    - '2026-11-22T12:45:09+08:00'
+    task_requirement_ids:
+    - FR-04
+    - NFR-04
+    - NFR-05
+    - NFR-09
+    - INV-01
+    - INV-04
+    - INV-06
+    - INV-07
+    - D8
+    - GATE-02
+    - GATE-05
+    - GATE-06
+    writable_path:
+    - src/egta/risk_gate/
+    - docs/evidence/FR-04/impl-green.txt
+    - docs/architecture/risk-policy.md
+    - docs/architecture/adr/003-risk-authority.md
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: approve
+      what: Authorized autonomous Phase 5 implementation after the approved test baseline
+      evidence: 'interactive approval: 允许你自主执行'
+      limit: Implementation PR still requires E code-owner and A independent review; no self-approval
+    changes:
+    - 'implemented src/egta/risk_gate: models, canonical, policy, rules, ledger, service'
+    - 139 approved tests pass; no test/contract/CI/human-only changes
+    - documented SELL concentration exemption and concurrent STALE_PORTFOLIO status
+    verification_output:
+    - command: python -m pytest test/offline/risk_gate -q
+      exit_code: 0
+      result: 139 passed
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: python -m mypy src/egta/risk_gate
+      exit_code: 0
+      result: 'Success: no issues found in 7 source files'
+    - command: python tools/check_approval.py --record docs/approvals/test-hash-FR-04-risk-gate.txt --implementation-base 276a020 --implementation-head HEAD --registry docs/req/requirements.yaml --author ZFebron491001
+      exit_code: 0
+      result: 'OK: approval record verified (per-file hash and new aggregate match)'
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: python -m pytest tests -m 'not integration' -q
+      exit_code: 0
+      result: 1412 passed, 1 skipped (langchain_aws missing), 1 deselected, 100 subtests
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: python -m coverage run --source=src/egta/risk_gate -m pytest test/offline/risk_gate -q
+      exit_code: 0
+      result: 92% total line coverage; policy.py 80% (NFR-06 100% security-branch coverage not claimed)
+      evidence: docs/evidence/FR-04/impl-green.txt
+    git_output:
+    - action: git commit
+      result: dbebd1b5553f9e0d16bf7ac81a0ccb1f4ae9c909 (implementation)
+    implementation_status: IMPLEMENTED + VERIFIED locally; implementation PR pending E/A review
+    test_pr: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/17
+    test_pr_state: MERGED
+    approval_links:
+    - 'PR #17 A approved head 1fd6d29; merge commit b245bdb; aggregate 8486182b'
+    - 'docs/approvals/test-hash-FR-04-risk-gate.txt (record-only #19 pending)'
+    repository_blockers:
+    - Implementation PR requires E code-owner review and A independent review.
+    - Shared contracts/ticker/product policy remain pending for final integration.
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No test, contract, CI, CODEOWNERS or human-only file was changed.
+    - 'Coverage: 92% total; policy.py 80%; 100% security-branch coverage is NOT claimed.'
+    - 'CI offline gate is expected to report risk_gate: 139 passed on the implementation PR.'
+  - session_id: D-2026-11-22-FR04-e-review-fix
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    time:
+    - '2026-11-22T14:36:53+08:00'
+    - '2026-11-22T14:37:06+08:00'
+    task_requirement_ids:
+    - FR-04
+    - NFR-09
+    - INV-06
+    - GATE-02
+    - GATE-05
+    - GATE-06
+    writable_path:
+    - src/egta/risk_gate/canonical.py
+    - src/egta/risk_gate/ledger.py
+    - docs/architecture/risk-policy.md
+    - docs/architecture/adr/003-risk-authority.md
+    - docs/evidence/FR-04/impl-green.txt
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: redirect
+      what: E code-owner review found the outbox payload_hash was not byte-compatible with contracts.audit (timestamp +00:00 vs Z); D asked for a targeted fix
+      evidence: 'PR #20 E review comment (2026-11-22T06:05:43Z)'
+      limit: E and A must re-review the new head; author must not self-approve
+    changes:
+    - outbox payload_hash now uses contracts.audit canonicalization (sorted compact JSON, UTC timestamp Z)
+    - outbox stores the same Z timestamp; stored events are accepted by contracts.audit.verify_payload
+    - documented that UNIQUE(proposal_hash) is intentional because proposal_hash covers run_id
+    verification_output:
+    - command: python -m pytest test/offline/risk_gate -q
+      exit_code: 0
+      result: 139 passed after the compatibility fix
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: python -m mypy src/egta/risk_gate
+      exit_code: 0
+      result: 'Success: no issues found in 7 source files'
+      evidence: docs/evidence/FR-04/impl-green.txt
+    - command: contracts.audit.verify_payload on the persisted outbox event (contracts code from origin/impl/FR-05-contracts-v3)
+      exit_code: 0
+      result: OK; stored == recomputed payload_hash = eaa25281582252eeddd22a4d581fa25b4e99c71425f78c69888e4714b13f8955
+      evidence: docs/evidence/FR-04/impl-green.txt
+    git_output:
+    - action: git commit
+      result: 6bad1699c13ca0f7abf6ba1c2d577877977e7f83 (compatibility fix)
+    - action: pull request
+      result: 'PR #20 updated; new head requires E/A re-review'
+    implementation_status: FIXED + VERIFIED locally; awaiting E/A review of the new head
+    test_pr: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/17
+    test_pr_state: MERGED
+    approval_links:
+    - 'PR #17 A approved head 1fd6d29; merge commit b245bdb; aggregate 8486182b'
+    - 'PR #20 E review comment resolved by commit 6bad169; re-review pending'
+    repository_blockers:
+    - 'E code-owner approval and A independent approval of the new PR #20 head.'
+    - Shared contracts/ticker/product policy remain pending for final integration.
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No test, contract, CI, CODEOWNERS or human-only file was changed.
+    - E's contracts code was used read-only from impl/FR-05-contracts-v3 for compatibility verification.
+    - The earlier CI run passed on 5419dd8; the new head needs a fresh CI run.
+    - 'After E PR #18 merged, contracts.audit is on main; verify_payload re-ran OK on main.'
+  - session_id: D-2026-11-22-post-20-inventory-verify
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    opencode_session_id: ses_dfd91c6a0ffeGCYpCzxK7KuCWM
+    previous_opencode_session_id: ses_e079e10bcffenzVS8BxvxK6Dl8
+    previous_session_last_update: '2026-11-22T16:10:15+08:00'
+    time:
+    - '2026-11-22T16:45:07+08:00'
+    - '2026-11-22T16:54:20+08:00'
+    task_requirement_ids:
+    - FR-04
+    - FR-05
+    - GATE-01
+    - GATE-03
+    - GATE-06
+    writable_path:
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: approve
+      what: 'Approved the prior read-only inventory''s next-step plan: sync local main, verify #23 read-only, update D fragment'
+      evidence: 'interactive approval: 批准'
+      limit: No authorization was given to submit a GitHub review, comment, approval or merge; frozen tests, approval records, contracts, CI and human-only files remain unchanged
+    changes:
+    - 'local main fast-forwarded from 31d01cc to 6830926 (remote main after #26); origin/main updated'
+    - 'verified #23 on post-#20 main in a temporary detached worktree with the #23 diff applied; no repository source change'
+    verification_output:
+    - command: git fetch origin main && git branch -f main origin/main
+      exit_code: 0
+      result: main and origin/main = 6830926c44e7a16bae0cac1992f43a6aac8b26f6
+    - command: 'post-#20 main 6830926 + #23 94f2185 diff; extracted CI Gate each offline suite'
+      exit_code: 0
+      result: contracts 223/223 OK; evaluation 28/28 OK; risk_gate 139/139 OK; budget src/egta/budget absent -> N/A
+      evidence: /tmp/opencode/pr23-gate.out (temporary, not committed)
+    - command: git merge-base --is-ancestor 66f17b9 10ee52d; git grep D#4 assertions on 6830926
+      exit_code: 0
+      result: '#12 merge 66f17b9 is ancestor of #18 merge 10ee52d; D#4 assertions present (MISSING_METRIC, quality_labels, run_pair_id/case_id, illegal rubric, threshold->REVIEW)'
+    - command: 'inspect #23 old CI run 44999261418 / base 10ee52d'
+      exit_code: 0
+      result: old base tree has no src/egta/risk_gate; the old-base CI run cannot prove risk_gate 139
+    - command: 'inspect #9/#10 current state'
+      exit_code: 0
+      result: '#9 open, head 762f148, base 3741987, BEHIND, D comment 7075616405 unchanged, no duplicate reply; #10 remains OPEN'
+    git_output:
+    - action: git fetch / local main update
+      result: 31d01cc -> 6830926; no commit, push, PR review, comment, approval or merge
+    - action: D fragment update
+      result: D-side record prepared; later included in feat/FR-04-governance-checkers
+    implementation_status: 'FR-04 delivered; #23 D4 closure locally verified but official D review pending post-#20 sync/rebase; #9 pending A'
+    approval_links:
+    - 'PR #17 A approved head 1fd6d29; merge b245bdb; aggregate 8486182b'
+    - 'PR #18 merge 10ee52d; PR #20 final head 5825a5d, A+E approved, merge 31d01cc'
+    - 'PR #26 head 5808f0a, A approved, merge 6830926'
+    - 'PR #23 head 94f2185 (open, base 10ee52d, behind)'
+    repository_blockers:
+    - '#23 head 94f2185 is still based on 10ee52d (pre-#20); it needs sync/rebase to 6830926 and a fresh CI run before D review.'
+    - '#10 is still OPEN; the formal D close/supersede marker described in #23 is not yet recorded.'
+    - '#9 head 762f148 is behind main; A aggregation, sync and CI are pending.'
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - This entry records only D-observed facts; no GitHub review/comment/approval/merge was submitted.
+    - No frozen test, approval record, contract, CI or CODEOWNERS file was changed.
+    - The budget suite is correctly N/A until FR-02 exists and docs/approvals/test-hash-FR-02-budget.txt exists.
+    - 'The earlier #23 CI run 44999261418 is not current risk_gate evidence because its base 10ee52d predates src/egta/risk_gate.'
+    - The temporary verification worktree and patch are outside the repository under /tmp/opencode; E's total log was not touched.
+  - session_id: D-2026-11-22-FR04-governance-checkers
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    opencode_session_id: ses_dfd91c6a0ffeGCYpCzxK7KuCWM
+    time:
+    - '2026-11-22T16:58:00+08:00'
+    - '2026-11-22T17:08:08+08:00'
+    - '2026-11-22T17:12:50+08:00'
+    task_requirement_ids:
+    - FR-04
+    - NFR-05
+    - NFR-07
+    - GATE-01
+    - GATE-02
+    - D3
+    - GOV-03
+    writable_path:
+    - tools/check_permissions.py
+    - tools/check_approval.py
+    - docs/architecture/permission-model.md
+    - docs/evidence/FR-04/phase7-governance-green.txt
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: approve
+      what: 'Authorized autonomous completion of plan B: implement the approved Phase 7 governance checkers, push the branch and open the implementation PR'
+      evidence: 'interactive approval: 后续执行计划todo和执行命令，你可自主完成'
+      limit: No self-approval or merge; A/E independent review remains required.
+    changes:
+    - 'added tools/check_permissions.py: role allowlists, human-only/protected/contract/approval path rejection, cross-module import detection, credential-reference detection and JSON output'
+    - 'added tools/check_approval.py: record parsing, pending/self-approval checks, registry lookup, approved-test ancestry, per-file/aggregate hash checks, test-drift detection and JSON output'
+    - updated permission-model observed facts and checker status without claiming CI or runtime enforcement
+    - 'added Phase 7 green evidence including #26 test hashes for A''s approval record'
+    - added AGENTS.md to the D-writable allowlist so D3 ownership does not require a policy exception
+    - added root AGENTS.md D3 entry point with structural constraints, permission rules, human-only rules, MCP reference and project covenant
+    verification_output:
+    - command: python -m pytest test/offline/governance -q
+      exit_code: 0
+      result: 38 passed (32 behavioural + 6 manifest)
+    - command: python -m pytest test/offline/risk_gate -q
+      exit_code: 0
+      result: 139 passed
+    - command: python -m pytest -m spec <seven FR-05 contracts files> -q
+      exit_code: 0
+      result: 223 passed
+    - command: python -m pytest -m spec test/offline/evaluation -q
+      exit_code: 0
+      result: 28 passed
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+    - command: python -m mypy tools/check_permissions.py tools/check_approval.py
+      exit_code: 0
+      result: 'Success: no issues found in 2 source files'
+    git_output:
+    - action: git branch
+      result: feat/FR-04-governance-checkers from 6830926
+    - action: git commit
+      result: 7dca154b843fbe900a6aa25a9ca343322556888d implementation; 325d6fb54ed4d5273a68fc8b71472742d4a2d39f local log record
+    - action: git push
+      result: origin/feat/FR-04-governance-checkers
+    - action: pull request
+      result: 'PR #29 https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/29 (open, A/E review required)'
+    implementation_status: 'IMPLEMENTED + VERIFIED; PR #29 open awaiting A/E review and E CI integration'
+    approval_links:
+    - 'Test baseline: PR #26, A approved head 5808f0a, merge 6830926, test content 0c5c2e7'
+    - 'Implementation PR: #29 https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/29'
+    repository_blockers:
+    - docs/req/requirements.yaml (#9) is still missing on main; approval checker production CI integration must wait for it.
+    - AGENTS.md/Prompt.md/.opencode rules remain missing; GOV-03/GOV-09 still cannot pass.
+    - ADR-003 and risk-policy remain PROPOSED pending human approval.
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No frozen governance tests, approval records, contracts, CI or CODEOWNERS were changed.
+    - 'A single-invocation pytest test/offline is not used: existing basename collisions and the FR-01 EvidenceItem import gap are pre-existing; CI runs per-suite.'
+    - 'The #26 per-file and aggregate hashes are evidence, not an approval record; A''s GitHub approval remains authoritative.'
+    - AGENTS.md is a proposed D3 policy artifact and requires human review; Prompt.md is still missing, so GOV-09 is not claimed.
+    - Push and PR creation were performed under explicit human authorization; no GitHub review, approval or merge was submitted.
+  - session_id: D-2026-11-22-D1-D4-merge-closeout
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    opencode_session_id: ses_dfd91c6a0ffeGCYpCzxK7KuCWM
+    time:
+    - '2026-11-22T20:36:59+08:00'
+    - '2026-11-22T20:38:42+08:00'
+    - '2026-11-22T20:40:31+08:00'
+    - '2026-11-22T20:41:17+08:00'
+    task_requirement_ids:
+    - FR-04
+    - FR-05
+    - GATE-01
+    - GATE-03
+    - GATE-06
+    - D3
+    - D4
+    - GOV-03
+    writable_path:
+    - docs/ai-use-log-D-fragment.yaml
+    - docs/evidence/FR-04/phase7-governance-green.txt
+    human_intervention:
+    - type: approve
+      what: 'Authorized autonomous closeout after A/E completed their assigned steps: merge approved PRs, review #9, and record final state'
+      evidence: 'interactive approval: 这些A与E对应完成，请你开始逐项执行任务'
+      limit: 'No self-approval; #15 was not approved; no review was submitted without an independent approval.'
+    changes:
+    - 'merged #23 df3d64e after D/A approvals; verified contracts 223, evaluation 28, risk_gate 139 and budget N/A; DEBT-FR05-D4 closed and #10 closed'
+    - 'merged #29 d375b7a after A/E approvals on fe197a6; branch updated to df3d64e and approvals remained valid; AGENTS.md and governance checkers are on main'
+    - 'reviewed and approved #9 e5dad3f; merged dc59be1 after verifying D entries, GOV-03/GOV-09 criteria and schema compatibility'
+    - recorded merged heads and remaining blockers in the D log and Phase 7 evidence
+    verification_output:
+    - command: '#23 offline gate run 45021369196'
+      exit_code: 0
+      result: contracts 223/223 OK; evaluation 28/28 OK; risk_gate 139/139 OK; budget N/A
+    - command: '#29 CI run 45023246672'
+      exit_code: 0
+      result: 7/7 checks successful
+    - command: '#9 CI run 45023374986'
+      exit_code: 0
+      result: 7/7 checks successful
+    - command: main CI run 45023510507 on dc59be1
+      exit_code: 0
+      result: 7/7 checks successful
+    - command: python -m pytest test/offline/governance -q on main dc59be1
+      exit_code: 0
+      result: 38 passed
+    - command: python tools/check_permissions.py --base df3d64e --head d375b7a --role build-d
+      exit_code: 0
+      result: 'OK: no permission violations on the #29 merge diff'
+    - command: 'validate #9 registry against #15 schema head 5adba44'
+      exit_code: 0
+      result: 0 schema errors across 38 requirements
+    git_output:
+    - action: GitHub merges
+      result: '#23 df3d64e8695b8f35864520a0c3ce48b0432d9cda; #29 d375b7ae211d0aedbe4a352f814e37bd2993c760; #9 dc59be13ffe664214006de0cf89dfa6c96be3ca1'
+    - action: main head
+      result: dc59be13ffe664214006de0cf89dfa6c96be3ca1
+    implementation_status: 'D1 registry, D3 AGENTS and governance checkers merged; D4 debt closed; #15 still blocked; E CI wiring and Prompt/.opencode remain'
+    approval_links:
+    - 'PR #23 merged df3d64e; D and A approved 1dabad1'
+    - 'PR #29 merged d375b7a; A approved fe197a6; E approved fe197a6'
+    - 'PR #9 merged dc59be1; D approved e5dad3f'
+    repository_blockers:
+    - '#15 still has D CHANGES_REQUESTED: PRD by_component INV-07, stale review record and final status remain; A must fix.'
+    - Prompt.md and .opencode/rules.md remain missing; GOV-09 cannot PASS and .opencode/rules.md is human-only.
+    - E must wire the governance checkers into CI; D reverse-block verification is pending that wiring.
+    - ADR-003 and risk-policy remain PROPOSED pending human approval or an explicit debt record.
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - D approvals were submitted only after independent implementation review; no self-approval.
+    - 'The #29 approvals remained bound to the updated head e66aed8 after the branch update.'
+    - No frozen test, approval record, contract or CODEOWNERS file was edited during closeout.
+    - 'Main CI run 45023510507 on dc59be1 passed 7/7 after the #9 merge.'
+  - session_id: D-2026-11-22-FR04-date-only-canonical
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    opencode_session_id: ses_dfd91c6a0ffeGCYpCzxK7KuCWM
+    time:
+    - '2026-11-22T20:45:00+08:00'
+    - '2026-11-22T20:54:10+08:00'
+    task_requirement_ids:
+    - FR-04
+    - FR-01
+    - NFR-09
+    - INV-06
+    - GATE-01
+    writable_path:
+    - src/egta/risk_gate/canonical.py
+    - test/offline/risk_gate/test_evidence_time_policy.py
+    - docs/evidence/FR-04/date-only-canonical-fix.txt
+    - docs/approvals/test-hash-FR-04-risk-gate.txt
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: redirect
+      what: 'A reported PR #25 E-07 date-only failure and requested D-side canonical support plus a D regression test'
+      evidence: 'A message: canonical date-only blocker; keep E-07 and equality test; add D-side date-only risk-gate test'
+      limit: D fixed canonical.py and added the regression.
+    - type: approve
+      what: 'A independently recomputed the new per-file hash and aggregate and explicitly directed D to update the FR-04 approval record on #38'
+      evidence: 'A message: exact per-file/aggregate values; re-signed by A; 139 unchanged'
+      limit: 'A''s GitHub review on #38 remains authoritative; D applied the verified values and did not self-approve.'
+    changes:
+    - canonical.py now normalizes datetime.date to an ISO date string after the datetime branch, preserving datetime precedence
+    - T-RISK-EVD-05 now also checks date-only canonical bytes and hash equality with the equivalent ISO-string pack
+    - added date-only evidence with red/green outputs and the new test hash/aggregate
+    - 'updated the FR-04 approval record per A''s independently verified values; test_content_commit/reviewed_pr_head use the stable test commit 276a020 and merge_commit is PENDING #38'
+    verification_output:
+    - command: python -m pytest test/offline/risk_gate/test_evidence_time_policy.py -q -k EVD-05 --tb=short (before fix)
+      exit_code: 1
+      result: 'TypeError: cannot canonicalize <class ''datetime.date''> (expected RED)'
+    - command: python -m pytest test/offline/risk_gate/test_evidence_time_policy.py -q -k EVD-05 --tb=short (after fix)
+      exit_code: 0
+      result: 1 passed, 21 deselected
+    - command: python -m pytest test/offline/risk_gate -q
+      exit_code: 0
+      result: 139 passed
+    - command: python -m ruff check .
+      exit_code: 0
+      result: All checks passed
+    - command: python -m mypy src/egta/risk_gate
+      exit_code: 0
+      result: 'Success: no issues found in 7 source files'
+    git_output:
+    - action: test-first commit
+      result: 276a020 (date-only regression, expected RED)
+    - action: fix commit
+      result: '95d6bb9; implementation PR #38'
+    implementation_status: 'FIXED + VERIFIED; approval record updated per A''s verified values; A/E review of #38 pending'
+    approval_links:
+    - 'A PR #25: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/25'
+    - 'D fix PR #38: https://github.com/ZFebron491001/EGTA-CS5351-Group20/pull/38'
+    - 'A re-sign values for #38: per-file eae1f93c..., aggregate f3c45de2...'
+    repository_blockers:
+    - 'A/E must review #38 at the new head after the approval-record update.'
+    - The risk_gate expected count remains 139; no CI count change is required.
+    - 'A must rebind #25 to current main and confirm E-07 plus the equality test on the new D canonical.'
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No frozen test was deleted or skipped; the existing EVD-05 case gained the date-only canonical assertion.
+    - The approval record was updated at A's explicit direction with A's independently recomputed values; A's GitHub review remains authoritative.
+    - 'The date-only branch is based on main before the open #37 D-log closeout PR; the final D-log merge order must keep both entries.'
+  - session_id: D-2026-11-23-E3-required-reverse-D3-closeout
+    student: D / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash
+    opencode_session_id: ses_dfd91c6a0ffeGCYpCzxK7KuCWM
+    time:
+    - '2026-11-23T15:28:31+08:00'
+    task_requirement_ids:
+    - FR-04
+    - D3
+    - GATE-01
+    - GATE-02
+    - GATE-06
+    - NFR-07
+    - GOV-03
+    - GOV-09
+    writable_path:
+    - docs/ai-use-log-D-fragment.yaml
+    - docs/evidence/FR-04/gate-reverse-proof.txt
+    human_intervention:
+    - type: approve
+      what: Human completed the ADR-003/risk-policy deferral and human-only .opencode/rules.md; authorized D to verify and record the next-stage evidence
+      evidence: 'interactive: 这两项任务已经完成，检查之后推进下一阶段任务'
+      limit: The agent did not edit .opencode/rules.md or sign ADR-003; the ADR remains PROPOSED by design and the policy approval is recorded as debt.
+    changes:
+    - '#52 merged ADR-003/risk-policy deferral text and DEBT-FR04-POLICY-APPROVAL; the ADR remains PROPOSED and the gate remains fail-closed.'
+    - '#53 merged the human-maintained .opencode/rules.md; runtime enforcement is not claimed.'
+    - '#47 merged precise FR-01 evidence routing and the FR-02 budget approval record.'
+    - Added governance (exact 38), check-permissions (GATE-02) and check-approval (GATE-01) to protect-main required checks.
+    - 'Reverse-proof failure control #48 proved all three gates fail and the PR is BLOCKED; normal control #49 proved all 10 required checks pass on main; the GATE-01 base bug was fixed by #50.'
+    - 'Closed throwaway #48/#49 and #32 without merge; #33 was updated and merged, and #43 was merged after the E routing/producer fixes.'
+    verification_output:
+    - command: '#48 failure control run 45105760411'
+      exit_code: 1
+      result: governance, check-permissions and check-approval failed; mergeStateStatus=BLOCKED
+    - command: '#49 normal control run 45131000924 on main 809ec6f'
+      exit_code: 0
+      result: all 10 required checks passed; only review requirement blocked; closed without merge
+    - command: '#50 merged; GATE-01 uses PR base for implementation PRs'
+      exit_code: 0
+      result: 0fef55b; false TEST_DRIFT removed; test/spec PRs N/A; missing records fail closed
+    - command: git show origin/main:.opencode/rules.md; ADR/debt inspection
+      exit_code: 0
+      result: .opencode/rules.md present; ADR-003/risk-policy still PROPOSED; DEBT-FR04-POLICY-APPROVAL Open
+    - command: post-closeout merge check
+      exit_code: 0
+      result: '#33 merged 93da0ff; #43 merged dfb7a3f; #57 merged aa9ce5a; #43 check-approval is now green after routing/record fixes'
+    git_output:
+    - action: GitHub merges
+      result: '#47 320bf4d; #50 0fef55b; #51 5f21991; #53 29a8556; #52 809ec6f; #33 93da0ff; #43 dfb7a3f; #57 aa9ce5a'
+    - action: main head
+      result: aa9ce5a8cc330b4254c6cf1220a2d8caed38d68d
+    implementation_status: D3 rules and ADR/policy deferral complete; required/reverse verification complete; D5 transcript and final log/evidence freeze remain
+    approval_links:
+    - 'ADR/policy deferral: #52; debt DEBT-FR04-POLICY-APPROVAL'
+    - 'Human rules: #53'
+    - 'Reverse proof: #48 failure, #49 normal pass, #50 fix'
+    repository_blockers:
+    - '#46 Prompt.md remains CHANGES_REQUESTED (invalid YAML, read/write conflict, behind main).'
+    - '#45 budget implementation still needs E review; #56 budget co-sign is open/behind main.'
+    - D5 main transcript and E's merge of A/B/C/D fragments into docs/ai-use-log.yaml remain pending.
+    - C FR-03 deliberation implementation is still absent.
+    cost: unknown
+    session_path: unknown (raw session not exported yet)
+    notes:
+    - No frozen test, approval record, contract or CI file was edited by this closeout entry.
+    - Human-only .opencode/rules.md was authored by the human; the agent only verified it.
+    - The ADR-003 status remains PROPOSED; deferral is explicit, not an inferred approval.
+  - session_id: D-2026-11-23-D5-transcript
+    student: D / Zhang Fan / 61017180 / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash / 1.18.34
+    time:
+    - '2026-11-23T17:01:40+08:00'
+    task_requirement_ids:
+    - D5
+    - GATE-06
+    - NFR-07
+    writable_path:
+    - transcripts/61017180-Zhang-Fan.md
+    - transcripts/61017180-Zhang-Fan.raw.json
+    - transcripts/61017180-Zhang-Fan-annotations.md
+    - transcripts/appendix/61017180-Zhang-Fan-session2.md
+    - transcripts/appendix/61017180-Zhang-Fan-session2.raw.json
+    - transcripts/INDEX.md
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: approve
+      what: Human supplied student ID 61017180 and authorized D5 transcript preparation and commit
+      evidence: 'interactive: student ID 61017180'
+      limit: The readable transcript is a render; reasoning is retained in raw JSON; no secret values are included.
+    changes:
+    - Exported main D session ses_e079e10bcffenzVS8BxvxK6Dl8 and continuation ses_dfd91c6a0ffeGCYpCzxK7KuCWM.
+    - Rendered main and appendix Markdown; retained compact raw JSON; added curated human-intervention annotations.
+    - Updated transcripts/INDEX.md D row, session IDs and raw/Markdown hashes.
+    verification_output:
+    - command: opencode export ses_e079e10bcffenzVS8BxvxK6Dl8; opencode export ses_dfd91c6a0ffeGCYpCzxK7KuCWM
+      exit_code: 0
+      result: 483 main messages / 361 continuation messages; main raw 9,763,161 bytes; appendix raw 4,253,980 bytes
+    - command: secret-pattern scan and Markdown render
+      exit_code: 0
+      result: 0 secret hits; main Markdown 1,713,061 bytes; appendix Markdown 1,636,709 bytes
+    - command: sha256sum transcripts/61017180-Zhang-Fan* transcripts/appendix/61017180-Zhang-Fan-session2*
+      exit_code: 0
+      result: main raw e6ab20a2851011254673caf589d14cbfa05ac7ada3908866a940451f7952d865; main md 649ed97c097724c5fba1703e13c09e96c4f7a5b495abe44dfdac002566bb96a3; appendix raw ebfcbb189893d6dce86696440c6b5895ed8c836847ae26bc3bef0d5fdb69c003; appendix md b7321abebd729fad317009d911082b8a83dae4e142f41049ec347d8240fffe9a; annotations e19b6f7d0372868b962b3c58372a8b8f14bcf3f216e008a2b8ccd66b3e4abea3
+    - command: git diff --name-only
+      exit_code: 0
+      result: transcripts + INDEX + D fragment only; no source/test/contract/CI/approval change
+    git_output:
+    - action: branch
+      result: docs/D5-transcript from main
+    - action: commit
+      result: D5 transcript commit in this branch
+    implementation_status: D5 main + appendix + raw JSON + annotations complete; awaiting human/A/E review
+    approval_links:
+    - transcripts/INDEX.md D row
+    repository_blockers:
+    - B and C transcripts remain pending; E final acceptance/freeze remains pending.
+    cost: unknown
+    session_path: transcripts/61017180-Zhang-Fan.md + transcripts/appendix/61017180-Zhang-Fan-session2.md
+    notes:
+    - Main session is the original FR-04 risk-gate design session; the continuation is an appendix, not a substitute.
+    - Reasoning parts are retained in raw JSON and omitted from the readable Markdown render.
+    - The regex scan found 0 secret patterns; masked token output remains masked.
+  - session_id: D-2026-11-23-report-sections
+    student: D / Zhang Fan / 61017180 / ZFebron491001
+    agent_tool_model: OpenCode / DeepSeek V4.1 Flash / 1.18.34
+    time:
+    - '2026-11-23T17:32:02+08:00'
+    task_requirement_ids:
+    - D6
+    - D5
+    - GATE-06
+    writable_path:
+    - docs/report/D-sections.md
+    - docs/ai-use-log-D-fragment.yaml
+    human_intervention:
+    - type: approve
+      what: Human authorized D to complete the remaining report sections and reflection
+      evidence: 'interactive: 好的，请你帮我完成即可'
+      limit: Draft compilation material only; E owns the final Report.md and cannot be replaced by this fragment.
+    changes:
+    - Created docs/report/D-sections.md with D's §4 architecture, §5 agent governance, §6 implementation, §7 verification, §8 debt/limitations, §9 reflection and evidence index.
+    - 'Recorded real D-side numbers and deferred items: 139 risk_gate, 38 governance, 10 required checks, #48/#49/#50, DEBT-FR04-POLICY-APPROVAL.'
+    verification_output:
+    - command: word-count check
+      exit_code: 0
+      result: D sections 3068 words; reflection 475 words (within 300-500)
+    - command: fact check against main e797138
+      exit_code: 0
+      result: 'D5 merged 4677a11; #54 merged e797138; D fragment 11 sessions; ADR/rules statuses match main'
+    - command: git diff --name-only
+      exit_code: 0
+      result: docs/report/D-sections.md + D fragment only; no source/test/CI/approval change
+    git_output:
+    - action: branch
+      result: docs/D-report-sections from main e797138
+    - action: commit
+      result: D report sections commit in this branch
+    implementation_status: D report draft complete for E compilation; final Report.md assembly remains E-owned
+    approval_links:
+    - docs/report/A-sections.md, docs/report/E-sections-draft.md for section conventions
+    repository_blockers:
+    - Final Report.md compilation, B/C transcript acceptance, C Prompt/FR-03, and budget implementation activation remain outside D's report draft.
+    cost: unknown
+    session_path: transcripts/61017180-Zhang-Fan.md + appendix
+    notes:
+    - E compiles the final Report.md; this is D's compilation material.
+    - No claim is made that ADR-003, product policy, ticker identity, budget or C modules are complete.
