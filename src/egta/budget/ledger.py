@@ -97,9 +97,17 @@ def _exact_add(a: Decimal, b: Decimal) -> Decimal:
     would make a sub-cent over-budget request fit. Compute under a precision large
     enough for both operands' digits so the sum is exact.
     """
-    digits = max(len(a.as_tuple().digits), len(b.as_tuple().digits)) + abs(
-        a.as_tuple().exponent
-    ) + abs(b.as_tuple().exponent) + 8
+    # Both operands are finite (validated by ``_money``), so each ``exponent`` is an
+    # ``int``; narrow it explicitly for the type checker while keeping exact addition.
+    a_exp = a.as_tuple().exponent
+    b_exp = b.as_tuple().exponent
+    assert isinstance(a_exp, int) and isinstance(b_exp, int)
+    digits = (
+        max(len(a.as_tuple().digits), len(b.as_tuple().digits))
+        + abs(a_exp)
+        + abs(b_exp)
+        + 8
+    )
     with localcontext() as ctx:
         ctx.prec = max(ctx.prec, digits)
         return a + b

@@ -26,6 +26,7 @@ from egta.budget.ledger import (
     SettlementConflict,
     UnknownReservation,
 )
+from egta.contracts.events import ReasonCode
 
 
 @dataclass(frozen=True)
@@ -37,9 +38,13 @@ class Reservation:
 
 @dataclass(frozen=True)
 class BudgetDenied:
-    """A refusal: the call would exceed at least one budget axis."""
+    """A refusal: the call would exceed at least one budget axis.
 
-    reason_code: str = "BUDGET_DENIED"
+    ``reason_code`` uses the shared ``ReasonCode`` enum; because it is a ``StrEnum``
+    the serialized value stays the string ``"BUDGET_DENIED"``.
+    """
+
+    reason_code: ReasonCode = ReasonCode.BUDGET_DENIED
 
 
 @dataclass(frozen=True)
