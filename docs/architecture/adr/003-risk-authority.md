@@ -188,6 +188,12 @@ thresholds or fee/slippage model change; or the outbox/audit sink mapping to E's
 
 ## Approval record
 
-This section is intentionally blank. The agent may not create, infer, or backfill an
-approval. A human reviewer must record the reviewer identity, date, reviewed commit
-SHA, and any conditions before this ADR becomes APPROVED.
+No human approval is recorded. Approval is deferred pending resolution of
+[DEBT-FR04-POLICY-APPROVAL](../../debt-register.md#debt-fr04-policy-approval).
+This ADR remains proposed, and the demo policy remains unfrozen. Test fixture
+values are not defaults; an unconfigured or incompatible policy fails closed.
+
+Only a human reviewer may record the reviewer identity, date and time zone,
+exact reviewed commit SHA, approval scope, conditions, and review link before
+this ADR becomes APPROVED. Separate policy approval must identify the approved
+parameters, version, content hash, and effective window.

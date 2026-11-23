@@ -211,3 +211,46 @@ sessions:
     cost: "unknown"
     notes:
       - "Docs-only: requirements.yaml + this fragment."
+
+  - session_id: "ses_spec_FR01_precedence"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-22T23:15+08:00"
+    task_requirement_ids: [FR-01, INV-02, GATE-01]
+    writable_path:
+      - "test/offline/evidence/"
+      - "docs/approvals/"
+      - "docs/req/"
+      - "docs/ai-use-log-A-fragment.yaml"
+    branch: "test/FR-01-pack-precedence"
+    base: "main (0431ac7 after rebase)"
+    pr: 44
+    commits: ["777f43e1d499d2863afa38b1c90cef406ca0cfe5"]   # rebased head; original 4e75ceb superseded by rebase onto main 0431ac7
+    test_approval:
+      record_path: "docs/approvals/test-hash-FR-01-precedence.txt"
+      test_content_commit: "777f43e1d499d2863afa38b1c90cef406ca0cfe5"
+      actual_cases: 4
+      reviewed_pr_head: "PENDING (D fills at review)"
+      approved_by: "PENDING (D fills at review)"
+    session_path: "unknown (raw opencode session not exported yet; recorded 'unknown', not fabricated)"
+    generated_files:
+      - file: "test/offline/evidence/test_pack_precedence.py"
+        note: "4 additive FR-01 classification-precedence cases (integrity->stale->time->dedupe). RED by design (egta.evidence.pack absent)."
+      - file: "docs/approvals/test-hash-FR-01-precedence.txt"
+        note: "test-only approval record: actual_cases 4, per-file + aggregate sha256; reviewed/approved/merge PENDING for D."
+      - file: "docs/req/trace-FR-01-pack-precedence.md"
+        note: "spec trace; records the contract-level precedence decision."
+    human_intervention:
+      - category: "human review / approval"
+        action: "Split the 4 precedence cases out of impl PR #43 into this standalone test/spec PR per D's GATE-01 request; test-only, no implementation."
+        requirement_ids: ["GATE-01"]
+    verification_output:
+      - command: "pytest -m spec test/offline/evidence/test_pack_precedence.py -q"
+        result: "4 errors (ImportError RED: egta.evidence.pack absent), no xfail/skip"
+      - command: "ruff check test/offline/evidence/test_pack_precedence.py"
+        result: "All checks passed!"
+    cost: "unknown"
+    notes:
+      - "Test-only: no src/, contracts, CI or other module change."
+      - "Frozen test_pack.py (hash 75fc9d) untouched; this adds a separate file."
