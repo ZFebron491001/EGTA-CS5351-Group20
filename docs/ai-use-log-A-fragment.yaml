@@ -211,3 +211,172 @@ sessions:
     cost: "unknown"
     notes:
       - "Docs-only: requirements.yaml + this fragment."
+
+  - session_id: "ses_spec_FR01_precedence"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-22T23:15+08:00"
+    task_requirement_ids: [FR-01, INV-02, GATE-01]
+    writable_path:
+      - "test/offline/evidence/"
+      - "docs/approvals/"
+      - "docs/req/"
+      - "docs/ai-use-log-A-fragment.yaml"
+    branch: "test/FR-01-pack-precedence"
+    base: "main (0431ac7 after rebase)"
+    pr: 44
+    commits: ["777f43e1d499d2863afa38b1c90cef406ca0cfe5"]   # rebased head; original 4e75ceb superseded by rebase onto main 0431ac7
+    test_approval:
+      record_path: "docs/approvals/test-hash-FR-01-precedence.txt"
+      test_content_commit: "777f43e1d499d2863afa38b1c90cef406ca0cfe5"
+      actual_cases: 4
+      reviewed_pr_head: "PENDING (D fills at review)"
+      approved_by: "PENDING (D fills at review)"
+    session_path: "unknown (raw opencode session not exported yet; recorded 'unknown', not fabricated)"
+    generated_files:
+      - file: "test/offline/evidence/test_pack_precedence.py"
+        note: "4 additive FR-01 classification-precedence cases (integrity->stale->time->dedupe). RED by design (egta.evidence.pack absent)."
+      - file: "docs/approvals/test-hash-FR-01-precedence.txt"
+        note: "test-only approval record: actual_cases 4, per-file + aggregate sha256; reviewed/approved/merge PENDING for D."
+      - file: "docs/req/trace-FR-01-pack-precedence.md"
+        note: "spec trace; records the contract-level precedence decision."
+    human_intervention:
+      - category: "human review / approval"
+        action: "Split the 4 precedence cases out of impl PR #43 into this standalone test/spec PR per D's GATE-01 request; test-only, no implementation."
+        requirement_ids: ["GATE-01"]
+    verification_output:
+      - command: "pytest -m spec test/offline/evidence/test_pack_precedence.py -q"
+        result: "4 errors (ImportError RED: egta.evidence.pack absent), no xfail/skip"
+      - command: "ruff check test/offline/evidence/test_pack_precedence.py"
+        result: "All checks passed!"
+    cost: "unknown"
+    notes:
+      - "Test-only: no src/, contracts, CI or other module change."
+      - "Frozen test_pack.py (hash 75fc9d) untouched; this adds a separate file."
+
+  - session_id: "ses_feat_FR01_impl_ascoped"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-23T15:00+08:00"
+    task_requirement_ids: [FR-01, INV-02, NFR-06]
+    writable_path:
+      - "src/egta/evidence/"
+      - "docs/evidence/FR-01/"
+      - "docs/req/"
+      - "docs/ai-use-log-A-fragment.yaml"
+    pr: 43
+    branch: "feat/FR-01-evidence-pack"
+    base: "5f21991 (#51 merge); descends from approved precedence spec"
+    generated_files:
+      - file: "src/egta/evidence/pack.py"
+        note: "build_pack/validate_claims/InvalidCitation; injectable hasher port (default local canonical_pack_hash); precedence integrity->stale->time->dedupe; no cross-module import."
+      - file: "src/egta/evidence/hashing.py"
+        note: "local canonical evidence hash, byte-identical to egta.risk_gate.canonical.recompute_evidence_hash; equality proven by test_pack_hash_matches_risk_gate_canonical."
+      - file: "docs/req/trace-FR-01-evidence-impl.md"
+        note: "implementation trace; hasher-port rationale; no contracts/risk_gate/CI change."
+    human_intervention:
+      - category: "review response"
+        action: "D blocker 1 (no cross-module import) satisfied without touching contracts/risk_gate: local byte-identical hasher + injected port, keeping all changes within module A (check_permissions --role build-a OK). Earlier attempt (moving canonical to contracts + editing risk_gate+CI) was reverted because it violated A's write scope (GATE-02)."
+        requirement_ids: ["FR-01","NFR-06","GATE-02"]
+    verification_output:
+      - command: "pytest -m spec test/offline/evidence -q"
+        result: "37 passed, 13 deselected"
+      - command: "pytest -m 'not spec' test/offline/evidence -q"
+        result: "13 passed, 37 deselected"
+      - command: "ruff check src/egta/evidence test/offline/evidence; mypy src/egta/evidence"
+        result: "ruff clean; mypy no issues"
+      - command: "tools/check_permissions.py --role build-a"
+        result: "OK: no permission violations"
+    cost: "unknown"
+    notes:
+      - "A-scoped: only src/egta/evidence/, docs/evidence/FR-01/, docs/req/, this fragment."
+      - "CI gating of evidence suite is E/D-owned; A does not edit CI."
+
+  - session_id: "ses_test_FR01_live_provider"
+    student: "A / yuxiangdu39"
+    agent_tool_model: "OpenCode / opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-23T16:00+08:00"
+    task_requirement_ids: [FR-01, INV-02, NFR-08]
+    writable_path:
+      - "test/live/test_data_provider.py"
+      - "docs/ai-use-log-A-fragment.yaml"
+    branch: "test/FR-01-live-data-provider"
+    base: "main (post-#43)"
+    generated_files:
+      - file: "test/live/test_data_provider.py"
+        note: "Live Yahoo Finance test of FR-01 invariants (bar date not future, sha256(excerpt)==content_hash, INV-02 admissible, build_pack well-formed). Skipped unless EGTA_LIVE_DATA=1 (built-in skipif; pyproject not module A's scope)."
+    human_intervention:
+      - category: "scope decision"
+        action: "Chose env-gated skipif instead of adding a 'live' marker to pyproject.toml, because pyproject is outside module A's allowed paths and offline CI must stay network-free (NFR-08)."
+        requirement_ids: ["NFR-08","FR-01"]
+    verification_output:
+      - command: "pytest test/live/test_data_provider.py -q (offline)"
+        result: "4 skipped (no error)"
+      - command: "EGTA_LIVE_DATA=1 pytest test/live/test_data_provider.py -q"
+        result: "4 passed (real provider)"
+      - command: "ruff check test/live/test_data_provider.py"
+        result: "All checks passed!"
+      - command: "tools/check_permissions.py --role build-a"
+        result: "OK: no permission violations"
+    cost: "unknown"
+    notes:
+      - "A-scoped: test/live/test_data_provider.py only."
+
+  - session_id: "ses_dfc7091b2ffeKoDECWYCHHLaNB"
+    student: "A / Du Yuxiang / 61016736 / yuxiangdu39"
+    agent_tool_model: "opencode CLI / CS5351/DeepSeek-V4-Flash (provider custom-foundry)"
+    time:
+      - "2026-11-22T14:01:01Z"   # session start
+      - "2026-11-23T08:31:21Z"   # last user turn (requested D5 export)
+    task_requirement_ids: [FR-01, INV-02, NFR-06, NFR-08, NFR-10, D1, D5, GATE-01, GATE-02, GATE-05, GATE-06]
+    writable_path:
+      - "src/egta/evidence/"
+      - "test/offline/evidence/"
+      - "test/live/test_data_provider.py"
+      - "docs/req/"
+      - "docs/evidence/FR-01/"
+      - "docs/ai-use-log-A-fragment.yaml"
+      - "transcripts/"
+    branch: "multiple (feat/FR-01-evidence-pack, test/FR-01-pack-precedence, feat/FR-01-impl-rebuild, test/FR-01-live-data-provider, docs/D5-A-transcript)"
+    generated_files:
+      - file: "transcripts/61016736-DuYuxiang.md"
+        note: "D5 main-session transcript (raw render; tool outputs verbatim)"
+      - file: "transcripts/61016736-DuYuxiang.en.md"
+        note: "English narrative translation (user/assistant prose in English; tool I/O raw)"
+      - file: "transcripts/61016736-DuYuxiang.raw.json"
+        note: "authoritative `opencode export` JSON"
+      - file: "transcripts/61016736-DuYuxiang-annotations.md"
+        note: "human-intervention annotation index (English, §10.1 format)"
+      - file: "src/egta/evidence/pack.py, hashing.py, __init__.py"
+        note: "FR-01 build_pack/validate_claims + A-scoped local canonical hasher port (PR #43)"
+      - file: "test/live/test_data_provider.py"
+        note: "live FR-01 data-provider test, skipped unless EGTA_LIVE_DATA=1 (PR #57)"
+      - file: "docs/req/trace-FR-01-evidence-impl.md"
+        note: "FR-01 impl trace"
+    human_intervention:
+      - category: "supervision / redirects / approvals"
+        action: "Multiple human directives, corrections and gate approvals across the session; see transcripts/61016736-DuYuxiang-annotations.md for the indexed list (28 user turns). Key: instructed rigorous self-audit after rework; chose option A (per-file routing); authorized merging non-authored PRs #42/#51 after independent approval; identified the A permission-boundary violation, leading to the A-scoped hasher-port redesign."
+        requirement_ids: ["GATE-01","NFR-06","D5"]
+    verification_output:
+      - command: "pytest -m spec test/offline/evidence -q (on main)"
+        result: "37 passed, 13 deselected"
+      - command: "pytest test/live/test_data_provider.py -q"
+        result: "4 skipped offline; 4 passed with EGTA_LIVE_DATA=1"
+      - command: "tools/check_permissions.py --role build-a (each PR)"
+        result: "OK: no permission violations"
+    cost: "unknown"
+    transcript:
+      raw_json: "transcripts/61016736-DuYuxiang.raw.json"
+      markdown_raw: "transcripts/61016736-DuYuxiang.md"
+      markdown_en: "transcripts/61016736-DuYuxiang.en.md"
+      annotations: "transcripts/61016736-DuYuxiang-annotations.md"
+      export_sha256: "6f120ce7d8e15ac64316acb529c378b9838dc687d4635bef30496a06c8b4837b"   # English narrative md
+      raw_md_sha256: "f55b11e02f82a573fb135aee6a6ccbba6f5e17cb929b9695a1b64f05300a81c6"
+      raw_export_sha256: "fc0d1bd5d0977433a9027954338278e9a4c6cf429458af991107a5d2eebe1c04"
+      messages: 612
+    notes:
+      - "Raw session only; tool outputs kept verbatim (like E). English narrative provided in .en.md; raw .md authoritative."
+      - "Credentials redacted (****REDACTED****); scanned clean (no github_pat_/ghp_/sk- tokens in export)."

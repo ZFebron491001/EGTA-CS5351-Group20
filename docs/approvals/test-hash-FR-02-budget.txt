@@ -1,0 +1,55 @@
+PR/task: FR-02 / INV-03 budget reservation + admission spec (test/spec ONLY — no implementation)
+branch:   spec/B-budget-reservation-v2
+base:     main
+PR:       #22 (merged)
+
+# --- Commit binding (test-content only) --------------------------------------
+# test_content_commit = the commit that last changed the budget test files'
+# content (B's concurrent-admission increment). The implementation lives in
+# src/egta/budget (PR #45); this record binds the APPROVED TEST CONTENT so a
+# post-approval test edit voids it (re-review required). Do not push after approval.
+test_content_commit: b73fda339fc727fb22fb2067f0f3fe1b96556618
+reviewed_pr_head:    b73fda339fc727fb22fb2067f0f3fe1b96556618
+merge_commit:        a47c29c0c673c177b55601610cbf538c8c1ae64a
+requirement:         FR-02
+
+case_inventory:
+  spec_cases: 4              # pytest -m spec test/offline/budget --collect-only
+  reservation_holds: 3       # unknown-usage held / unsettled held / known-low releases
+  admission_concurrency: 1   # two threads race one call slot -> 1 Reservation + 1 BudgetDenied
+  note: "These 4 are the ONLY spec (pytest -m spec) cases; the real-gateway
+         send-then-interrupt / durable-restart / structured-fallback paths remain
+         'pending gateway wiring' tracked in docs/req/trace-FR-02-admission.md and
+         are NOT in this count."
+
+actual_cases: 4              # pytest -m spec test/offline/budget (terminal summary must show 4 passed)
+
+files (per-file SHA-256):
+  bbf2f5d3db5ecf909027cc07a391fd9bc042fcd967548a2ff1ee94437020ec5c  test/offline/budget/conftest.py
+  04b7b87eed8c0a6712fd58ab1777de3ad04bfc05d979e3d5c65282ba7aa51de7  test/offline/budget/fakes.py
+  a1a012e09ee0cfc765ac297c05307e82c9dcd97f086417183bf20794e0bdc1d2  test/offline/budget/test_admission.py
+  06fabe6c32fee059421e242615868ab490ef02d30dc83479c2ef6d338fb64506  test/offline/budget/test_reservation_holds.py
+
+aggregate_sha256 (sha256sum of per-file lines, sorted by path):
+  a4c1923187d908d339f698faeaeb9907402dba14ba6c049fb980f00fd89c61ba
+
+# --- Approval ----------------------------------------------------------------
+# AUTHOR of the FR-02 spec (#22) = B (@cosine-Y). The author MUST NOT self-approve.
+# approved_by is therefore PENDING; a NON-AUTHOR (A or E) co-signs. The
+# authoritative approval is the GitHub review commit_id on the reviewed test head.
+approved_by: PENDING (author = B/@cosine-Y; approver = A/@yuxiangdu39 or E/@jianmin2004, non-author)
+approved_at: PENDING
+
+# --- What this record unlocks -------------------------------------------------
+# CI `offline-tests` budget gate (src/egta/budget ⇔ -m spec test/offline/budget)
+# reads actual_cases from this file. Before this record the budget suite was
+# silently N/A (record absent). With src/egta/budget present (PR #45) + this
+# record, the gate now ENFORCES exactly `actual_cases` passed (blocking), so the
+# budget suite cannot be green-vacuously.
+
+notes:
+- Test-first spec only; created RED with no src/egta/budget, now GREEN after #45.
+- If any budget test file changes after approval, the aggregate hash changes and
+  the approval is void (re-review required).
+- This file is a hash + count record, not itself an approval; the non-author
+  reviewer co-signs via GitHub review on the reviewed test head.

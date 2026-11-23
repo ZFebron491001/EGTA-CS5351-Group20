@@ -593,31 +593,31 @@ sessions:
   - session_id: "A-2026-11-22-d1-check-requirements"
     student: "A / yuxiangdu39"
     agent_tool_model: "OpenCode / opencode CLI / CS5351-DeepSeek-V4-Flash"
-    pr: 30
-    branch: spec/D1-check-requirements (spec) -> feat/D1-check-requirements (impl)
+    pr: "30 (spec) + 31 (impl)"
+    branch: "spec/D1-check-requirements (spec #30) -> feat/D1-check-requirements (impl #31)"
     time:
-      - "2026-11-22T16:20:00+08:00"   # checker implementation + first tests
-      - "2026-11-22T17:10:00+08:00"   # rework after D request-changes on PR #27
-      - "2026-11-22T18:40:00+08:00"   # split into spec #30 + impl #31; id-type + real-schema tests
+      - "2026-11-22T16:20:00+08:00"   # spec: checker tests + first implementation attempt
+      - "2026-11-22T17:10:00+08:00"   # spec: rework after D request-changes on PR #27
+      - "2026-11-22T18:40:00+08:00"   # spec: split into #30 (RED) + #31; id-type + real-schema tests
+      - "2026-11-22T23:20:00+08:00"   # impl #31: rebuild on main after #30 merged; tool + CI + CODEOWNERS
     task_requirement_ids: [NFR-10, GATE-03, GATE-06]
     writable_path: ["tools/check_requirements.py", "test/offline/requirements/", "pyproject.toml", ".github/workflows/ci.yml", ".github/CODEOWNERS", "docs/req/", "docs/approvals/", "docs/ai-use-log.yaml"]
     generated_files:
-      - "test/offline/requirements/test_check_requirements.py (24 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression; spec branch RED because tool + schema absent)"
-      - "tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage) — impl PR #31"
-      - "docs/req/trace-D1-check-requirements.md"
-      - "docs/approvals/test-hash-D1-check-requirements.txt (actual_cases 24)"
-      - "pyproject.toml (dev extras: jsonschema, PyYAML) — impl PR #31"
-      - ".github/workflows/ci.yml (requirements suite wired, EXPECT_REQUIREMENTS 24) — impl PR #31"
-      - ".github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements/) — impl PR #31"
+      - "spec #30: test/offline/requirements/test_check_requirements.py (24 functions / 24 cases: 18 contract + 2 id-type linkage + 4 real-schema regression)"
+      - "spec #30: docs/req/trace-D1-check-requirements.md, docs/approvals/test-hash-D1-check-requirements.txt"
+      - "impl #31: tools/check_requirements.py (schema layer via jsonschema + semantic layer incl. id-prefix-to-type linkage)"
+      - "impl #31: .github/workflows/ci.yml (requirements suite wired into offline-tests, EXPECT_REQUIREMENTS 24, presence via tool file Path.exists)"
+      - "impl #31: .github/CODEOWNERS (tools/check_requirements.py + test/offline/requirements/)"
+      - "impl #31: pyproject.toml (dev extras: jsonschema, PyYAML)"
     human_intervention:
-      - "D request-changes on PR #27 with 7 items and on PR #15 item 2; A drove all fixes and split the mixed PR into test-first spec #30 (RED) + impl #31 (tool + CI + CODEOWNERS), matching the FR-04 governance spec model."
-      - "A placed the 4 real-schema regression tests in the checker spec per D #15 item 6; merge order #15 -> #30 -> #31 so the real-schema cases resolve against #15."
+      - "D request-changes on PR #27 (7 items) and PR #15 (item 2); A split the mixed PR into test-first spec #30 (RED) + impl #31, matching the FR-04 governance model."
+      - "D request-changes on #30 (trace counts, schema assertions, AI-use, anchor) and on #31 (approval-record closure + impl AI-use + PR description); A closed both. A placed the 4 real-schema tests in the spec per D #15 item 6."
     verification_output:
-      - "spec #30: pytest test/offline/requirements -q -> 24 failed (tool + schema absent, collection OK) — expected RED"
-      - "impl #31: pytest test/offline/requirements -q -> 24 passed (against #15 schema)"
-      - "impl e2e: python tools/check_requirements.py --registry <#9> --schema <#15> -> OK, exit 0"
-      - "impl negative: FR-01 + type governance -> exit 1 'does not match its id prefix'"
-      - "CI offline gate: requirements: collect-only=24 expected=24 -> OK"
+      - "spec #30 (before merge): pytest test/offline/requirements -> 24 failed (tool absent, collection OK) — expected RED"
+      - "impl #31 (on main 0431ac7, tool + schema present): pytest test/offline/requirements -> 24 passed"
+      - "impl #31 e2e: python tools/check_requirements.py --registry docs/req/requirements.yaml --schema docs/req/req-schema.json -> OK, exit 0 (38 entries, 38 confirmed)"
+      - "impl #31 negative: FR-01 + type governance -> exit 1 'does not match its id prefix'"
+      - "impl #31 CI offline gate: requirements: collect-only=24 expected=24; passed=24 expected=24 -> OK (Actions run 45037827018)"
       - "ruff clean; upstream pytest -> 1412 passed, 1 skipped"
     cost: "unknown"
     session_path: "unknown"
@@ -627,9 +627,11 @@ sessions:
       record: "docs/approvals/test-hash-D1-check-requirements.txt"
       test_content_commit: "cd9c25867e4238eeacaa26b880c427c15dba9abe"
       actual_cases: 24
+      spec_reviewed_head: "e1ea3212d0341b3673559a93719e0a05812133b6"
+      spec_merge_commit: "0431ac76a9d1d85de4c296a1a99ebc3dd44269a0"
     commits:
-      - "spec #30 test commit cd9c258 (24 cases; id-type + real-schema)"
-      - "impl #31 tool/CI/CODEOWNERS commit on feat/D1-check-requirements"
+      - "spec #30 test content: cd9c258 (24 cases; id-type + real-schema)"
+      - "impl #31 implementation commit: bdad677 (tool + CI + CODEOWNERS + pyproject; descends from #30 merge 0431ac7)"
     placement_note: >-
       Recorded in the shared main log (not the A fragment) because D's reviews of
       #27 and #25 explicitly required a docs/ai-use-log.yaml session entry for
