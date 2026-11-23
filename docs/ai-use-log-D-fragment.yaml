@@ -707,3 +707,72 @@ sessions:
       - "No frozen test was deleted or skipped; the existing EVD-05 case gained the date-only canonical assertion."
       - "The approval record was updated at A's explicit direction with A's independently recomputed values; A's GitHub review remains authoritative."
       - "The date-only branch is based on main before the open #37 D-log closeout PR; the final D-log merge order must keep both entries."
+
+  - session_id: "D-2026-11-23-E3-required-reverse-D3-closeout"
+    student: "D / ZFebron491001"
+    agent_tool_model: "OpenCode / DeepSeek V4.1 Flash"
+    opencode_session_id: "ses_dfd91c6a0ffeGCYpCzxK7KuCWM"
+    time:
+      - "2026-11-23T15:28:31+08:00"   # verification and D evidence closeout
+    task_requirement_ids:
+      - FR-04
+      - D3
+      - GATE-01
+      - GATE-02
+      - GATE-06
+      - NFR-07
+      - GOV-03
+      - GOV-09
+    writable_path:
+      - "docs/ai-use-log-D-fragment.yaml"
+      - "docs/evidence/FR-04/gate-reverse-proof.txt"
+    human_intervention:
+      - type: approve
+        what: "Human completed the ADR-003/risk-policy deferral and human-only .opencode/rules.md; authorized D to verify and record the next-stage evidence"
+        evidence: "interactive: 这两项任务已经完成，检查之后推进下一阶段任务"
+        limit: "The agent did not edit .opencode/rules.md or sign ADR-003; the ADR remains PROPOSED by design and the policy approval is recorded as debt."
+    changes:
+      - "#52 merged ADR-003/risk-policy deferral text and DEBT-FR04-POLICY-APPROVAL; the ADR remains PROPOSED and the gate remains fail-closed."
+      - "#53 merged the human-maintained .opencode/rules.md; runtime enforcement is not claimed."
+      - "#47 merged precise FR-01 evidence routing and the FR-02 budget approval record."
+      - "Added governance (exact 38), check-permissions (GATE-02) and check-approval (GATE-01) to protect-main required checks."
+      - "Reverse-proof failure control #48 proved all three gates fail and the PR is BLOCKED; normal control #49 proved all 10 required checks pass on main; the GATE-01 base bug was fixed by #50."
+      - "Closed throwaway #48/#49 and #32 without merge; requested changes on stale reverse-proof doc #33."
+    verification_output:
+      - command: "#48 failure control run 45105760411"
+        exit_code: 1
+        result: "governance, check-permissions and check-approval failed; mergeStateStatus=BLOCKED"
+      - command: "#49 normal control run 45131000924 on main 809ec6f"
+        exit_code: 0
+        result: "all 10 required checks passed; only review requirement blocked; closed without merge"
+      - command: "#50 merged; GATE-01 uses PR base for implementation PRs"
+        exit_code: 0
+        result: "0fef55b; false TEST_DRIFT removed; test/spec PRs N/A; missing records fail closed"
+      - command: "git show origin/main:.opencode/rules.md; ADR/debt inspection"
+        exit_code: 0
+        result: ".opencode/rules.md present; ADR-003/risk-policy still PROPOSED; DEBT-FR04-POLICY-APPROVAL Open"
+      - command: "#43 check-approval inspection"
+        exit_code: 1
+        result: "src/egta/evidence/ still routes to the old FR-01-evidence record; E/A must split pack/hashing to FR-01-pack and repair the old record"
+    git_output:
+      - action: "GitHub merges"
+        result: "#47 320bf4d; #50 0fef55b; #51 5f21991; #53 29a8556; #52 809ec6f"
+      - action: "main head"
+        result: "809ec6f801d40f10d63437ea282eaf5123524aca"
+    implementation_status: "D3 rules and ADR/policy deferral complete; required/reverse verification complete; D5 transcript and final log/evidence freeze remain"
+    approval_links:
+      - "ADR/policy deferral: #52; debt DEBT-FR04-POLICY-APPROVAL"
+      - "Human rules: #53"
+      - "Reverse proof: #48 failure, #49 normal pass, #50 fix"
+    repository_blockers:
+      - "#43 GATE-01 is blocked by E source routing to the old FR-01-evidence record; pack/hashing need FR-01-pack mapping and the old record needs repair."
+      - "#46 Prompt.md remains CHANGES_REQUESTED (invalid YAML, read/write conflict, behind main)."
+      - "#45 budget implementation and the FR-02 budget record co-sign remain pending."
+      - "#33 reverse-proof doc is stale and changes were requested."
+      - "D5 main transcript and E's merge of A/B/C/D fragments into docs/ai-use-log.yaml remain pending."
+    cost: "unknown"
+    session_path: "unknown (raw session not exported yet)"
+    notes:
+      - "No frozen test, approval record, contract or CI file was edited by this closeout entry."
+      - "Human-only .opencode/rules.md was authored by the human; the agent only verified it."
+      - "The ADR-003 status remains PROPOSED; deferral is explicit, not an inferred approval."

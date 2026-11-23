@@ -1,0 +1,71 @@
+EGTA required-check reverse proof and D3 closeout evidence
+==========================================================
+Date: 2026-11-23T15:28:31+08:00
+Main inspected: 809ec6f801d40f10d63437ea282eaf5123524aca
+Owner: D (verifier)
+
+Required checks on protect-main (10)
+------------------------------------
+offline spec suites (per-suite gate)
+ruff (strict, full repo)
+clean-install smoke
+tests (py3.11)
+tests (py3.12, America/New_York)
+tests (py3.13)
+tests (py3.14)
+governance (exact 38)
+check-permissions (GATE-02)
+check-approval (GATE-01)
+
+Failure control (closed, never merged)
+--------------------------------------
+PR #48: [reverse-proof] DO NOT MERGE - gate failure cases
+Head: 86b11dd
+Run: 45105760411
+Deliberate faults:
+- src/egta/contracts/reverse_proof.py
+- test/offline/risk_gate/test_evidence_time_policy.py modified
+- test/offline/governance/test_reverse_extra.py added
+Observed:
+- governance (exact 38): FAILURE
+- check-permissions (GATE-02): FAILURE
+- check-approval (GATE-01): FAILURE
+- mergeStateStatus: BLOCKED
+Closed without merge.
+
+Normal control (closed, never merged)
+-------------------------------------
+PR #49: [reverse-proof] DO NOT MERGE - normal in-scope pass
+Head: bf5068e (rebased to 809ec6f)
+Run: 45131000924
+Change: src/egta/risk_gate/reverse_proof_ok.py only
+Observed: all 10 required checks SUCCESS, including
+- governance: 38 passed
+- check-permissions: pass
+- check-approval: pass
+The PR remained blocked only by the expected review requirement.
+Closed without merge.
+
+GATE-01 false-positive found and fixed
+-------------------------------------
+PR #50 (merged 0fef55b):
+- implementation PRs now use the PR base as --implementation-base
+- test/spec PRs whose record test commit is not in base are N/A
+- applicable modules with a missing record fail closed
+
+D3 / ADR-policy closeout
+------------------------
+- .opencode/rules.md is present on main (human-maintained, #53);
+  runtime enforcement is not claimed.
+- ADR-003 and risk-policy remain PROPOSED by design; approval is deferred via
+  DEBT-FR04-POLICY-APPROVAL (#52), not inferred. The gate remains fail-closed.
+- DEBT-FR04-POLICY-APPROVAL is Open and must be carried into submission evidence.
+
+Residual issues (not D gate defects)
+------------------------------------
+- #43 check-approval still fails because src/egta/evidence/ routes to the old
+  FR-01-evidence record. Pack/hashing need FR-01-pack routing and the old record
+  needs A/E repair.
+- #46 Prompt.md remains CHANGES_REQUESTED.
+- #45 budget implementation and FR-02 budget record co-sign remain pending.
+- #33 reverse-proof doc is stale; D requested changes.
