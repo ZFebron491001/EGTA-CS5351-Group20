@@ -27,8 +27,8 @@
   deleted or skipped.
 - Offline suites are network-free and use fake ports/temp SQLite. Expected counts are
   exact: risk_gate **139**, governance **38**, contracts **223**, evaluation **28**,
-  budget **4**, and evidence spec **37** (pack 33 + precedence 4; time-policy 13 is
-  not-spec).
+  budget **4**, evidence spec **37** (pack 33 + precedence 4; time-policy 13 is
+  not-spec), and FR-02 integration spec **8** (4 gateway + 4 runner/CLI).
 - Any skip, xfail, xpass or error fails the per-suite gate; a missing module directory may
   be N/A, but an implemented module with a missing approval record fails closed.
 - The 10 required checks on `protect-main` are: tests (3.11/3.12-NY/3.13/3.14),
@@ -46,6 +46,10 @@
 - FR-05/E2: comparison is per-side and missing metrics are `INCOMPLETE/MISSING_METRIC`;
   threshold breaches yield `REVIEW`; audit replay verifies hash chain and anchor.
 - Budget: reserve/settle, unknown-usage hold, concurrency and persisted limits.
+- FR-02 integration: 8 spec cases (gateway adapter and runner/CLI); `test/offline/integration/`
+  maps to the build-e role and the separate `test-hash-FR-02-integration.txt` record. The
+  implementation (`src/egta/app/` and `src/egta/adapters/`) is B-owned and remains the
+  activation dependency; the suite is not yet an offline-tests CI job.
 - Governance: 32 permission/approval cases plus 6 manifest meta-tests; failure controls
   prove the required checks block.
 
@@ -59,6 +63,7 @@ python -m pytest -m "not spec" test/offline/evidence -q  # 13 passed, 37 deselec
 python -m pytest -m spec test/offline/contracts -q  # FR-05 isolated files: 223
 python -m pytest -m spec test/offline/evaluation -q # 28 passed
 python -m pytest -m spec test/offline/budget -q     # 4 passed
+python -m pytest -m spec test/offline/integration -q  # 8 passed after B implementation
 python -m ruff check .
 python -m mypy src/egta/risk_gate
 python tools/check_permissions.py --repo . --base <base> --head <head> --role <role>
@@ -110,7 +115,9 @@ until the Actions run is attached.
   than fully automated by the checkers.
 - GATE-03 schema, GATE-04 semantic and GATE-06 AI-use are not all expressed as required
   status checks; GATE-04 depends on C's semantic runner, and GATE-06 is review-enforced.
-- C's FR-03 deliberation and transcript/report are outside D's module; D does not claim
-  them. B's architecture/application package is B-owned.
+- B's D2 architecture package is complete, but `src/egta/app/` and
+  `src/egta/adapters/` remain missing; #67's 8 integration tests are RED until B
+  implements them. C's FR-03 deliberation and transcript/report are outside D's module;
+  D does not claim them.
 - The final release checklist and submission ZIP/video are E's assembly, not proof that
   every upstream or external dependency is complete.
