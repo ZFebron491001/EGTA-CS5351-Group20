@@ -1,0 +1,48 @@
+PR/task: FR-02 budget-gateway adapter + runner/CLI integration (test-first spec, test/spec ONLY — no implementation)
+branch:   spec/B-budget-gateway
+base:     main
+PR:       #67
+
+# --- Commit binding (test-content only) --------------------------------------
+# Integration suite = the 4 adapter cases moved OUT of test/offline/budget/ (so
+# budget keeps exactly its 4 #22 cases) + 4 runner/CLI cases. Separate suite,
+# separate record. The implementation lives in src/egta/adapters/ + src/egta/app/
+# (BudgetedModelGateway, runner) and is NOT frozen here. Do not push after approval.
+test_content_commit: fefcee83710ae4083c0bcda8bd4b426becb08362
+reviewed_pr_head:    fefcee83710ae4083c0bcda8bd4b426becb08362
+merge_commit:        PENDING (PR #67)
+requirement:         FR-02
+
+case_inventory:
+  spec_cases: 8              # pytest -m spec test/offline/integration --collect-only
+  gateway_adapter: 4         # test_gateway.py (adapter: ample/zero-budget/bind-tools/structured-400-fallback)
+  runner_cli: 4              # test_runner_cli.py (runner normal/risk-reject/budget-deny/CLI dispatch)
+  note: "Moved from test/offline/budget/ so the #22 budget record keeps exactly
+         actual_cases: 4 (frozen test_reservation_holds.py/test_admission.py/
+         conftest.py/fakes.py unchanged). Kept as its OWN record — this suite does
+         NOT belong to the budget-reservation record."
+
+actual_cases: 8              # pytest -m spec test/offline/integration (terminal summary must show 8 passed)
+
+files (per-file SHA-256):
+  08d72e600cb08251167dfd651fc5993318c94af3f5add5abacc9c18c90d2c0ce  test/offline/integration/conftest.py
+  124d9cba1af5b3a19290bbf60310182963b067e0356b244519911cf44781afb7  test/offline/integration/fakes_gateway.py
+  b7b5d318e3d59fc3bdf70d310e6e0a727dc5b8c7e9553ea07153ddd2371ad652  test/offline/integration/test_gateway.py
+  834619021090fcfdce58c2cc9859700aa2932e831760381a5b58b91857338609  test/offline/integration/test_runner_cli.py
+
+aggregate_sha256 (sha256sum of per-file lines, sorted by path):
+  baec131bdc0680947127f08b2901ce9304700c64340e9299128c63a0b385adae
+
+# --- Approval ----------------------------------------------------------------
+# AUTHOR of the FR-02 integration spec (#67) = B (@cosine-Y). The author MUST NOT
+# self-approve. approved_by is PENDING; a NON-AUTHOR (A or E) co-signs. The
+# authoritative approval is the GitHub review commit_id on the reviewed test head.
+approved_by: PENDING (author = B; non-author A or E must co-sign)
+approved_at: PENDING
+
+notes:
+- Test-first spec; RED until src/egta/adapters/model_gateway.py + runner exist.
+- If any integration test file changes after approval, the aggregate changes and
+  the approval is void (re-review required).
+- This file is a hash + count record; the non-author reviewer co-signs via GitHub
+  review on the reviewed test head.
