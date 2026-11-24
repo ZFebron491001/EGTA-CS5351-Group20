@@ -87,3 +87,24 @@ issues are omitted.
   are now checked independently. Evidence: `docs/evidence/FR-04/gate-reverse-proof.txt`.
 - **Invariant/gap:** GATE-01/GATE-03. Residual: tools/contracts paths are still not fully
   automated and remain a human/code-owner review boundary.
+
+## BUG-06 — GATE-02 build-e role still rejected FR-02 integration docs
+
+- **Symptom:** after #68 added `test/offline/integration/` to the build-e role detector,
+  #67's `check-permissions (GATE-02)` still failed with `PATH_NOT_ALLOWED` for the three
+  FR-02 docs under `docs/req/`.
+- **Reproduction:** run `tools/check_permissions.py --role build-e` on the #67 diff
+  (`base 804bdfb`, `head e1b0f62`); the integration test paths pass, but
+  `docs/req/acceptance-FR-02-integration.md`, `spec-FR-02-gateway.md` and
+  `trace-FR-02-gateway.md` are outside the build-e allowlist.
+- **Classification:** GATE-02 policy/allowlist gap, not a product or test-content bug.
+- **Root cause:** #68 fixed the role inference and the FR-02-integration approval record,
+  but the three FR-02 spec/trace/acceptance docs were still not in the build-e writable
+  scope. A single role must cover both the integration tests and their module docs.
+- **Fix:** add the three exact FR-02 integration docs to `ALLOWED_PREFIXES["build-e"]` in
+  `tools/check_permissions.py`; rerun the checker on #67. No test/CI/approval content is
+  changed.
+- **Regression:** `check_permissions` on #67 returns `OK: no permission violations`;
+  governance remains 38 passed; ruff clean. #67 must be re-synced after this fix.
+- **Invariant/gap:** GATE-02 / FR-02. Residual: `docs/req/` is not a general build-e
+  writable path; only the named FR-02 integration docs are allowed.

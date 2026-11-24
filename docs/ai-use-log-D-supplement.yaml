@@ -1,0 +1,67 @@
+# AI-use log — D supplement (post-fold)
+#
+# The original D fragment was folded into the canonical docs/ai-use-log.yaml by
+# E (#63/#65) and is marked SUPERSEDED. This supplement records one later D
+# change and is intended for E to append to the canonical log; it is not a test
+# approval record.
+
+schema_version: "1.0"
+project: EGTA-CS5351-Group20
+role: D
+github_login: ZFebron491001
+
+sessions:
+  - session_id: "D-2026-11-24-FR02-integration-docs-role"
+    student: "D / Zhang Fan / 61017180 / ZFebron491001"
+    agent_tool_model: "OpenCode / DeepSeek V4.1 Flash / 1.18.34"
+    time:
+      - "2026-11-24T13:05:00+08:00"   # #67 GATE-02 follow-up
+    task_requirement_ids:
+      - FR-02
+      - D3
+      - GATE-02
+      - GATE-06
+    writable_path:
+      - "tools/check_permissions.py"
+      - "docs/review-memo.md"
+      - "docs/bug-diary.md"
+      - "docs/code-governance/verification-constraints.md"
+      - "docs/ai-use-log-D-supplement.yaml"
+    human_intervention:
+      - type: approve
+        what: "Human asked D to improve the division code after E's #68 CI fix"
+        evidence: "interactive: E完成了#68的合并，请你基于此反馈对我们的分工代码进行改进"
+        limit: "D changed only the permission allowlist and D4 docs; B still owns app/adapters implementation and E owns the canonical AI-use log."
+    changes:
+      - "Added the three exact FR-02 integration docs under docs/req/ to the build-e allowlist; no general docs/req access."
+      - "Recorded #67/#68 in the review memo and added BUG-06 to the bug diary."
+      - "Updated verification constraints with the FR-02 integration 8-case suite, build-e routing and the implementation dependency."
+    verification_output:
+      - command: "tools/check_permissions.py --base 804bdfb --head e1b0f62 --role build-e"
+        exit_code: 0
+        result: "OK: no permission violations (previously PATH_NOT_ALLOWED on the three FR-02 docs)"
+      - command: "python -m pytest test/offline/governance -q"
+        exit_code: 0
+        result: "38 passed"
+      - command: "python -m ruff check tools/check_permissions.py"
+        exit_code: 0
+        result: "All checks passed"
+    git_output:
+      - action: "branch"
+        result: "docs/D4-integration-feedback"
+      - action: "pull request"
+        result: "PR pending; E/A review requested"
+    implementation_status: "GATE-02 docs/role allowlist fixed; #67 must be re-synced; B app/adapters implementation remains"
+    approval_links:
+      - "E #68 merge 804bdfb"
+      - "#67 test spec approved; record approved_by PENDING"
+    repository_blockers:
+      - "#67 check-permissions was still failing on docs/req FR-02 docs; this allowlist fix addresses it."
+      - "B's app/adapters implementation is still missing; the 8 integration tests are RED until it lands."
+      - "C's FR-03/transcript/report and E's final Report/release checklist remain outside D."
+    cost: "unknown"
+    session_path: "transcripts/61017180-Zhang-Fan.md + appendix"
+    notes:
+      - "No test, contract, CI or approval record was changed."
+      - "The canonical docs/ai-use-log.yaml was not edited; E should append this session."
+      - "The docs/req allowance is limited to the three named FR-02 integration docs."
