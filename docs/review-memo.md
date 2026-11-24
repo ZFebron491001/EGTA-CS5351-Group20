@@ -27,6 +27,8 @@ self-approval.
 | #46 / C Prompt.md | `43595d8` | Changes required, then **APPROVE** by D | Valid C AI-use YAML, read-vs-write conflict, D9 boundaries, current-main CI | Merge `68fb4f3` |
 | #47 / evidence routing + budget record | `876b11b` | **APPROVE** | FR-01 pack/precedence/evidence routing, FR-02 record actual_cases 4 | Merge `320bf4d` |
 | #50 / GATE-01 base fix | `4fd7bcc` | **APPROVE** (E) | PR base for implementation records; test/spec N/A; missing records fail closed | Merge `0fef55b`; reverse proof #48/#49 |
+| #67 / FR-02 integration test spec | `e1b0f62` (rebound after #68) | **APPROVE** (D); record PENDING A/E co-sign | 8 integration cases (4 gateway + 4 runner/CLI); role build-e | Open; rebind required after the role/docs allowlist fix |
+| #68 / GATE-02 integration role + record | `e208cc6` | **APPROVE** (D/A) | `test/offline/integration/` → build-e; FR-02-integration record `actual_cases: 8` | Merge `804bdfb` |
 | #54 / D closeout evidence | A/E approved `181bc5c` | D author; independent A/E approval | Conflict resolution; both closeout and D5 entries retained | Merge `e797138` |
 | #60 / D5 transcript | A/E approved `983b9c4` | D author; independent A/E approval | Raw/Markdown/annotations, 0 secret hits, D5 hashes | Merge `4677a11` |
 | #61 / D report sections | A/E approved `99c4088` | D author; independent A/E approval | D sections + 475-word reflection + evidence index | Merge `a435640` |
@@ -50,7 +52,7 @@ self-approval.
 ## Residual review risks
 
 - C's FR-03 deliberation and transcript/report remain outside D's module ownership.
-- B's D2 architecture package and C's FR-03/deliberation are external to D's module; D does not claim their completion.
+- B's D2 architecture package is complete on main; B's `src/egta/app/` / `src/egta/adapters/` implementation is still missing, so #67's integration tests remain RED until B implements it. C's FR-03/deliberation and transcript/report remain external to D's module.
 - ADR-003/risk-policy remain PROPOSED/deferred (`DEBT-FR04-POLICY-APPROVAL`).
 - CI-only, tools/ and some contracts paths remain human/code-owner-reviewed rather than
   fully automated gate paths.
