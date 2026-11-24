@@ -326,7 +326,7 @@ jobs:
           if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/budget/\|^src/egta/adapters/\|^src/egta/app/\|^test/offline/budget/'; then role=build-b; fi
           if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/deliberation/\|^test/offline/deliberation/\|^prompts/'; then role=build-c; fi
           if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/risk_gate/\|^test/offline/risk_gate/'; then role=build-d; fi
-          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/evaluation/\|^test/offline/evaluation/'; then role=build-e; fi
+          if [ -z "$role" ] && echo "$changed" | grep -q '^src/egta/evaluation/\|^test/offline/evaluation/\|^test/offline/integration/'; then role=build-e; fi
           # B.2 fail-closed: if the diff touches src/test but NO role label and NO
           # module matched, do NOT default to verify -- mark unknown (fail later).
           if [ -z "$role" ]; then
@@ -396,6 +396,7 @@ jobs:
   #   src/egta/evidence/ -> FR-01-pack;  test/offline/evidence/ (per-file, below) + test/offline/contracts/test_evidence_contracts.py -> their own FR-01-* records
   #   src/egta/risk_gate/ | test/offline/risk_gate/ -> FR-04-risk-gate
   #   src/egta/budget/ ... -> FR-02-budget
+  #   test/offline/integration/ -> FR-02-integration (separate suite; see trace-FR-02-gateway)
   # A single change may match several modules -> the loop checks EACH record.
   # ---------------------------------------------------------------------------
   check-approval:
@@ -432,6 +433,7 @@ jobs:
           hit_fr05=$(echo "$changed" | grep -E '^src/egta/contracts/|^src/egta/evaluation/|^test/offline/contracts/' | grep -v '^test/offline/contracts/test_evidence_contracts\.py' || true)
           hit_risk=$(echo "$changed" | grep -E '^src/egta/risk_gate/|^test/offline/risk_gate/' || true)
           hit_budget=$(echo "$changed" | grep -E '^src/egta/budget/' || true)
+          hit_fr02_integration=$(echo "$changed" | grep -E '^test/offline/integration/' || true)
 
           fail=0; ran=0
           check() {
@@ -485,5 +487,6 @@ jobs:
           check FR-05-contracts          "$hit_fr05"
           check FR-04-risk-gate          "$hit_risk"
           check FR-02-budget             "$hit_budget"
+          check FR-02-integration        "$hit_fr02_integration"
           if [ "$ran" -eq 0 ]; then echo "::notice::no module record matched -- N/A"; fi
           exit $fail
